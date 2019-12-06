@@ -596,7 +596,7 @@ export default class MutationTable<P extends IMutationTableProps> extends React.
             tooltip: (<span><a href="https://gnomad.broadinstitute.org/">gnomAD</a> population allele frequencies. 
             Overall population allele frequency is shown. Hover over a frequency to see the frequency for each specific population.</span>),
             defaultSortDirection: "desc",
-            visible: false,
+            visible: true,
             align: "right"
         };
 
@@ -608,7 +608,7 @@ export default class MutationTable<P extends IMutationTableProps> extends React.
             tooltip: (<span><a href="https://www.ncbi.nlm.nih.gov/clinvar/" target="_blank">ClinVar</a>
             &nbsp;aggregates information about genomic variation and its relationship to human health.</span>),
             defaultSortDirection: "desc",
-            visible: false,
+            visible: true,
             align: "right"
         };
 
@@ -625,7 +625,7 @@ export default class MutationTable<P extends IMutationTableProps> extends React.
                 </span>
             ),
             defaultSortDirection: "desc",
-            visible: false,
+            visible: true,
             align: "right"
         };
     }
