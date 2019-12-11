@@ -94,6 +94,8 @@ import { getGeneFilterDefault } from './PatientViewPageStoreUtil';
 import {checkNonProfiledGenesExist} from "../PatientViewPageUtils";
 
 
+import { ITherapyRecommendation, IGeneticAlteration } from "../../../shared/model/TherapyRecommendation";
+
 type PageMode = 'patient' | 'sample';
 
 export async function checkForTissueImage(patientId: string): Promise<boolean> {
@@ -1132,5 +1134,122 @@ export class PatientViewPageStore {
             return [];
         }
     }, []);
+
+    therapyRecommendations = [
+        {
+            id: "1", 
+            comment: "test",
+            reasoning: {
+                geneticAlterations: [
+                    {
+                        entrezGeneId: 673,
+                        hugoSymbol: "BRAF",
+                        proteinChange: "V600E"
+                    }
+                ]
+            },
+            evidenceLevel: "I",
+            modifications: [
+                {
+                    modified: "Created",
+                    recommender: {
+                        credentials: "alice"
+                    },
+                    timestamp: "20191210"
+                }
+            ],
+            references: [
+                {
+                    pmid: 12345,
+                    name: "PubMed Test"
+                }
+            ],
+            treatments: [
+                {
+                    name: "TEST MED"
+                }
+            ]
+        } as ITherapyRecommendation, 
+        {
+            id: "2", 
+            comment: "test2",
+            reasoning: {
+                geneticAlterations: [
+                    {
+                        entrezGeneId: 675,
+                        hugoSymbol: "BRCA2",
+                        proteinChange: "T3085Nfs*26"
+                    }
+                ]
+            },
+            evidenceLevel: "II",
+            modifications: [
+                {
+                    modified: "Created",
+                    recommender: {
+                        credentials: "alice"
+                    },
+                    timestamp: "20191210"
+                }
+            ],
+            references: [
+                {
+                    pmid: 12345,
+                    name: "PubMed Test"
+                }
+            ],
+            treatments: [
+                {
+                    name: "TEST MED1"
+                }
+            ]
+        } as ITherapyRecommendation,
+        {
+            id: "3", 
+            comment: "test3",
+            reasoning: {
+                geneticAlterations: [
+                    {
+                        entrezGeneId: 673,
+                        hugoSymbol: "BRAF",
+                        proteinChange: "V600E"
+                    },
+                    {
+                        entrezGeneId: 675,
+                        hugoSymbol: "BRCA2",
+                        proteinChange: "T3085Nfs*26"
+                    }
+                ]
+            },
+            evidenceLevel: "III",
+            modifications: [
+                {
+                    modified: "Created",
+                    recommender: {
+                        credentials: "alice"
+                    },
+                    timestamp: "20191210"
+                }
+            ],
+            references: [
+                {
+                    pmid: 30942711,
+                    name: "Developing New Analysis Functions for a Translational Research Platform: Extending the cBioPortal for Cancer Genomics."
+                },
+                {
+                    pmid: 30942707,
+                    name: "A REST Service for the Visualization of Clinical Time Series Data in the Context of Clinical Decision Support."
+                }
+            ],
+            treatments: [
+                {
+                    name: "TEST MED1"
+                },
+                {
+                    name: "TEST MED2"
+                }
+            ]
+        } as ITherapyRecommendation
+    ] as ITherapyRecommendation[];
 
 }

@@ -54,6 +54,7 @@ import { GeneFilterOption } from "./mutation/GeneFilterMenu";
 import { checkNonProfiledGenesExist } from "./PatientViewPageUtils";
 import PatientViewMutationsTab from "./mutation/PatientViewMutationsTab";
 import PatientViewGenePanelModal from "./PatientViewGenePanelModal/PatientViewGenePanelModal";
+import TherapyRecommendationTable from "./therapyRecommendation/TherapyRecommendationTable";
 import { PatientViewPageTabs } from "./PatientViewPageTabs";
 
 export interface IPatientViewPageProps {
@@ -211,6 +212,10 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
     private shouldShowTrialMatch(patientViewPageStore: PatientViewPageStore): boolean {
         return getBrowserWindow().localStorage.trialmatch === 'true' &&
             patientViewPageStore.detailedTrialMatches.isComplete && patientViewPageStore.detailedTrialMatches.result.length > 0;
+    }
+
+    private shouldShowTreatmentRecommendation(patientViewPageStore: PatientViewPageStore): boolean {
+        return true;
     }
 
 
@@ -675,7 +680,20 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                         )
                     }
 
-                    {/*<MSKTab key={5} id={{PatientViewPageTabs.MutationalSignatures}} linkText="Mutational Signature Data" hide={true}>*/}
+                    {
+                        this.shouldShowTreatmentRecommendation(this.patientViewPageStore) && this.patientViewPageStore.mutationData.isComplete && (
+                            <MSKTab key={8} id="therapyRecommendationTab" linkText="Therapy Recommendation">
+                                <TherapyRecommendationTable
+                                    mutations={this.patientViewPageStore.mutationData.result}
+                                    sampleManager={sampleManager}
+                                    therapyRecommendations={this.patientViewPageStore.therapyRecommendations}
+                                    containerWidth={WindowStore.size.width-20}
+                                />
+                            </MSKTab>
+                        )
+                    }
+
+                    {/*<MSKTab key={5} id="mutationalSignatures" linkText="Mutational Signature Data" hide={true}>*/}
                         {/*<div className="clearfix">*/}
                             {/*<FeatureTitle title="Mutational Signatures" isLoading={ this.patientViewPageStore.clinicalDataGroupedBySample.isPending } className="pull-left" />*/}
                             {/*<LoadingIndicator isLoading={this.patientViewPageStore.mutationalSignatureData.isPending}/>*/}
