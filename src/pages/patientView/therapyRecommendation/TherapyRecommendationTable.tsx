@@ -29,7 +29,7 @@ enum ColumnKey {
     REASONING = 'Reasoning',
     REFERENCES = 'References',
     EVIDENCE = 'Evidence Level',
-    //STATUS = 'Status',
+    EDIT = '',
 }
 
 enum ColumnWidth {
@@ -56,18 +56,20 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         name: ColumnKey.THERAPY,
         render: (therapyRecommendation: ITherapyRecommendation) => (
             <If condition={therapyRecommendation.treatments.length > 0}>
-            <div>
-                <span>
-                    <img src={require("../../../globalStyles/images/drug.png")} style={{ width: 18, marginTop: -5 }} alt="drug icon"/>
-                    <b>{therapyRecommendation.treatments.map((treatment: ITreatment) => treatment.name).join(' + ')}</b></span>
-            </div>
+                <div>
+                    <span>
+                        <img src={require("../../../globalStyles/images/drug.png")} style={{ width: 18, marginTop: -5 }} alt="drug icon"/>
+                        <b>{therapyRecommendation.treatments.map((treatment: ITreatment) => treatment.name).join(' + ')}</b>
+                    </span>
+                </div>
             </If>
         ),
         // width: this.columnWidths[ColumnKey.THERAPY]
     }, {
         name: ColumnKey.COMMENT,
         render: (therapyRecommendation: ITherapyRecommendation) => (
-            <div>{therapyRecommendation.comment}
+            <div>
+                {therapyRecommendation.comment}
             </div>
         ),
         // width: this.columnWidths[ColumnKey.COMMENT]
@@ -77,17 +79,36 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
             <div>
                 <div className={styles.reasoningInfoContainer}>
                     <div className={styles.genomicInfoContainer}>
-                        <div>
-                            {therapyRecommendation.reasoning.geneticAlterations.map((geneticAlteration: IGeneticAlteration, index:number) => (
-                                <div className={styles.reasoningContainer}>
-                                    <div className={styles.firstLeft}>
-                                        {geneticAlteration && this.getGeneticAlteration(geneticAlteration)}
+                        <div className={styles.reasoningContainer}>
+                            <div className={styles.firstLeft}>
+                                <div className={styles.secondLeft}>
+                                    Positve for alterations:
+                                    <div>
+                                        {therapyRecommendation.reasoning.geneticAlterations && 
+                                            this.getGeneticAlterations(therapyRecommendation.reasoning.geneticAlterations)}
+                                    </div>
+                                    In samples:
+                                    <div>
+                                        {therapyRecommendation.reasoning.geneticAlterations && 
+                                            this.getSampleIdIcons(therapyRecommendation.reasoning.geneticAlterations)}
+                                    </div>
+                                    </div>
+                                <div className={styles.secondRight}>
+                                    Negative for alterations:
+                                    <div>
+                                        {therapyRecommendation.reasoning.geneticAlterationsMissing && 
+                                            this.getGeneticAlterations(therapyRecommendation.reasoning.geneticAlterationsMissing)}
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                        <div>
-                            <span>Fitting Samples: {this.getSampleIdIcons(therapyRecommendation)}</span>
+                            </div>
+                            <div className={styles.firstRight}>
+                            <div>
+                                {therapyRecommendation.reasoning.tmb && "TMB: " + therapyRecommendation.reasoning.tmb}
+                            </div>
+                            <div>
+                                {therapyRecommendation.reasoning.other && "Notes: " + therapyRecommendation.reasoning.other}
+                            </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -113,13 +134,27 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
             </If>
         ),
         // width: this.columnWidths[ColumnKey.REFERENCES]
-    },
+    }, {
+        name: ColumnKey.EDIT,
+        render: (therapyRecommendation: ITherapyRecommendation) => (
+            <div className={styles.editContainer}>
+                <span className={styles.edit}>
+                    <Button type="button" className={"btn btn-default " + styles.editButton} onClick={() => this.openEditForm(therapyRecommendation)}><i className={`fa fa-edit ${styles.marginLeft}`} aria-hidden="true"></i> Edit</Button>
+                </span>
+                <span className={styles.edit}>
+                    <Button type="button" className={"btn btn-default " + styles.deleteButton} onClick={() => this.openDeleteForm(therapyRecommendation)}><i className={`fa fa-trash ${styles.marginLeft}`} aria-hidden="true"></i> Delete</Button>
+                </span>
+            </div>
+        ),
+        // width: this.columnWidths[ColumnKey.EDIT]
+    }
 ];
 
 
 
-    public getSampleIdIcons(therapyRecommendation : ITherapyRecommendation) {
-        let entrezGeneIds = therapyRecommendation.reasoning.geneticAlterations.map((geneticAlteration : IGeneticAlteration) => geneticAlteration.entrezGeneId);
+    public getSampleIdIcons(geneticAlterations: IGeneticAlteration[]) {
+        if(!geneticAlterations || geneticAlterations.length == 0) return;
+        let entrezGeneIds = geneticAlterations.map((geneticAlteration : IGeneticAlteration) => geneticAlteration.entrezGeneId);
         let groupedMutations = (_.groupBy(this.props.mutations, (mutation: Mutation) => mutation.sampleId));
         let fittingSampleIds : String[] = [];
         for (let sampleId in groupedMutations) {
@@ -142,6 +177,15 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                 ))}
             </React.Fragment>
         );
+    }
+
+    public openDeleteForm(therapyRecommendation: ITherapyRecommendation) {
+    }
+
+    public openEditForm(therapyRecommendation: ITherapyRecommendation) {
+    }
+
+    public openAddForm() {
     }
 
     // public getClinicalMatch(clinicalGroupMatch: IClinicalGroupMatch) {
@@ -180,11 +224,27 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     //     this.selectedtherapyRecommendationFeedbackFormData = data;
     // }
 
+    public getGeneticAlterations(geneticAlterations: IGeneticAlteration[]) {
+        return (
+            <React.Fragment>
+                <If condition={geneticAlterations && geneticAlterations.length > 0}>
+                    <div>
+                        {geneticAlterations && geneticAlterations.map((geneticAlteration: IGeneticAlteration, index:number) => (
+                            <div>
+                                {geneticAlteration && this.getGeneticAlteration(geneticAlteration)}
+                            </div>
+                        ))}
+                    </div>
+                </If>
+            </React.Fragment>
+        );
+    }
+
     public getGeneticAlteration(geneticAlteration: IGeneticAlteration) {
         return (
             <React.Fragment>
                 <div>
-                    <span style={{'marginRight': 5}}><b>{geneticAlteration.hugoSymbol}</b> {geneticAlteration.proteinChange}</span>
+                    <span style={{'marginRight': 5}}><b>{geneticAlteration.hugoSymbol}</b> {geneticAlteration.proteinChange || "any"}</span>
                     <DefaultTooltip
                         placement='bottomLeft'
                         trigger={['hover', 'focus']}
@@ -256,7 +316,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         return (
             <div className={styles.tooltip}>
                 <div>Genomic selection specified in the therapy recommendation:</div>
-                <div><b>{geneticAlteration.hugoSymbol}</b> (ID: {geneticAlteration.entrezGeneId}) {geneticAlteration.proteinChange}</div>
+                <div><b>{geneticAlteration.hugoSymbol}</b> (ID: {geneticAlteration.entrezGeneId}) {geneticAlteration.proteinChange || "any"}</div>
             </div>
         );
     }
@@ -295,7 +355,10 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     render() {
         return (
             <div>
-                <p style={{marginBottom: '0'}}>Therapy Recommendations:</p>
+                <h2 style={{marginBottom: '0'}}>Therapy Recommendations</h2>
+                <p className={styles.edit}>
+                    <Button type="button" className={"btn btn-default " + styles.addButton} onClick={() => this.openAddForm()}><i className={`fa fa-plus ${styles.marginLeft}`} aria-hidden="true"></i> Add</Button>
+                </p>
                 <TherapyRecommendationTableComponent
                     data={this.props.therapyRecommendations}
                     columns={this._columns}

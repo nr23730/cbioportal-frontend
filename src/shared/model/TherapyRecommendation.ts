@@ -47,13 +47,14 @@ export interface ITreatment {
 }
 
 export interface IReasoning {
-    geneticAlterations: IGeneticAlteration[];
+    geneticAlterations?: IGeneticAlteration[];
+    geneticAlterationsMissing?: IGeneticAlteration[];
     tmb?: number;
-    other?: string[];
+    other?: string;
 }
 
 export interface IGeneticAlteration {
     entrezGeneId: number;
     hugoSymbol: string;
-    proteinChange: string;
+    proteinChange?: string;
 };

@@ -18,15 +18,7 @@
   maxWidth: 600px;
   overflow: auto;
 }
-.statusBackground {
-  display: block;
-  padding: 10px;
-  width: 130px;
-  border-radius: 10px;
-  background: #73AD21;
-  text-align: center;
-  color: #ffffff;
-}
+
 .icon {
   .marginLeft {
     margin-left:5px;
@@ -57,46 +49,83 @@
   justify-content: space-between;
   margin-bottom: 10px;
 
-  .firstLeft {
-    flex: 1 1 auto;
-    margin: 0 5px 0 0;
-  }
-
-  .firstRight{
+  .firstLeft{
     display:flex;
     flex: 0 0 auto;
-    width: 300px;
+    width: 400px;
     justify-content: space-between;
 
     .secondLeft {
       flex: 0 0 auto;
-      width: 85px;
+      width: 195px;
       margin-right: 10px;
     }
     .secondRight{
       flex: 1 1 auto;
     }
   }
+
+  .firstRight {
+    flex: 1 1 auto;
+    margin: 0 5px 0 0;
+  }
+
 }
 .powered {
   padding-right: 9px;
   text-align: right;
   font-size: 13px;
 }
-.statusContainer {
+.editContainer {
   margin: 20% 0 20% 0;
 
   a:hover {
     text-decoration: none;
   }
 }
-.feedback {
-  font-size: 12px;
+.edit {
+  font-size: 14px;
+  
 
-  .feedbackButton {
+  .editButton {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90px;
+    margin-top: 10px;
+  }
+
+  .deleteButton {
     display: block;
     margin-left: auto;
     margin-right: auto;
     margin-top: 10px;
+    width: 90px;
+    // background: red !important;
+    // color: white !important;
+    color: red !important;
   }
+
+  .addButton {
+    float: left;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    width: 90px;
+    color: white !important;
+    background: #73AD21 !important;
+  }
+
+  
+
 }
+// .statusBackground {
+//   display: block;
+//   padding: 10px;
+//   width: 130px;
+//   border-radius: 10px;
+//   background: #73AD21;
+//   text-align: center;
+//   color: #ffffff;
+// }

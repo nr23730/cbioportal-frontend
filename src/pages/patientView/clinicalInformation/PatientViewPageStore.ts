@@ -1249,7 +1249,66 @@ export class PatientViewPageStore {
                     name: "TEST MED2"
                 }
             ]
+        } as ITherapyRecommendation,
+        {
+            id: "4", 
+            comment: "test4",
+            reasoning: {
+                geneticAlterations: [
+                    {
+                        entrezGeneId: 673,
+                        hugoSymbol: "BRAF",
+                        proteinChange: "V600E"
+                    }
+                ],
+                geneticAlterationsMissing: [
+                    {
+                        entrezGeneId: 672,
+                        hugoSymbol: "BRCA1"
+                    }
+                ], 
+                tmb: 42,
+                other: "Other Reasoning"
+            },
+            evidenceLevel: "IV",
+            modifications: [
+                {
+                    modified: "Created",
+                    recommender: {
+                        credentials: "alice"
+                    },
+                    timestamp: "20191210"
+                }
+            ],
+            references: [
+                {
+                    pmid: 30942711,
+                    name: "Developing New Analysis Functions for a Translational Research Platform: Extending the cBioPortal for Cancer Genomics."
+                },
+                {
+                    pmid: 30942707,
+                    name: "A REST Service for the Visualization of Clinical Time Series Data in the Context of Clinical Decision Support."
+                }
+            ],
+            treatments: [
+                {
+                    name: "Long Medication Name"
+                }
+            ]
         } as ITherapyRecommendation
     ] as ITherapyRecommendation[];
+
+    public therapyRecommendationOnDelete(therapyRecommendationToDelete: ITherapyRecommendation) {
+        this.therapyRecommendations = this.therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDelete !== therapyRecommendation);
+    }
+
+    public therapyRecommendationOnAdd(therapyRecommendationToAdd: ITherapyRecommendation) {
+        this.therapyRecommendations.push(therapyRecommendationToAdd);
+    }
+
+    public therapyRecommendationOnEdit(therapyRecommendationToEdit: ITherapyRecommendation) {
+        this.therapyRecommendationOnDelete(therapyRecommendationToEdit);
+        this.therapyRecommendationOnAdd(therapyRecommendationToEdit);
+    }
 
 }
