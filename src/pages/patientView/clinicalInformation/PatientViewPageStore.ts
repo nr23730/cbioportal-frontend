@@ -1299,16 +1299,23 @@ export class PatientViewPageStore {
     ] as ITherapyRecommendation[];
 
     public therapyRecommendationOnDelete(therapyRecommendationToDelete: ITherapyRecommendation) {
+        console.log("therapyRecommendationOnDelete " + therapyRecommendationToDelete.id);
+        console.log(this.therapyRecommendations);
         this.therapyRecommendations = this.therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDelete !== therapyRecommendation);
+        console.log(this.therapyRecommendations);
+        return true;
+
     }
 
     public therapyRecommendationOnAdd(therapyRecommendationToAdd: ITherapyRecommendation) {
         this.therapyRecommendations.push(therapyRecommendationToAdd);
+        return true;
     }
 
     public therapyRecommendationOnEdit(therapyRecommendationToEdit: ITherapyRecommendation) {
         this.therapyRecommendationOnDelete(therapyRecommendationToEdit);
         this.therapyRecommendationOnAdd(therapyRecommendationToEdit);
+        return true;
     }
 
 }

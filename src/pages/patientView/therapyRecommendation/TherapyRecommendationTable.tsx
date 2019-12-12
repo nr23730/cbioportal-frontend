@@ -21,6 +21,9 @@ export type ITherapyRecommendationProps = {
     sampleManager: SampleManager | null;
     therapyRecommendations: ITherapyRecommendation[];
     containerWidth: number;
+    onAdd: (therapyRecommendation: ITherapyRecommendation) => boolean;
+    onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
+    onEdit: (therapyRecommendation: ITherapyRecommendation) => boolean;
 }
 
 enum ColumnKey {
@@ -180,6 +183,8 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     }
 
     public openDeleteForm(therapyRecommendation: ITherapyRecommendation) {
+        console.log("openDeleteForm " + therapyRecommendation.id);
+        if(this.props.onDelete(therapyRecommendation)) this.forceUpdate();
     }
 
     public openEditForm(therapyRecommendation: ITherapyRecommendation) {
