@@ -1,18 +1,19 @@
-enum EvidenceLevel {
+export enum EvidenceLevel {
+    NA = "NA",
     I = "I",
     II = "II",
     III = "III",
     IV = "IV"
 }
 
-enum Modified {
-    created = "Created",
-    modified = "Modified",
-    deleted = "Deleted"
+export enum Modified {
+    CREATED = "Created",
+    MODIFIED = "Modified",
+    DELETED = "Deleted"
 }
 
 
-interface IRecommender {
+export interface IRecommender {
     credentials: string;
     full_name?: string;
     email?: string;

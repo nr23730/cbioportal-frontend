@@ -11,19 +11,21 @@ import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTabl
 import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from "../SampleManager";
 import DefaultTooltip, { placeArrowBottomLeft } from "../../../public-lib/components/defaultTooltip/DefaultTooltip";
-import { getAgeRangeDisplay } from "./TherapyRecommendationTableUtils";
+import { truncate, getNewTherapyRecommendation } from "./TherapyRecommendationTableUtils";
 import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
 import { Mutation } from 'shared/api/generated/CBioPortalAPI';
+import TherapyRecommendationForm from './TherapyRecommendationForm';
 
 export type ITherapyRecommendationProps = {
     mutations: Mutation[];
     sampleManager: SampleManager | null;
     therapyRecommendations: ITherapyRecommendation[];
     containerWidth: number;
-    onAdd: (therapyRecommendation: ITherapyRecommendation) => boolean;
     onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
-    onEdit: (therapyRecommendation: ITherapyRecommendation) => boolean;
+    onAddOrEdit: (therapyRecommendation: ITherapyRecommendation) => boolean;
+    // onAdd: (therapyRecommendation: ITherapyRecommendation) => boolean;
+    // onEdit: (therapyRecommendation: ITherapyRecommendation) => boolean;
 }
 
 enum ColumnKey {
@@ -54,6 +56,8 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     //         //[ColumnKey.MATCHING_CRITERIA]: 0.65 * (this.props.containerWidth - ColumnWidth.ID)
     //     };
     // }
+
+    @observable selectedTherapyRecommendation: ITherapyRecommendation | undefined;
 
     private _columns = [{
         name: ColumnKey.THERAPY,
@@ -131,7 +135,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
             <If condition={therapyRecommendation.treatments.length > 0}>
             <div>
                     {therapyRecommendation.references.map((reference: IReference) => (
-                    <div><a target="_blank" href={"https://www.ncbi.nlm.nih.gov/pubmed/" + reference.pmid}>[{reference.pmid}] {this.truncate(reference.name, 40, true)}</a></div>
+                    <div><a target="_blank" href={"https://www.ncbi.nlm.nih.gov/pubmed/" + reference.pmid}>[{reference.pmid}] {truncate(reference.name, 40, true)}</a></div>
                     ))}
             </div>
             </If>
@@ -145,7 +149,9 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                     <Button type="button" className={"btn btn-default " + styles.editButton} onClick={() => this.openEditForm(therapyRecommendation)}><i className={`fa fa-edit ${styles.marginLeft}`} aria-hidden="true"></i> Edit</Button>
                 </span>
                 <span className={styles.edit}>
-                    <Button type="button" className={"btn btn-default " + styles.deleteButton} onClick={() => this.openDeleteForm(therapyRecommendation)}><i className={`fa fa-trash ${styles.marginLeft}`} aria-hidden="true"></i> Delete</Button>
+                    <Button type="button" className={"btn btn-default " + styles.deleteButton} 
+                        onClick={() => window.confirm("Are you sure you wish to delete this item?") && this.openDeleteForm(therapyRecommendation)}>
+                        <i className={`fa fa-trash ${styles.marginLeft}`} aria-hidden="true"></i> Delete</Button>
                 </span>
             </div>
         ),
@@ -183,14 +189,21 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     }
 
     public openDeleteForm(therapyRecommendation: ITherapyRecommendation) {
-        console.log("openDeleteForm " + therapyRecommendation.id);
         if(this.props.onDelete(therapyRecommendation)) this.forceUpdate();
     }
 
     public openEditForm(therapyRecommendation: ITherapyRecommendation) {
+        this.selectedTherapyRecommendation = therapyRecommendation;
     }
 
     public openAddForm() {
+        this.selectedTherapyRecommendation = getNewTherapyRecommendation({credentials: AppConfig.serverConfig.user_email_address});
+    }
+
+    public onHideAddEditForm(newTherapyRecommendation: ITherapyRecommendation) {
+        console.log("HIDE");
+        this.selectedTherapyRecommendation = undefined;
+        if(this.props.onAddOrEdit(newTherapyRecommendation)) this.forceUpdate();
     }
 
     // public getClinicalMatch(clinicalGroupMatch: IClinicalGroupMatch) {
@@ -225,8 +238,8 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     // }
 
     // @action
-    // public openCloseFeedbackForm(data?: ISelectedtherapyRecommendationFeedbackFormData) {
-    //     this.selectedtherapyRecommendationFeedbackFormData = data;
+    // public openCloseTherapyRecommendationForm(data?: ITherapyRecommendation) {
+    //     this.selectedTherapyRecommendation = data;
     // }
 
     public getGeneticAlterations(geneticAlterations: IGeneticAlteration[]) {
@@ -349,13 +362,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     //     return `${preContent} ${genomicAlterationContent} ${postContent}`;
     // }
 
-    truncate( s: String, n: number, useWordBoundary: boolean ){
-        if (s.length <= n) { return s; }
-        var subString = s.substr(0, n-1);
-        return (useWordBoundary 
-           ? subString.substr(0, subString.lastIndexOf(' ')) 
-           : subString) + " [...]";
-    };
+
 
     render() {
         return (
@@ -364,6 +371,15 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                 <p className={styles.edit}>
                     <Button type="button" className={"btn btn-default " + styles.addButton} onClick={() => this.openAddForm()}><i className={`fa fa-plus ${styles.marginLeft}`} aria-hidden="true"></i> Add</Button>
                 </p>
+                {this.selectedTherapyRecommendation &&
+                    <TherapyRecommendationForm
+                        show={!!this.selectedTherapyRecommendation}
+                        data={this.selectedTherapyRecommendation}
+                        onHide={(therapyRecommendation: ITherapyRecommendation) => {this.onHideAddEditForm(therapyRecommendation)}}
+                        title="Edit therapy recommendation"
+                        userEmailAddress={AppConfig.serverConfig.user_email_address}
+                    />
+                }
                 <TherapyRecommendationTableComponent
                     data={this.props.therapyRecommendations}
                     columns={this._columns}

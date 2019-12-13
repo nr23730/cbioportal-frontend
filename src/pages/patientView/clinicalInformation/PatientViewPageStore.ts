@@ -94,7 +94,7 @@ import { getGeneFilterDefault } from './PatientViewPageStoreUtil';
 import {checkNonProfiledGenesExist} from "../PatientViewPageUtils";
 
 
-import { ITherapyRecommendation, IGeneticAlteration } from "../../../shared/model/TherapyRecommendation";
+import { ITherapyRecommendation, IGeneticAlteration, EvidenceLevel, Modified } from "../../../shared/model/TherapyRecommendation";
 
 type PageMode = 'patient' | 'sample';
 
@@ -1148,10 +1148,10 @@ export class PatientViewPageStore {
                     }
                 ]
             },
-            evidenceLevel: "I",
+            evidenceLevel: EvidenceLevel.I,
             modifications: [
                 {
-                    modified: "Created",
+                    modified: Modified.CREATED,
                     recommender: {
                         credentials: "alice"
                     },
@@ -1182,10 +1182,10 @@ export class PatientViewPageStore {
                     }
                 ]
             },
-            evidenceLevel: "II",
+            evidenceLevel: EvidenceLevel.II,
             modifications: [
                 {
-                    modified: "Created",
+                    modified: Modified.CREATED,
                     recommender: {
                         credentials: "alice"
                     },
@@ -1221,10 +1221,10 @@ export class PatientViewPageStore {
                     }
                 ]
             },
-            evidenceLevel: "III",
+            evidenceLevel: EvidenceLevel.III,
             modifications: [
                 {
-                    modified: "Created",
+                    modified: Modified.CREATED,
                     recommender: {
                         credentials: "alice"
                     },
@@ -1270,10 +1270,10 @@ export class PatientViewPageStore {
                 tmb: 42,
                 other: "Other Reasoning"
             },
-            evidenceLevel: "IV",
+            evidenceLevel: EvidenceLevel.IV,
             modifications: [
                 {
-                    modified: "Created",
+                    modified: Modified.CREATED,
                     recommender: {
                         credentials: "alice"
                     },
@@ -1299,23 +1299,28 @@ export class PatientViewPageStore {
     ] as ITherapyRecommendation[];
 
     public therapyRecommendationOnDelete(therapyRecommendationToDelete: ITherapyRecommendation) {
-        console.log("therapyRecommendationOnDelete " + therapyRecommendationToDelete.id);
-        console.log(this.therapyRecommendations);
-        this.therapyRecommendations = this.therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDelete !== therapyRecommendation);
-        console.log(this.therapyRecommendations);
+        this.therapyRecommendations = this.therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDelete.id !== therapyRecommendation.id);
         return true;
 
     }
 
-    public therapyRecommendationOnAdd(therapyRecommendationToAdd: ITherapyRecommendation) {
+    public therapyRecommendationOnAddOrEdit(therapyRecommendationToAdd: ITherapyRecommendation) {
+        this.therapyRecommendations = this.therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToAdd.id !== therapyRecommendation.id);
+        (therapyRecommendationToAdd: ITherapyRecommendation) => this.therapyRecommendationOnDelete(therapyRecommendationToAdd);
         this.therapyRecommendations.push(therapyRecommendationToAdd);
         return true;
     }
 
-    public therapyRecommendationOnEdit(therapyRecommendationToEdit: ITherapyRecommendation) {
-        this.therapyRecommendationOnDelete(therapyRecommendationToEdit);
-        this.therapyRecommendationOnAdd(therapyRecommendationToEdit);
-        return true;
-    }
+
+    // public therapyRecommendationOnAdd(therapyRecommendationToAdd: ITherapyRecommendation) {
+    //     this.therapyRecommendations.push(therapyRecommendationToAdd);
+    //     return true;
+    // }
+
+    // public therapyRecommendationOnEdit(therapyRecommendationToEdit: ITherapyRecommendation) {
+    //     this.therapyRecommendationOnDelete(therapyRecommendationToEdit);
+    //     this.therapyRecommendationOnAdd(therapyRecommendationToEdit);
+    //     return true;
+    // }
 
 }
