@@ -2,31 +2,23 @@ import * as React from "react";
 import * as _ from 'lodash';
 import {Modal} from "react-bootstrap";
 import { ITherapyRecommendation, EvidenceLevel } from "shared/model/TherapyRecommendation";
+import OQLTextArea from "shared/components/GeneSelectionBox/OQLTextArea";
+import TherapyRecommendationFormAlterationInput from "./TherapyRecommendationFormAlterationInput";
+import { Mutation } from "shared/api/generated/CBioPortalAPI";
 
 
-interface ITherapyRecommendationFeedbackProps {
+interface ITherapyRecommendationFormProps {
     show: boolean;
     data: ITherapyRecommendation;
+    mutations: Mutation[];
     title: string;
     userEmailAddress: string;
     onHide: ((newTherapyRecommendation: ITherapyRecommendation) => void);
 }
 
-export default class TherapyRecommendationForm extends React.Component<ITherapyRecommendationFeedbackProps, {}> {
+export default class TherapyRecommendationForm extends React.Component<ITherapyRecommendationFormProps, {}> {
     public render() {
-        // let src = '';
-        // if (this.props.show) {
-        //     const url = "https://docs.google.com/forms/d/e/1FAIpQLSfcoLRG0iWO_qUb4hfzWFQ1toP575EKCTwqPcXE9DmMzuS34w/viewform";
-        //     const userParam = `entry.1655318994=${this.props.userEmailAddress || ''}`;
-        //     const uriParam = `entry.1782078941=${encodeURIComponent(window.location.href)}`;
-        //     src = `${url}?${userParam}&${uriParam}&embedded=true`;
-        //     if (!_.isUndefined(this.props.data)) {
-        //         const nctIdParam = `entry.1070287537=${this.props.data.nctId || ''}`;
-        //         const protocolNoParam = `entry.699867040=${this.props.data.protocolNo || ''}`;
-        //         src = `${url}?${userParam}&${uriParam}&${nctIdParam}&${protocolNoParam}&embedded=true`;
-        //     }
-        // }
-        let therapyRecommendation: ITherapyRecommendation = this.props.data;
+        let therapyRecommendation: ITherapyRecommendation = Object.create(this.props.data);
         return (
             <Modal show={this.props.show} onHide={() => {this.props.onHide(therapyRecommendation)}}>
                 <Modal.Header closeButton>
@@ -34,15 +26,12 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                 </Modal.Header>
                 <Modal.Body>
                     <form className="form">
-
                         <div className="form-group">
                             <h5>Drug(s):</h5>
                             <input
                             type="text"
-                            value={therapyRecommendation.treatments.toString()}
-                            // onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            //     this.handleChangeInput(e.target.value)
-                            // }
+                            defaultValue={therapyRecommendation.treatments.map(t => t.name).join(' + ')}
+                            onChange={(e) => therapyRecommendation.treatments = (e.target.value.replace(/\s/g, "").split('+')).map(s => ({name:s}))}
                             className="form-control"
                             />
                         </div>
@@ -51,23 +40,35 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                             <h5>Comment:</h5>
                             <input
                             type="text"
-                            value={therapyRecommendation.comment}
-                            // onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            //     this.handleChangeInput(e.target.value)
-                            // }
+                            defaultValue={therapyRecommendation.comment}
+                            onChange={(e) => therapyRecommendation.comment = e.target.value}
                             className="form-control"
                             />
                         </div>
 
                         <div className="form-group">
                             <h5>Evidence Level:</h5>
-                            
-                            <select className="form-control input-sm" value={therapyRecommendation.evidenceLevel}>
-                                        {Object.keys(EvidenceLevel).map(key => (
-                                            <option value={key}>{EvidenceLevel[key as any]}</option>
-                                          ))}
+                            <select 
+                            className="form-control" 
+                            defaultValue={therapyRecommendation.evidenceLevel}
+                            onChange={(e) => therapyRecommendation.evidenceLevel = EvidenceLevel[e.target.value as keyof typeof EvidenceLevel]}
+                            >
+                                {Object.keys(EvidenceLevel).map(key => (
+                                    <option value={key}>{EvidenceLevel[key as any]}</option>
+                                    ))}
                             </select>
                         </div>
+
+                        <div className="form-group">
+                            <h5>Positive for alterations:</h5>
+                            {/* {TherapyRecommendationFormAlterationInput(this.props.data, this.props.mutations)} */}
+                            <TherapyRecommendationFormAlterationInput
+                                data={this.props.data}
+                                mutations={this.props.mutations}
+                            />
+                        </div>
+
+
 
                         {/* {(this.boxPlotData.isComplete && this.boxPlotData.result.length > 1) && (
                             <div className="form-group">
@@ -106,4 +107,6 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
             </Modal>
         );
     }
+
+
 }

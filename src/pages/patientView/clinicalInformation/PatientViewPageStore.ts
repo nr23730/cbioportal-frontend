@@ -1301,7 +1301,7 @@ export class PatientViewPageStore {
     public therapyRecommendationOnDelete(therapyRecommendationToDelete: ITherapyRecommendation) {
         this.therapyRecommendations = this.therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDelete.id !== therapyRecommendation.id);
         return true;
-
+        
     }
 
     public therapyRecommendationOnAddOrEdit(therapyRecommendationToAdd: ITherapyRecommendation) {

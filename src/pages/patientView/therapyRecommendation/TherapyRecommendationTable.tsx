@@ -11,11 +11,11 @@ import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTabl
 import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from "../SampleManager";
 import DefaultTooltip, { placeArrowBottomLeft } from "../../../public-lib/components/defaultTooltip/DefaultTooltip";
-import { truncate, getNewTherapyRecommendation } from "./TherapyRecommendationTableUtils";
+import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation } from "./TherapyRecommendationTableUtils";
 import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
 import { Mutation } from 'shared/api/generated/CBioPortalAPI';
-import TherapyRecommendationForm from './TherapyRecommendationForm';
+import TherapyRecommendationForm from './form/TherapyRecommendationForm';
 
 export type ITherapyRecommendationProps = {
     mutations: Mutation[];
@@ -197,11 +197,11 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     }
 
     public openAddForm() {
-        this.selectedTherapyRecommendation = getNewTherapyRecommendation({credentials: AppConfig.serverConfig.user_email_address});
+        this.selectedTherapyRecommendation = getNewTherapyRecommendation();
     }
 
     public onHideAddEditForm(newTherapyRecommendation: ITherapyRecommendation) {
-        console.log("HIDE");
+        newTherapyRecommendation = addModificationToTherapyRecommendation(newTherapyRecommendation);
         this.selectedTherapyRecommendation = undefined;
         if(this.props.onAddOrEdit(newTherapyRecommendation)) this.forceUpdate();
     }
@@ -375,6 +375,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                     <TherapyRecommendationForm
                         show={!!this.selectedTherapyRecommendation}
                         data={this.selectedTherapyRecommendation}
+                        mutations={this.props.mutations}
                         onHide={(therapyRecommendation: ITherapyRecommendation) => {this.onHideAddEditForm(therapyRecommendation)}}
                         title="Edit therapy recommendation"
                         userEmailAddress={AppConfig.serverConfig.user_email_address}

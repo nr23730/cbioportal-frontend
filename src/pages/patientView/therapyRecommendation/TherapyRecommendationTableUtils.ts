@@ -1,4 +1,5 @@
 import { ITherapyRecommendation, EvidenceLevel, Modified, IRecommender } from "shared/model/TherapyRecommendation";
+import AppConfig from "appConfig";
 
 export function truncate( s: String, n: number, useWordBoundary: boolean ){
     if (s.length <= n) { return s; }
@@ -8,9 +9,9 @@ export function truncate( s: String, n: number, useWordBoundary: boolean ){
        : subString) + " [...]";
 };
 
-export function getNewTherapyRecommendation(recommender: IRecommender): ITherapyRecommendation {
-    const therapyRecommendation: ITherapyRecommendation = {
-        id: "test", 
+export function getNewTherapyRecommendation(): ITherapyRecommendation {
+    let therapyRecommendation: ITherapyRecommendation = {
+        id: (new Date()).toISOString(), 
         comment: "",
         reasoning: {},
         evidenceLevel: EvidenceLevel.NA,
@@ -18,7 +19,7 @@ export function getNewTherapyRecommendation(recommender: IRecommender): ITherapy
             {
                 modified: Modified.CREATED,
                 recommender: {
-                    credentials: recommender.credentials
+                    credentials: AppConfig.serverConfig.user_email_address
                 },
                 timestamp: (new Date()).toISOString()
             }
@@ -26,5 +27,18 @@ export function getNewTherapyRecommendation(recommender: IRecommender): ITherapy
         references: [],
         treatments: []
     };
+    return therapyRecommendation;
+}
+
+export function addModificationToTherapyRecommendation(therapyRecommendation: ITherapyRecommendation) : ITherapyRecommendation {
+    therapyRecommendation.modifications.push(
+        {
+            modified: Modified.MODIFIED,
+            recommender: {
+                credentials: AppConfig.serverConfig.user_email_address
+            },
+            timestamp: (new Date()).toISOString()
+        }
+    );
     return therapyRecommendation;
 }
