@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import {Modal} from "react-bootstrap";
 import { ITherapyRecommendation, EvidenceLevel } from "shared/model/TherapyRecommendation";
 import OQLTextArea from "shared/components/GeneSelectionBox/OQLTextArea";
-import TherapyRecommendationFormAlterationInput from "./TherapyRecommendationFormAlterationInput";
+import { TherapyRecommendationFormAlterationPositiveInput, TherapyRecommendationFormAlterationNegativeInput } from "./TherapyRecommendationFormAlterationInput";
 import { Mutation } from "shared/api/generated/CBioPortalAPI";
 
 
@@ -60,11 +60,18 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                         </div>
 
                         <div className="form-group">
-                            <h5>Positive for alterations:</h5>
-                            {/* {TherapyRecommendationFormAlterationInput(this.props.data, this.props.mutations)} */}
-                            <TherapyRecommendationFormAlterationInput
-                                data={this.props.data}
+                            <h5>Reasoning:</h5>
+                            <h6>Positive for alterations:</h6>
+                            <TherapyRecommendationFormAlterationPositiveInput
+                                data={therapyRecommendation}
                                 mutations={this.props.mutations}
+                                onChange={(alterations) => therapyRecommendation.reasoning.geneticAlterations = alterations}
+                            />
+                            <h6>Negative for alterations:</h6>
+                            <TherapyRecommendationFormAlterationNegativeInput
+                                data={therapyRecommendation}
+                                mutations={this.props.mutations}
+                                onChange={(alterations) => therapyRecommendation.reasoning.geneticAlterationsMissing = alterations}
                             />
                         </div>
 
