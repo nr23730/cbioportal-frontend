@@ -214,7 +214,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
             patientViewPageStore.detailedTrialMatches.isComplete && patientViewPageStore.detailedTrialMatches.result.length > 0;
     }
 
-    private shouldShowTreatmentRecommendation(patientViewPageStore: PatientViewPageStore): boolean {
+    private shouldShowTherapyRecommendation(patientViewPageStore: PatientViewPageStore): boolean {
         return true;
     }
 
@@ -681,7 +681,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                     }
 
                     {
-                        this.shouldShowTreatmentRecommendation(this.patientViewPageStore) && this.patientViewPageStore.mutationData.isComplete && (
+                        this.shouldShowTherapyRecommendation(this.patientViewPageStore) && this.patientViewPageStore.mutationData.isComplete && (
                             <MSKTab key={8} id="therapyRecommendationTab" linkText="Therapy Recommendation">
                                 <TherapyRecommendationTable
                                     mutations={this.patientViewPageStore.mutationData.result}

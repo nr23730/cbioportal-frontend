@@ -65,8 +65,14 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
             <If condition={therapyRecommendation.treatments.length > 0}>
                 <div>
                     <span>
-                        <img src={require("../../../globalStyles/images/drug.png")} style={{ width: 18, marginTop: -5 }} alt="drug icon"/>
-                        <b>{therapyRecommendation.treatments.map((treatment: ITreatment) => treatment.name).join(' + ')}</b>
+                        {/* <img src={require("../../../globalStyles/images/drug.png")} style={{ width: 18, marginTop: -5 }} alt="drug icon"/>
+                        <b>{therapyRecommendation.treatments.map((treatment: ITreatment) => treatment.name).join(' + ')}</b> */}
+                        {therapyRecommendation.treatments.map((treatment: ITreatment) => (
+                            <div>
+                                <img src={require("../../../globalStyles/images/drug.png")} style={{ width: 18, marginTop: -5 }} alt="drug icon"/>
+                                <b>{treatment.name}</b>
+                            </div>
+                        ))}
                     </span>
                 </div>
             </If>

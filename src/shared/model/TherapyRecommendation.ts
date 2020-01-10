@@ -55,7 +55,7 @@ export interface IReasoning {
 }
 
 export interface IGeneticAlteration {
-    entrezGeneId: number;
+    entrezGeneId?: number;
     hugoSymbol: string;
     proteinChange?: string;
 };

@@ -5,6 +5,7 @@ import { ITherapyRecommendation, EvidenceLevel } from "shared/model/TherapyRecom
 import OQLTextArea from "shared/components/GeneSelectionBox/OQLTextArea";
 import { TherapyRecommendationFormAlterationPositiveInput, TherapyRecommendationFormAlterationNegativeInput } from "./TherapyRecommendationFormAlterationInput";
 import { Mutation } from "shared/api/generated/CBioPortalAPI";
+import TherapyRecommendationFormDrugInput from "./TherapyRecommendationFormDrugInput";
 
 
 interface ITherapyRecommendationFormProps {
@@ -28,12 +29,16 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                     <form className="form">
                         <div className="form-group">
                             <h5>Drug(s):</h5>
-                            <input
+                            <TherapyRecommendationFormDrugInput
+                                data={therapyRecommendation}
+                                onChange={(drugs) => therapyRecommendation.treatments = drugs}
+                            />
+                            {/* <input
                             type="text"
                             defaultValue={therapyRecommendation.treatments.map(t => t.name).join(' + ')}
                             onChange={(e) => therapyRecommendation.treatments = (e.target.value.replace(/\s/g, "").split('+')).map(s => ({name:s}))}
                             className="form-control"
-                            />
+                            /> */}
                         </div>
 
                         <div className="form-group">
