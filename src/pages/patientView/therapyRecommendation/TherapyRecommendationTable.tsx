@@ -3,7 +3,7 @@ import { If, Then, Else } from 'react-if';
 import {observer} from "mobx-react";
 import * as _ from 'lodash';
 import {
-    ITherapyRecommendation, ITreatment, IGeneticAlteration, IReference
+    ITherapyRecommendation, ITreatment, IGeneticAlteration, IReference, IClinicalData
 } from "../../../shared/model/TherapyRecommendation";
 //import styles from './style/TherapyRecommendation.module.scss';
 import { action, computed, observable } from "mobx";
@@ -14,11 +14,12 @@ import DefaultTooltip, { placeArrowBottomLeft } from "../../../public-lib/compon
 import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation } from "./TherapyRecommendationTableUtils";
 import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
-import { Mutation } from 'shared/api/generated/CBioPortalAPI';
+import { Mutation, ClinicalData } from 'shared/api/generated/CBioPortalAPI';
 import TherapyRecommendationForm from './form/TherapyRecommendationForm';
 
 export type ITherapyRecommendationProps = {
     mutations: Mutation[];
+    clinicalData: ClinicalData[];
     sampleManager: SampleManager | null;
     therapyRecommendations: ITherapyRecommendation[];
     containerWidth: number;
@@ -115,12 +116,18 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                                 </div>
                             </div>
                             <div className={styles.firstRight}>
+                            Clinical data:
+                            {therapyRecommendation.reasoning.clinicalData && therapyRecommendation.reasoning.clinicalData.map((clinicalDataItem: IClinicalData) => (
                             <div>
+                                {clinicalDataItem.attribute + ": " + clinicalDataItem.value}
+                            </div>
+                            ))}
+                            {/* <div>
                                 {therapyRecommendation.reasoning.tmb && "TMB: " + therapyRecommendation.reasoning.tmb}
                             </div>
                             <div>
                                 {therapyRecommendation.reasoning.other && "Notes: " + therapyRecommendation.reasoning.other}
-                            </div>
+                            </div> */}
                             </div>
                         </div>
                     </div>
@@ -138,7 +145,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     }, {
         name: ColumnKey.REFERENCES,
         render: (therapyRecommendation: ITherapyRecommendation) => (
-            <If condition={therapyRecommendation.treatments.length > 0}>
+            <If condition={therapyRecommendation.references.length > 0}>
             <div>
                     {therapyRecommendation.references.map((reference: IReference) => (
                     <div><a target="_blank" href={"https://www.ncbi.nlm.nih.gov/pubmed/" + reference.pmid}>[{reference.pmid}] {truncate(reference.name, 40, true)}</a></div>
@@ -382,6 +389,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                         show={!!this.selectedTherapyRecommendation}
                         data={this.selectedTherapyRecommendation}
                         mutations={this.props.mutations}
+                        clinicalData={this.props.clinicalData}
                         onHide={(therapyRecommendation: ITherapyRecommendation) => {this.onHideAddEditForm(therapyRecommendation)}}
                         title="Edit therapy recommendation"
                         userEmailAddress={AppConfig.serverConfig.user_email_address}

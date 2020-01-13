@@ -685,6 +685,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                             <MSKTab key={8} id="therapyRecommendationTab" linkText="Therapy Recommendation">
                                 <TherapyRecommendationTable
                                     mutations={this.patientViewPageStore.mutationData.result}
+                                    clinicalData={this.patientViewPageStore.clinicalDataPatient.result.concat(this.patientViewPageStore.clinicalDataForSamples.result)}
                                     sampleManager={sampleManager}
                                     therapyRecommendations={this.patientViewPageStore.therapyRecommendations}
                                     containerWidth={WindowStore.size.width-20}

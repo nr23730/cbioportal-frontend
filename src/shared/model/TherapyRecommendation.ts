@@ -47,9 +47,15 @@ export interface ITreatment {
     synonyms?: string;
 }
 
+export interface IClinicalData {
+    attribute: string;
+    value: string;
+}
+
 export interface IReasoning {
     geneticAlterations?: IGeneticAlteration[];
     geneticAlterationsMissing?: IGeneticAlteration[];
+    clinicalData?: IClinicalData[];
     tmb?: number;
     other?: string;
 }

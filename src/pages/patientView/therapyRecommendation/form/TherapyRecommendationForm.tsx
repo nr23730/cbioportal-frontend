@@ -2,16 +2,18 @@ import * as React from "react";
 import * as _ from 'lodash';
 import {Modal} from "react-bootstrap";
 import { ITherapyRecommendation, EvidenceLevel } from "shared/model/TherapyRecommendation";
-import OQLTextArea from "shared/components/GeneSelectionBox/OQLTextArea";
 import { TherapyRecommendationFormAlterationPositiveInput, TherapyRecommendationFormAlterationNegativeInput } from "./TherapyRecommendationFormAlterationInput";
-import { Mutation } from "shared/api/generated/CBioPortalAPI";
+import { Mutation, ClinicalData } from "shared/api/generated/CBioPortalAPI";
 import TherapyRecommendationFormDrugInput from "./TherapyRecommendationFormDrugInput";
-
+import TherapyRecommendationFormClinicalInput from "./TherapyRecommendationFormClinicalInput";
+import Select from 'react-select';
+import TherapyRecommendationFormReferenceInput from "./TherapyRecommendationFormReferenceInput";
 
 interface ITherapyRecommendationFormProps {
     show: boolean;
     data: ITherapyRecommendation;
     mutations: Mutation[];
+    clinicalData: ClinicalData[];
     title: string;
     userEmailAddress: string;
     onHide: ((newTherapyRecommendation: ITherapyRecommendation) => void);
@@ -53,7 +55,19 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
 
                         <div className="form-group">
                             <h5>Evidence Level:</h5>
-                            <select 
+                            <Select
+                            options={Object.keys(EvidenceLevel).map(key => (
+                                ({label: key, value: EvidenceLevel[key as any]})
+                                ))}
+                            defaultValue={therapyRecommendation.evidenceLevel}
+                            name="evidenceLevel"
+                            className="basic-select"
+                            classNamePrefix="select"
+                            onChange={(selectedOption: {label: string, value: EvidenceLevel}) => {
+                                therapyRecommendation.evidenceLevel = EvidenceLevel[selectedOption.value as keyof typeof EvidenceLevel]
+                            }}
+                            />
+                            {/* <select 
                             className="form-control" 
                             defaultValue={therapyRecommendation.evidenceLevel}
                             onChange={(e) => therapyRecommendation.evidenceLevel = EvidenceLevel[e.target.value as keyof typeof EvidenceLevel]}
@@ -61,7 +75,7 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                                 {Object.keys(EvidenceLevel).map(key => (
                                     <option value={key}>{EvidenceLevel[key as any]}</option>
                                     ))}
-                            </select>
+                            </select> */}
                         </div>
 
                         <div className="form-group">
@@ -78,9 +92,21 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                                 mutations={this.props.mutations}
                                 onChange={(alterations) => therapyRecommendation.reasoning.geneticAlterationsMissing = alterations}
                             />
+                            <h6>Clinical data:</h6>
+                            <TherapyRecommendationFormClinicalInput
+                                data={therapyRecommendation}
+                                clinicalData={this.props.clinicalData}
+                                onChange={(clinicalDataItems) => therapyRecommendation.reasoning.clinicalData = clinicalDataItems}
+                            />
                         </div>
 
-
+                        <div className="form-group">
+                            <h5>Reference(s):</h5>
+                            <TherapyRecommendationFormReferenceInput
+                                data={therapyRecommendation}
+                                onChange={(references) => therapyRecommendation.references = references}
+                            />
+                        </div>
 
                         {/* {(this.boxPlotData.isComplete && this.boxPlotData.result.length > 1) && (
                             <div className="form-group">
