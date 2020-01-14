@@ -50,8 +50,7 @@ export default class TherapyRecommendationFormReferenceInput extends React.Compo
               this.props.onChange(selectedOption.map(option => {
                 console.log(option);
                 if (_.isString(option.value)) {
-                  let referenceString = option.value.toString().split(':');
-                  return {pmid: +referenceString[0], name: referenceString[1]} as IReference;
+                  return {pmid: -1, name: option.value} as IReference;
                 } else {
                   return option.value as IReference;
                 }
@@ -72,13 +71,13 @@ export default class TherapyRecommendationFormReferenceInput extends React.Compo
 
 
 
-const promiseOptions = (inputValue:String, callback: (options: ReadonlyArray<MyOption>) => void) =>
+const promiseOptions = (inputValue:string, callback: (options: ReadonlyArray<MyOption>) => void) =>
 new Promise<MyOption>((resolve, reject) => {
   if(isNaN(+inputValue)) {
-    const nanReference = {pmid: -1, name: "Invalid PubMed ID"};
+    const nanReference = {pmid: -1, name: inputValue};
     return callback([({
       value: nanReference, 
-      label: nanReference.pmid + ": " + nanReference.name
+      label: nanReference.name
     })])
   } else {
     const pmid = +inputValue;

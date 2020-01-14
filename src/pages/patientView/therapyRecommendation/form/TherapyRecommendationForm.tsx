@@ -59,7 +59,7 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                             options={Object.keys(EvidenceLevel).map(key => (
                                 ({label: key, value: EvidenceLevel[key as any]})
                                 ))}
-                            defaultValue={therapyRecommendation.evidenceLevel}
+                            defaultValue={({label: therapyRecommendation.evidenceLevel, value: therapyRecommendation.evidenceLevel })}
                             name="evidenceLevel"
                             className="basic-select"
                             classNamePrefix="select"

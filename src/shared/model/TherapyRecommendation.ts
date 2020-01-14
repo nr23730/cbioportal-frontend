@@ -37,7 +37,7 @@ export interface ITherapyRecommendation {
 
 export interface IReference {
     name: string;
-    pmid: number;
+    pmid?: number;
     comment?: string;
 }
 

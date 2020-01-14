@@ -1136,74 +1136,74 @@ export class PatientViewPageStore {
     }, []);
 
     therapyRecommendations = [
-        {
-            id: "1", 
-            comment: "test",
-            reasoning: {
-                geneticAlterations: [
-                    {
-                        entrezGeneId: 673,
-                        hugoSymbol: "BRAF",
-                        proteinChange: "V600E"
-                    }
-                ]
-            },
-            evidenceLevel: EvidenceLevel.I,
-            modifications: [
-                {
-                    modified: Modified.CREATED,
-                    recommender: {
-                        credentials: "alice"
-                    },
-                    timestamp: "20191210"
-                }
-            ],
-            references: [
-                {
-                    pmid: 12345,
-                    name: "PubMed Test"
-                }
-            ],
-            treatments: [
-                {
-                    name: "TEST MED"
-                }
-            ]
-        } as ITherapyRecommendation, 
-        {
-            id: "2", 
-            comment: "test2",
-            reasoning: {
-                geneticAlterations: [
-                    {
-                        entrezGeneId: 675,
-                        hugoSymbol: "BRCA2",
-                        proteinChange: "T3085Nfs*26"
-                    }
-                ]
-            },
-            evidenceLevel: EvidenceLevel.II,
-            modifications: [
-                {
-                    modified: Modified.CREATED,
-                    recommender: {
-                        credentials: "alice"
-                    },
-                    timestamp: "20191210"
-                }
-            ],
-            references: [
-                {
-                    pmid: 12345,
-                    name: "PubMed Test"
-                }
-            ],
-            treatments: [
-                {
-                    name: "TEST MED1"
-                }
-            ]
-        } as ITherapyRecommendation,
+        // {
+        //     id: "1", 
+        //     comment: "test",
+        //     reasoning: {
+        //         geneticAlterations: [
+        //             {
+        //                 entrezGeneId: 673,
+        //                 hugoSymbol: "BRAF",
+        //                 proteinChange: "V600E"
+        //             }
+        //         ]
+        //     },
+        //     evidenceLevel: EvidenceLevel.I,
+        //     modifications: [
+        //         {
+        //             modified: Modified.CREATED,
+        //             recommender: {
+        //                 credentials: "alice"
+        //             },
+        //             timestamp: "20191210"
+        //         }
+        //     ],
+        //     references: [
+        //         {
+        //             pmid: 12345,
+        //             name: "PubMed Test"
+        //         }
+        //     ],
+        //     treatments: [
+        //         {
+        //             name: "TEST MED"
+        //         }
+        //     ]
+        // } as ITherapyRecommendation, 
+        // {
+        //     id: "2", 
+        //     comment: "test2",
+        //     reasoning: {
+        //         geneticAlterations: [
+        //             {
+        //                 entrezGeneId: 675,
+        //                 hugoSymbol: "BRCA2",
+        //                 proteinChange: "T3085Nfs*26"
+        //             }
+        //         ]
+        //     },
+        //     evidenceLevel: EvidenceLevel.II,
+        //     modifications: [
+        //         {
+        //             modified: Modified.CREATED,
+        //             recommender: {
+        //                 credentials: "alice"
+        //             },
+        //             timestamp: "20191210"
+        //         }
+        //     ],
+        //     references: [
+        //         {
+        //             pmid: 12345,
+        //             name: "PubMed Test"
+        //         }
+        //     ],
+        //     treatments: [
+        //         {
+        //             name: "TEST MED1"
+        //         }
+        //     ]
+        // } as ITherapyRecommendation,
         {
             id: "3", 
             comment: "test3",
@@ -1250,52 +1250,52 @@ export class PatientViewPageStore {
                 }
             ]
         } as ITherapyRecommendation,
-        {
-            id: "4", 
-            comment: "test4",
-            reasoning: {
-                geneticAlterations: [
-                    {
-                        entrezGeneId: 673,
-                        hugoSymbol: "BRAF",
-                        proteinChange: "V600E"
-                    }
-                ],
-                geneticAlterationsMissing: [
-                    {
-                        entrezGeneId: 672,
-                        hugoSymbol: "BRCA1"
-                    }
-                ], 
-                tmb: 42,
-                other: "Other Reasoning"
-            },
-            evidenceLevel: EvidenceLevel.IV,
-            modifications: [
-                {
-                    modified: Modified.CREATED,
-                    recommender: {
-                        credentials: "alice"
-                    },
-                    timestamp: "20191210"
-                }
-            ],
-            references: [
-                {
-                    pmid: 30942711,
-                    name: "Developing New Analysis Functions for a Translational Research Platform: Extending the cBioPortal for Cancer Genomics."
-                },
-                {
-                    pmid: 30942707,
-                    name: "A REST Service for the Visualization of Clinical Time Series Data in the Context of Clinical Decision Support."
-                }
-            ],
-            treatments: [
-                {
-                    name: "Long Medication Name"
-                }
-            ]
-        } as ITherapyRecommendation
+        // {
+        //     id: "4", 
+        //     comment: "test4",
+        //     reasoning: {
+        //         geneticAlterations: [
+        //             {
+        //                 entrezGeneId: 673,
+        //                 hugoSymbol: "BRAF",
+        //                 proteinChange: "V600E"
+        //             }
+        //         ],
+        //         geneticAlterationsMissing: [
+        //             {
+        //                 entrezGeneId: 672,
+        //                 hugoSymbol: "BRCA1"
+        //             }
+        //         ], 
+        //         tmb: 42,
+        //         other: "Other Reasoning"
+        //     },
+        //     evidenceLevel: EvidenceLevel.IV,
+        //     modifications: [
+        //         {
+        //             modified: Modified.CREATED,
+        //             recommender: {
+        //                 credentials: "alice"
+        //             },
+        //             timestamp: "20191210"
+        //         }
+        //     ],
+        //     references: [
+        //         {
+        //             pmid: 30942711,
+        //             name: "Developing New Analysis Functions for a Translational Research Platform: Extending the cBioPortal for Cancer Genomics."
+        //         },
+        //         {
+        //             pmid: 30942707,
+        //             name: "A REST Service for the Visualization of Clinical Time Series Data in the Context of Clinical Decision Support."
+        //         }
+        //     ],
+        //     treatments: [
+        //         {
+        //             name: "Long Medication Name"
+        //         }
+        //     ]
+        // } as ITherapyRecommendation
     ] as ITherapyRecommendation[];
 
     public therapyRecommendationOnDelete(therapyRecommendationToDelete: ITherapyRecommendation) {

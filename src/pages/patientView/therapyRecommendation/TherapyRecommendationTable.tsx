@@ -16,6 +16,7 @@ import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
 import { Mutation, ClinicalData } from 'shared/api/generated/CBioPortalAPI';
 import TherapyRecommendationForm from './form/TherapyRecommendationForm';
+import { SimpleCopyDownloadControls } from 'shared/components/copyDownloadControls/SimpleCopyDownloadControls';
 
 export type ITherapyRecommendationProps = {
     mutations: Mutation[];
@@ -35,7 +36,7 @@ enum ColumnKey {
     REASONING = 'Reasoning',
     REFERENCES = 'References',
     EVIDENCE = 'Evidence Level',
-    EDIT = '',
+    EDIT = 'Edit',
 }
 
 enum ColumnWidth {
@@ -148,7 +149,15 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
             <If condition={therapyRecommendation.references.length > 0}>
             <div>
                     {therapyRecommendation.references.map((reference: IReference) => (
-                    <div><a target="_blank" href={"https://www.ncbi.nlm.nih.gov/pubmed/" + reference.pmid}>[{reference.pmid}] {truncate(reference.name, 40, true)}</a></div>
+                        <If condition={reference.pmid && reference.pmid > 0}>
+                        <Then>
+                            <div><a target="_blank" href={"https://www.ncbi.nlm.nih.gov/pubmed/" + reference.pmid}>[{reference.pmid}] {truncate(reference.name, 40, true)}</a></div>
+                        </Then>
+                        <Else>
+                        <div>{truncate(reference.name, 200, true)}</div>
+                        </Else>
+                        </If>
+                    
                     ))}
             </div>
             </If>
@@ -399,6 +408,13 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                     data={this.props.therapyRecommendations}
                     columns={this._columns}
                     showCopyDownload={false}
+                />
+                <SimpleCopyDownloadControls
+                    // className={classnames("pull-right", styles.copyDownloadControls)}
+                    downloadData={() => JSON.stringify(this.props.therapyRecommendations)}
+                    downloadFilename={`TherapyRecommendation_${this.props.sampleManager!.samples[0].id}.json`}
+                    controlsStyle="BUTTON"
+                    // containerId={this.props.id}
                 />
             </div>
         )
