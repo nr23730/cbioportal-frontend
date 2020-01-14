@@ -11,7 +11,7 @@ import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTabl
 import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from "../SampleManager";
 import DefaultTooltip, { placeArrowBottomLeft } from "../../../public-lib/components/defaultTooltip/DefaultTooltip";
-import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation } from "./TherapyRecommendationTableUtils";
+import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation, flatStringify } from "./TherapyRecommendationTableUtils";
 import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
 import { Mutation, ClinicalData } from 'shared/api/generated/CBioPortalAPI';
@@ -19,6 +19,7 @@ import TherapyRecommendationForm from './form/TherapyRecommendationForm';
 import { SimpleCopyDownloadControls } from 'shared/components/copyDownloadControls/SimpleCopyDownloadControls';
 
 export type ITherapyRecommendationProps = {
+    patientId: string;
     mutations: Mutation[];
     clinicalData: ClinicalData[];
     sampleManager: SampleManager | null;
@@ -219,13 +220,16 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     }
 
     public openAddForm() {
-        this.selectedTherapyRecommendation = getNewTherapyRecommendation();
+        
+        this.selectedTherapyRecommendation = getNewTherapyRecommendation(this.props.patientId);
     }
 
     public onHideAddEditForm(newTherapyRecommendation: ITherapyRecommendation) {
+        console.log(this.props.therapyRecommendations);
         newTherapyRecommendation = addModificationToTherapyRecommendation(newTherapyRecommendation);
         this.selectedTherapyRecommendation = undefined;
         if(this.props.onAddOrEdit(newTherapyRecommendation)) this.forceUpdate();
+        console.log(this.props.therapyRecommendations);
     }
 
     // public getClinicalMatch(clinicalGroupMatch: IClinicalGroupMatch) {
@@ -411,8 +415,8 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                 />
                 <SimpleCopyDownloadControls
                     // className={classnames("pull-right", styles.copyDownloadControls)}
-                    downloadData={() => JSON.stringify(this.props.therapyRecommendations)}
-                    downloadFilename={`TherapyRecommendation_${this.props.sampleManager!.samples[0].id}.json`}
+                    downloadData={() => flatStringify(this.props.therapyRecommendations)} //JSON.stringify(this.props.therapyRecommendations)} 
+                    downloadFilename={`TherapyRecommendation_${this.props.patientId}.json`}
                     controlsStyle="BUTTON"
                     // containerId={this.props.id}
                 />

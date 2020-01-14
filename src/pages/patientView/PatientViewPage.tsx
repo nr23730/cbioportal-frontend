@@ -684,6 +684,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                         this.shouldShowTherapyRecommendation(this.patientViewPageStore) && this.patientViewPageStore.mutationData.isComplete && (
                             <MSKTab key={8} id="therapyRecommendationTab" linkText="Therapy Recommendation">
                                 <TherapyRecommendationTable
+                                    patientId={this.patientViewPageStore.patientId}
                                     mutations={this.patientViewPageStore.mutationData.result}
                                     clinicalData={this.patientViewPageStore.clinicalDataPatient.result.concat(this.patientViewPageStore.clinicalDataForSamples.result)}
                                     sampleManager={sampleManager}

@@ -9,9 +9,10 @@ export function truncate( s: String, n: number, useWordBoundary: boolean ){
        : subString) + " [...]";
 };
 
-export function getNewTherapyRecommendation(): ITherapyRecommendation {
+export function getNewTherapyRecommendation(patientId: string): ITherapyRecommendation {
+    let timeString = (new Date()).toISOString();
     let therapyRecommendation: ITherapyRecommendation = {
-        id: (new Date()).toISOString(), 
+        id: (patientId + "_" + timeString), 
         comment: "",
         reasoning: {},
         evidenceLevel: EvidenceLevel.NA,
@@ -21,7 +22,7 @@ export function getNewTherapyRecommendation(): ITherapyRecommendation {
                 recommender: {
                     credentials: AppConfig.serverConfig.user_email_address
                 },
-                timestamp: (new Date()).toISOString()
+                timestamp: timeString
             }
         ],
         references: [],
@@ -41,4 +42,19 @@ export function addModificationToTherapyRecommendation(therapyRecommendation: IT
         }
     );
     return therapyRecommendation;
+}
+
+export function flatStringify(x: Array<any>) : string {
+    let y : any = {};
+    x.forEach(function(elem, index) {
+        let elemY : any = {};
+        for(var i in elem) {
+            if(!elem.hasOwnProperty(i)) {
+                elem[i] = elem[i];
+            }
+            elemY[i] = elem[i];
+        }
+        y[index] = elemY;   
+    });
+    return JSON.stringify(y);
 }

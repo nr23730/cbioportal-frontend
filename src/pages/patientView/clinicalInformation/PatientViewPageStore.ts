@@ -1305,9 +1305,11 @@ export class PatientViewPageStore {
     }
 
     public therapyRecommendationOnAddOrEdit(therapyRecommendationToAdd: ITherapyRecommendation) {
-        this.therapyRecommendations = this.therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToAdd.id !== therapyRecommendation.id);
+        console.log(this.therapyRecommendations);
+        // this.therapyRecommendations = this.therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToAdd.id !== therapyRecommendation.id);
         (therapyRecommendationToAdd: ITherapyRecommendation) => this.therapyRecommendationOnDelete(therapyRecommendationToAdd);
         this.therapyRecommendations.push(therapyRecommendationToAdd);
+        console.log(this.therapyRecommendations);
         return true;
     }
 

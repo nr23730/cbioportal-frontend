@@ -106,22 +106,3 @@ new Promise<MyOption>((resolve, reject) => {
         });
     }
 });
-
-
-// function getOptions(inputValue:String, callback: (options: ReadonlyArray<MyOption>) => void){
-//   const pmid = +inputValue;
-//   return fetch('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=' + pmid + '&retmode=json')
-//   .then(results=>{
-//       return results.json();
-//   }).then(data=>{
-//     const uid = data.uids[0];
-//     const reference = {pmid: pmid, name: data[uid].title};
-//     const option:MyOption = ({
-//       value: reference, 
-//       label: reference.pmid + ": " + reference.name
-//     })
-//    //console.log(options) 
-//    callback([option]);
-//   })
-
-// }
