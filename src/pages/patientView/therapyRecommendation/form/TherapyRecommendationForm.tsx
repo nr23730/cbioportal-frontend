@@ -35,12 +35,6 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                                 data={therapyRecommendation}
                                 onChange={(drugs) => therapyRecommendation.treatments = drugs}
                             />
-                            {/* <input
-                            type="text"
-                            defaultValue={therapyRecommendation.treatments.map(t => t.name).join(' + ')}
-                            onChange={(e) => therapyRecommendation.treatments = (e.target.value.replace(/\s/g, "").split('+')).map(s => ({name:s}))}
-                            className="form-control"
-                            /> */}
                         </div>
 
                         <div className="form-group">
@@ -67,15 +61,6 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                                 therapyRecommendation.evidenceLevel = EvidenceLevel[selectedOption.value as keyof typeof EvidenceLevel]
                             }}
                             />
-                            {/* <select 
-                            className="form-control" 
-                            defaultValue={therapyRecommendation.evidenceLevel}
-                            onChange={(e) => therapyRecommendation.evidenceLevel = EvidenceLevel[e.target.value as keyof typeof EvidenceLevel]}
-                            >
-                                {Object.keys(EvidenceLevel).map(key => (
-                                    <option value={key}>{EvidenceLevel[key as any]}</option>
-                                    ))}
-                            </select> */}
                         </div>
 
                         <div className="form-group">

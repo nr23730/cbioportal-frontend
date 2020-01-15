@@ -1,11 +1,9 @@
-import React, { ChangeEventHandler } from "react";
-import { ITherapyRecommendation, ITreatment, IReference } from "shared/model/TherapyRecommendation";
+import React from "react";
+import { ITherapyRecommendation, IReference } from "shared/model/TherapyRecommendation";
 import AsyncCreatableSelect from 'react-select/async-creatable';
-
-
 import _ from "lodash";
 import request from "superagent";
-import { callbackify } from "util";
+
 
 interface TherapyRecommendationFormReferenceInputProps {
   data: ITherapyRecommendation;
@@ -14,18 +12,9 @@ interface TherapyRecommendationFormReferenceInputProps {
 
 type MyOption = {label: string, value: IReference}
 
-
 export default class TherapyRecommendationFormReferenceInput extends React.Component<TherapyRecommendationFormReferenceInputProps, {}> {
 
   public render() {
-    
-    // let allDrugs = Drugs;
-
-    // let drugOptions = allDrugs.map((drug:ITreatment) => 
-    //   ({
-    //     value: drug, 
-    //     label: drug.name
-    //   }));
     const referenceDefault = this.props.data.references.map((reference:IReference) => 
     ({
       value: reference, 
@@ -33,22 +22,18 @@ export default class TherapyRecommendationFormReferenceInput extends React.Compo
     }));
       return (
         <AsyncCreatableSelect
-          // options={drugOptions}
-          // isDisabled
           isCreatable
           isMulti
           defaultValue={referenceDefault}
           cacheOptions
-
-          // name="negativeDrugs"
-          // className="basic-multi-select"
-          // classNamePrefix="select"
+          placeholder="Enter PubMed ID..."
+          name="referencesSelect"
+          className="creatable-multi-select"
+          classNamePrefix="select"
 
           onChange={(selectedOption: MyOption[]) => {
-            console.log(selectedOption);
             if (Array.isArray(selectedOption)) {
               this.props.onChange(selectedOption.map(option => {
-                console.log(option);
                 if (_.isString(option.value)) {
                   return {pmid: -1, name: option.value} as IReference;
                 } else {
@@ -59,20 +44,13 @@ export default class TherapyRecommendationFormReferenceInput extends React.Compo
               this.props.onChange([] as IReference[])
             }
           }}
-
           loadOptions={promiseOptions}
-
         />
       );
-    
-  }
-  }
-
-
-
+}}
 
 const promiseOptions = (inputValue:string, callback: (options: ReadonlyArray<MyOption>) => void) =>
-new Promise<MyOption>((resolve, reject) => {
+  new Promise<MyOption>((resolve, reject) => {
   if(isNaN(+inputValue)) {
     const nanReference = {pmid: -1, name: inputValue};
     return callback([({
@@ -85,7 +63,6 @@ new Promise<MyOption>((resolve, reject) => {
     request.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=' + pmid + '&retmode=json')
         .end((err, res)=>{
             if (!err && res.ok) {
-              // console.log(res);
                 const response = JSON.parse(res.text);
                 const result = response.result;
                 const uid = result.uids[0];
@@ -94,7 +71,6 @@ new Promise<MyOption>((resolve, reject) => {
                   value: reference, 
                   label: reference.pmid + ": " + reference.name
                 })
-                // resolve(ret)
                 return callback([ret]);
             } else {
               const errReference = {pmid: pmid, name: "Could not fetch name for ID " + pmid};

@@ -1,10 +1,7 @@
-import React, { ChangeEventHandler } from "react";
+import React from "react";
 import { ITherapyRecommendation, IClinicalData } from "shared/model/TherapyRecommendation";
 import CreatableSelect from 'react-select/creatable';
-
-
 import _ from "lodash";
-import { Drugs } from "./data/Drugs";
 import { ClinicalData } from "shared/api/generated/CBioPortalAPI";
 
 interface TherapyRecommendationFormClinicalInputProps {
@@ -45,14 +42,12 @@ export default class TherapyRecommendationFormClinicalInput extends React.Compon
           // isDisabled
           isMulti
           defaultValue={clinicalDataDefault}
-          // name="negativeDrugs"
-          // className="basic-multi-select"
-          // classNamePrefix="select"
+          name="clinicalSelect"
+          className="creatable-multi-select"
+          classNamePrefix="select"
           onChange={(selectedOption: MyOption[]) => {
             if (Array.isArray(selectedOption)) {
               this.props.onChange(selectedOption.map(option => {
-                console.log(option);
-                console.log(typeof(option));
                 if (_.isString(option.value)) {
                   let clinicalDataString = option.value.toString().split(':');
                   return {attribute: clinicalDataString[0], value: clinicalDataString[1]} as IClinicalData;
@@ -67,5 +62,4 @@ export default class TherapyRecommendationFormClinicalInput extends React.Compon
         />
       );
     
-  }
-  }
+}}

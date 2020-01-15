@@ -1,8 +1,6 @@
-import React, { ChangeEventHandler } from "react";
+import React from "react";
 import { ITherapyRecommendation, ITreatment } from "shared/model/TherapyRecommendation";
 import CreatableSelect from 'react-select/creatable';
-
-
 import _ from "lodash";
 import { Drugs } from "./data/Drugs";
 
@@ -32,17 +30,14 @@ export default class TherapyRecommendationFormDrugInput extends React.Component<
       return (
         <CreatableSelect
           options={drugOptions}
-          // isDisabled
           isMulti
           defaultValue={drugDefault}
-          // name="negativeDrugs"
-          // className="basic-multi-select"
-          // classNamePrefix="select"
+          name="drugsSelect"
+          className="creatable-multi-select"
+          classNamePrefix="select"
           onChange={(selectedOption: MyOption[]) => {
             if (Array.isArray(selectedOption)) {
               this.props.onChange(selectedOption.map(option => {
-                console.log(option);
-                console.log(typeof(option));
                 if (_.isString(option.value)) {
                   return {name: option.value.toString()} as ITreatment;
                 } else {
@@ -56,5 +51,4 @@ export default class TherapyRecommendationFormDrugInput extends React.Component<
         />
       );
     
-  }
-  }
+}}

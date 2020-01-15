@@ -1,10 +1,8 @@
-import React, { ChangeEventHandler } from "react";
+import React from "react";
 import { ITherapyRecommendation, IGeneticAlteration } from "shared/model/TherapyRecommendation";
 import { Mutation } from "shared/api/generated/CBioPortalAPI";
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
-
-
 import _ from "lodash";
 import { ResistenceGenes } from "./data/ResistenceGenes";
 
@@ -45,7 +43,7 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
           options={alterationOptions}
           isMulti
           defaultValue={alterationDefault}
-          name="positiveAlterations"
+          name="positiveAlterationsSelect"
           className="basic-multi-select"
           classNamePrefix="select"
           onChange={(selectedOption: MyOption[]) => {
@@ -58,8 +56,7 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
         />
       );
     
-  }
-  }
+  }}
 
   export class TherapyRecommendationFormAlterationNegativeInput extends React.Component<TherapyRecommendationFormAlterationInputProps, {}> {
 
@@ -80,12 +77,11 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
         return (
           <CreatableSelect
             options={alterationOptions}
-            // isDisabled
             isMulti
             defaultValue={alterationDefault}
-            // name="negativeAlterations"
-            // className="basic-multi-select"
-            // classNamePrefix="select"
+            name="negativeAlterationsSelect"
+            className="creatable-multi-select"
+            classNamePrefix="select"  
             onChange={(selectedOption: MyOptionNegative[]) => {
               if (Array.isArray(selectedOption)) {
                 this.props.onChange(selectedOption.map(option => {
@@ -103,6 +99,5 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
           />
         );
       
-    }
-    }
+  }}
   
