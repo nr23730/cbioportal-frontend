@@ -225,11 +225,9 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     }
 
     public onHideAddEditForm(newTherapyRecommendation: ITherapyRecommendation) {
-        console.log(this.props.therapyRecommendations);
         newTherapyRecommendation = addModificationToTherapyRecommendation(newTherapyRecommendation);
         this.selectedTherapyRecommendation = undefined;
         if(this.props.onAddOrEdit(newTherapyRecommendation)) this.forceUpdate();
-        console.log(this.props.therapyRecommendations);
     }
 
     // public getClinicalMatch(clinicalGroupMatch: IClinicalGroupMatch) {
