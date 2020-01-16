@@ -10,7 +10,7 @@ import { action, computed, observable } from "mobx";
 import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTable";
 import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from "../SampleManager";
-import DefaultTooltip, { placeArrowBottomLeft } from "../../../public-lib/components/defaultTooltip/DefaultTooltip";
+import {DefaultTooltip, placeArrowBottomLeft } from "cbioportal-frontend-commons";
 import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation, flatStringify } from "./TherapyRecommendationTableUtils";
 import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
