@@ -51,6 +51,11 @@ class TherapyRecommendationTableComponent extends LazyMobXTable<ITherapyRecommen
 @observer
 export default class TherapyRecommendationTable extends React.Component<ITherapyRecommendationProps> {
 
+    constructor (props:ITherapyRecommendationProps) {
+        super(props);
+        this.state = {therapyRecommendations: props.therapyRecommendations} 
+    }
+
     // @computed
     // get columnWidths() {
     //     return {
@@ -68,8 +73,6 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
             <If condition={therapyRecommendation.treatments.length > 0}>
                 <div>
                     <span>
-                        {/* <img src={require("../../../globalStyles/images/drug.png")} style={{ width: 18, marginTop: -5 }} alt="drug icon"/>
-                        <b>{therapyRecommendation.treatments.map((treatment: ITreatment) => treatment.name).join(' + ')}</b> */}
                         {therapyRecommendation.treatments.map((treatment: ITreatment) => (
                             <div>
                                 <img src={require("../../../globalStyles/images/drug.png")} style={{ width: 18, marginTop: -5 }} alt="drug icon"/>
@@ -106,14 +109,14 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                                     In samples:
                                     <div>
                                         {therapyRecommendation.reasoning.geneticAlterations && 
-                                            this.getSampleIdIcons(therapyRecommendation.reasoning.geneticAlterations)}
+                                            this.getSamplesForPostiveAlterations(therapyRecommendation.reasoning.geneticAlterations)}
                                     </div>
                                     </div>
                                 <div className={styles.secondRight}>
                                     Negative for alterations:
                                     <div>
                                         {therapyRecommendation.reasoning.geneticAlterationsMissing && 
-                                            this.getGeneticAlterations(therapyRecommendation.reasoning.geneticAlterationsMissing)}
+                                            this.getGeneticAlterationsNegative(therapyRecommendation.reasoning.geneticAlterationsMissing)}
                                     </div>
                                 </div>
                             </div>
@@ -182,19 +185,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     }
 ];
 
-
-
-    public getSampleIdIcons(geneticAlterations: IGeneticAlteration[]) {
-        if(!geneticAlterations || geneticAlterations.length == 0) return;
-        let entrezGeneIds = geneticAlterations.map((geneticAlteration : IGeneticAlteration) => geneticAlteration.entrezGeneId);
-        let groupedMutations = (_.groupBy(this.props.mutations, (mutation: Mutation) => mutation.sampleId));
-        let fittingSampleIds : String[] = [];
-        for (let sampleId in groupedMutations) {
-            let mutations = groupedMutations[sampleId];
-            if(entrezGeneIds.every((entrezGeneId:number) => (mutations.map((mutation:Mutation) => mutation.entrezGeneId)).includes(entrezGeneId))) {
-                fittingSampleIds.push(sampleId)
-            }
-        };
+    public getSampleIdIcons(fittingSampleIds: string[]) {
         let sortedSampleIds = fittingSampleIds;
         if (fittingSampleIds.length > 1) {
             const sampleOrder = this.props.sampleManager!.getSampleIdsInOrder();
@@ -211,8 +202,47 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         );
     }
 
+    public getSamplesForPostiveAlterations(geneticAlterations: IGeneticAlteration[]) {
+        if(!geneticAlterations || geneticAlterations.length == 0) return;
+        let alterationIds = geneticAlterations.map((geneticAlteration : IGeneticAlteration) => (geneticAlteration.entrezGeneId || "") + (geneticAlteration.proteinChange || ""));
+        let groupedMutations = (_.groupBy(this.props.mutations, (mutation: Mutation) => mutation.sampleId));
+        let fittingSampleIds : string[] = [];
+        for (let sampleId in groupedMutations) {
+            let mutations = groupedMutations[sampleId];
+            if(alterationIds.every((alterationId:string) => (mutations.map((mutation:Mutation) => mutation.entrezGeneId + mutation.proteinChange)).includes(alterationId))) {
+                fittingSampleIds.push(sampleId)
+            }
+        };
+        return this.getSampleIdIcons(fittingSampleIds);
+    }
+
+
+    public getSamplesForNegativeAlteration(geneticAlteration: IGeneticAlteration) {
+        if(!geneticAlteration || !geneticAlteration.hugoSymbol) return;
+        let groupedMutations = (_.groupBy(this.props.mutations, (mutation: Mutation) => mutation.sampleId));
+        let fittingSampleIds : string[] = [];
+        for (let sampleId in groupedMutations) {
+            let mutations = groupedMutations[sampleId];
+            (mutations.map((mutation:Mutation) => console.log(mutation.gene.hugoGeneSymbol + mutation.proteinChange + " - " + (geneticAlteration.hugoSymbol || "") + (geneticAlteration.proteinChange || ""))));
+            if((mutations.map((mutation:Mutation) => mutation.gene.hugoGeneSymbol + mutation.proteinChange)).includes((geneticAlteration.hugoSymbol || "") + (geneticAlteration.proteinChange || ""))) {
+                fittingSampleIds.push(sampleId)
+            }
+        };
+        return (
+            <div>
+                <If condition={fittingSampleIds.length > 0}>
+                    <div>
+                    <p style={{'color': 'red'}}>Attention: Alteration in samples:</p>
+                    {this.getSampleIdIcons(fittingSampleIds)}
+                    </div>
+                </If>
+            </div>
+        );
+    }
+
+
     public openDeleteForm(therapyRecommendation: ITherapyRecommendation) {
-        if(this.props.onDelete(therapyRecommendation)) this.forceUpdate();
+        if(this.props.onDelete(therapyRecommendation)) this.setState(this.props.therapyRecommendations); // this.forceUpdate();
     }
 
     public openEditForm(therapyRecommendation: ITherapyRecommendation) {
@@ -220,14 +250,13 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     }
 
     public openAddForm() {
-        
         this.selectedTherapyRecommendation = getNewTherapyRecommendation(this.props.patientId);
     }
 
     public onHideAddEditForm(newTherapyRecommendation: ITherapyRecommendation) {
         newTherapyRecommendation = addModificationToTherapyRecommendation(newTherapyRecommendation);
         this.selectedTherapyRecommendation = undefined;
-        if(this.props.onAddOrEdit(newTherapyRecommendation)) this.forceUpdate();
+        if(this.props.onAddOrEdit(newTherapyRecommendation)) this.setState(this.props.therapyRecommendations); // this.forceUpdate();
     }
 
     // public getClinicalMatch(clinicalGroupMatch: IClinicalGroupMatch) {
@@ -282,6 +311,25 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         );
     }
 
+    public getGeneticAlterationsNegative(geneticAlterations: IGeneticAlteration[]) {
+        return (
+            <React.Fragment>
+                <If condition={geneticAlterations && geneticAlterations.length > 0}>
+                    <div>
+                        {geneticAlterations && geneticAlterations.map((geneticAlteration: IGeneticAlteration, index:number) => (
+                            <div>
+                                {geneticAlteration && this.getGeneticAlteration(geneticAlteration)}
+                                <div>
+                                    {this.getSamplesForNegativeAlteration(geneticAlteration)}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </If>
+            </React.Fragment>
+        );
+    }
+
     public getGeneticAlteration(geneticAlteration: IGeneticAlteration) {
         return (
             <React.Fragment>
@@ -299,60 +347,6 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
             </React.Fragment>
         );
     }
-
-    // public getGenomicNotMatch(notMatches: IGenomicMatchType) {
-    //     let mutationAndCnagenemicAlterations: string[] = [];
-    //     if (notMatches.MUTATION.length > 0) {
-    //         mutationAndCnagenemicAlterations = notMatches.MUTATION[0].genomicAlteration;
-    //     }
-    //     if (notMatches.CNA.length > 0) {
-    //         mutationAndCnagenemicAlterations = mutationAndCnagenemicAlterations.concat(notMatches.CNA[0].genomicAlteration);
-    //     }
-    //     return (
-    //         <React.Fragment>
-    //             { mutationAndCnagenemicAlterations.length > 0 &&
-    //             <div>
-    //                 <span className={styles.genomicSpan}>{this.getDescriptionForNotMatches(mutationAndCnagenemicAlterations, 3, 'Negative for alterations in', '')}</span>
-    //                 <DefaultTooltip
-    //                     placement='bottomLeft'
-    //                     trigger={['hover', 'focus']}
-    //                     overlay={this.tooltipGenomicContent(mutationAndCnagenemicAlterations)}
-    //                     destroyTooltipOnHide={false}
-    //                     onPopupAlign={placeArrowBottomLeft}>
-    //                     <i className={'fa fa-info-circle ' + styles.icon}></i>
-    //                 </DefaultTooltip>
-    //             </div>
-    //             }
-    //             { notMatches.MSI.length > 0 &&
-    //             <div>Tumor is not MSI-H</div>
-    //             }
-    //             { notMatches.WILDTYPE.length > 0 &&
-    //             <div>
-    //                 <span className={styles.genomicSpan}>{this.getDescriptionForNotMatches(notMatches.WILDTYPE[0].genomicAlteration, 3, 'Tumor doesn\'t have', 'defined by the therapyRecommendation')}</span>
-    //                 <DefaultTooltip
-    //                     placement='bottomLeft'
-    //                     trigger={['hover', 'focus']}
-    //                     overlay={this.tooltipGenomicContent(notMatches.WILDTYPE[0].genomicAlteration)}
-    //                     destroyTooltipOnHide={false}
-    //                     onPopupAlign={placeArrowBottomLeft}>
-    //                     <i className={'fa fa-info-circle ' + styles.icon}></i>
-    //                 </DefaultTooltip>
-    //             </div>
-    //             }
-    //         </React.Fragment>
-    //     );
-    // }
-
-    // public getGenomicAlteration(data: string[]) {
-    //     const filteredData = data.map((e: string) => e.split(' '));
-    //     return (
-    //         <div>
-    //             {filteredData.map((e: string[]) => (
-    //                 <div><b>{e[0]}</b> {e[1]}</div>
-    //             ))}
-    //         </div>
-    //     );
-    // }
 
     public tooltipGenomicContent(geneticAlteration: IGeneticAlteration) {
         return (

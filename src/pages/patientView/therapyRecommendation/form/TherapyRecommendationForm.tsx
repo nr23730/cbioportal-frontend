@@ -48,22 +48,6 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                         </div>
 
                         <div className="form-group">
-                            <h5>Evidence Level:</h5>
-                            <Select
-                            options={Object.keys(EvidenceLevel).map(key => (
-                                ({label: key, value: EvidenceLevel[key as any]})
-                                ))}
-                            defaultValue={({label: therapyRecommendation.evidenceLevel, value: therapyRecommendation.evidenceLevel })}
-                            name="evidenceLevel"
-                            className="basic-select"
-                            classNamePrefix="select"
-                            onChange={(selectedOption: {label: string, value: EvidenceLevel}) => {
-                                therapyRecommendation.evidenceLevel = EvidenceLevel[selectedOption.value as keyof typeof EvidenceLevel]
-                            }}
-                            />
-                        </div>
-
-                        <div className="form-group">
                             <h5>Reasoning:</h5>
                             <h6>Positive for alterations:</h6>
                             <TherapyRecommendationFormAlterationPositiveInput
@@ -82,6 +66,22 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                                 data={therapyRecommendation}
                                 clinicalData={this.props.clinicalData}
                                 onChange={(clinicalDataItems) => therapyRecommendation.reasoning.clinicalData = clinicalDataItems}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <h5>Evidence Level:</h5>
+                            <Select
+                            options={Object.keys(EvidenceLevel).map(key => (
+                                ({label: key, value: EvidenceLevel[key as any]})
+                                ))}
+                            defaultValue={({label: therapyRecommendation.evidenceLevel, value: therapyRecommendation.evidenceLevel })}
+                            name="evidenceLevel"
+                            className="basic-select"
+                            classNamePrefix="select"
+                            onChange={(selectedOption: {label: string, value: EvidenceLevel}) => {
+                                therapyRecommendation.evidenceLevel = EvidenceLevel[selectedOption.value as keyof typeof EvidenceLevel]
+                            }}
                             />
                         </div>
 
