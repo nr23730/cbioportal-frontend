@@ -11,7 +11,7 @@ import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTabl
 import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from "../SampleManager";
 import {DefaultTooltip, placeArrowBottomLeft } from "cbioportal-frontend-commons";
-import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation, flatStringify } from "./TherapyRecommendationTableUtils";
+import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation, flattenStringify, isTherapyRecommendationEmpty, flattenObject } from "./TherapyRecommendationTableUtils";
 import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
 import { Mutation, ClinicalData } from 'shared/api/generated/CBioPortalAPI';
@@ -253,9 +253,11 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         this.selectedTherapyRecommendation = getNewTherapyRecommendation(this.props.patientId);
     }
 
-    public onHideAddEditForm(newTherapyRecommendation: ITherapyRecommendation) {
-        newTherapyRecommendation = addModificationToTherapyRecommendation(newTherapyRecommendation);
+    public onHideAddEditForm(newTherapyRecommendation?: ITherapyRecommendation) {
+        console.log(flattenObject(newTherapyRecommendation));
         this.selectedTherapyRecommendation = undefined;
+        if(newTherapyRecommendation == undefined || isTherapyRecommendationEmpty(newTherapyRecommendation)) return;
+        newTherapyRecommendation = addModificationToTherapyRecommendation(newTherapyRecommendation);
         if(this.props.onAddOrEdit(newTherapyRecommendation)) this.setState(this.props.therapyRecommendations); // this.forceUpdate();
     }
 
@@ -407,7 +409,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                 />
                 <SimpleCopyDownloadControls
                     // className={classnames("pull-right", styles.copyDownloadControls)}
-                    downloadData={() => flatStringify(this.props.therapyRecommendations)} //JSON.stringify(this.props.therapyRecommendations)} 
+                    downloadData={() => flattenStringify(this.props.therapyRecommendations)} //JSON.stringify(this.props.therapyRecommendations)} 
                     downloadFilename={`TherapyRecommendation_${this.props.patientId}.json`}
                     controlsStyle="BUTTON"
                     // containerId={this.props.id}

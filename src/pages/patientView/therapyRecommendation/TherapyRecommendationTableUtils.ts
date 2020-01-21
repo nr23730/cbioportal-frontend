@@ -1,5 +1,6 @@
 import { ITherapyRecommendation, EvidenceLevel, Modified, IRecommender } from "shared/model/TherapyRecommendation";
 import AppConfig from "appConfig";
+import _ from "lodash";
 
 export function truncate( s: String, n: number, useWordBoundary: boolean ){
     if (s.length <= n) { return s; }
@@ -44,7 +45,23 @@ export function addModificationToTherapyRecommendation(therapyRecommendation: IT
     return therapyRecommendation;
 }
 
-export function flatStringify(x: Array<any>) : string {
+
+export function isTherapyRecommendationEmpty(therapyRecommendation: ITherapyRecommendation) : boolean {
+    if(
+    therapyRecommendation.comment === "" &&
+    therapyRecommendation.evidenceLevel === EvidenceLevel.NA &&
+    _.isEmpty(therapyRecommendation.reasoning) &&
+    therapyRecommendation.treatments.length === 0 &&
+    therapyRecommendation.references.length === 0) 
+    {
+        return true;
+    } else {
+        return false;
+    }
+
+}
+
+export function flattenStringify(x: Array<any>) : string {
     let y : any = {};
     x.forEach(function(elem, index) {
         let elemY : any = {};
@@ -57,4 +74,15 @@ export function flatStringify(x: Array<any>) : string {
         y[index] = elemY;   
     });
     return JSON.stringify(y);
+}
+
+export function flattenObject(x: any) : any {
+    let y : any = {};
+    for(var i in x) {
+        if(!x.hasOwnProperty(i)) {
+            x[i] = x[i];
+        }
+        y[i] = x[i];
+    }
+    return y;
 }
