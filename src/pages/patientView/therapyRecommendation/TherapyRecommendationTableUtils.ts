@@ -11,9 +11,11 @@ export function truncate( s: String, n: number, useWordBoundary: boolean ){
 };
 
 export function getNewTherapyRecommendation(patientId: string): ITherapyRecommendation {
-    let timeString = (new Date()).toISOString();
+    let now = new Date();
+    let timeString = now.toISOString();
+    let timeId = now.getTime();
     let therapyRecommendation: ITherapyRecommendation = {
-        id: (patientId + "_" + timeString), 
+        id: (patientId + "_" + timeId), 
         comment: "",
         reasoning: {},
         evidenceLevel: EvidenceLevel.NA,
@@ -74,6 +76,21 @@ export function flattenStringify(x: Array<any>) : string {
         y[index] = elemY;   
     });
     return JSON.stringify(y);
+}
+
+export function flattenArray(x: Array<any>) : string {
+    let y : any = {};
+    x.forEach(function(elem, index) {
+        let elemY : any = {};
+        for(var i in elem) {
+            if(!elem.hasOwnProperty(i)) {
+                elem[i] = elem[i];
+            }
+            elemY[i] = elem[i];
+        }
+        y[index] = elemY;   
+    });
+    return y;
 }
 
 export function flattenObject(x: any) : any {

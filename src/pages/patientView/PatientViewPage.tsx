@@ -692,8 +692,6 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                                     containerWidth={WindowStore.size.width-20}
                                     onDelete={this.patientViewPageStore.therapyRecommendationOnDelete}
                                     onAddOrEdit={this.patientViewPageStore.therapyRecommendationOnAddOrEdit}
-                                    // onAdd={this.patientViewPageStore.therapyRecommendationOnAdd}
-                                    // onEdit={this.patientViewPageStore.therapyRecommendationOnEdit}
                                 />
                             </MSKTab>
                         )

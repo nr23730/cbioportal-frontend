@@ -27,8 +27,6 @@ export type ITherapyRecommendationProps = {
     containerWidth: number;
     onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
     onAddOrEdit: (therapyRecommendation: ITherapyRecommendation) => boolean;
-    // onAdd: (therapyRecommendation: ITherapyRecommendation) => boolean;
-    // onEdit: (therapyRecommendation: ITherapyRecommendation) => boolean;
 }
 
 enum ColumnKey {
@@ -223,7 +221,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         let fittingSampleIds : string[] = [];
         for (let sampleId in groupedMutations) {
             let mutations = groupedMutations[sampleId];
-            (mutations.map((mutation:Mutation) => console.log(mutation.gene.hugoGeneSymbol + mutation.proteinChange + " - " + (geneticAlteration.hugoSymbol || "") + (geneticAlteration.proteinChange || ""))));
+            // (mutations.map((mutation:Mutation) => console.log(mutation.gene.hugoGeneSymbol + mutation.proteinChange + " - " + (geneticAlteration.hugoSymbol || "") + (geneticAlteration.proteinChange || ""))));
             if((mutations.map((mutation:Mutation) => mutation.gene.hugoGeneSymbol + mutation.proteinChange)).includes((geneticAlteration.hugoSymbol || "") + (geneticAlteration.proteinChange || ""))) {
                 fittingSampleIds.push(sampleId)
             }

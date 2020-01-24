@@ -95,6 +95,10 @@ import {checkNonProfiledGenesExist} from "../PatientViewPageUtils";
 
 
 import { ITherapyRecommendation, IGeneticAlteration, EvidenceLevel, Modified } from "../../../shared/model/TherapyRecommendation";
+import { flattenStringify, flattenObject, flattenArray } from '../therapyRecommendation/TherapyRecommendationTableUtils';
+import { Query } from 'react-mutation-mapper/dist/model/OncoKb';
+import { getEvidenceQuery } from 'shared/lib/OncoKbUtils';
+
 
 type PageMode = 'patient' | 'sample';
 
@@ -1135,179 +1139,157 @@ export class PatientViewPageStore {
         }
     }, []);
     
-    therapyRecommendations = [
-        // {
-        //     id: "1", 
-        //     comment: "test",
-        //     reasoning: {
-        //         geneticAlterations: [
-        //             {
-        //                 entrezGeneId: 673,
-        //                 hugoSymbol: "BRAF",
-        //                 proteinChange: "V600E"
-        //             }
-        //         ]
-        //     },
-        //     evidenceLevel: EvidenceLevel.I,
-        //     modifications: [
-        //         {
-        //             modified: Modified.CREATED,
-        //             recommender: {
-        //                 credentials: "alice"
-        //             },
-        //             timestamp: "20191210"
-        //         }
-        //     ],
-        //     references: [
-        //         {
-        //             pmid: 12345,
-        //             name: "PubMed Test"
-        //         }
-        //     ],
-        //     treatments: [
-        //         {
-        //             name: "TEST MED"
-        //         }
-        //     ]
-        // } as ITherapyRecommendation, 
-        // {
-        //     id: "2", 
-        //     comment: "test2",
-        //     reasoning: {
-        //         geneticAlterations: [
-        //             {
-        //                 entrezGeneId: 675,
-        //                 hugoSymbol: "BRCA2",
-        //                 proteinChange: "T3085Nfs*26"
-        //             }
-        //         ]
-        //     },
-        //     evidenceLevel: EvidenceLevel.II,
-        //     modifications: [
-        //         {
-        //             modified: Modified.CREATED,
-        //             recommender: {
-        //                 credentials: "alice"
-        //             },
-        //             timestamp: "20191210"
-        //         }
-        //     ],
-        //     references: [
-        //         {
-        //             pmid: 12345,
-        //             name: "PubMed Test"
-        //         }
-        //     ],
-        //     treatments: [
-        //         {
-        //             name: "TEST MED1"
-        //         }
-        //     ]
-        // } as ITherapyRecommendation,
-        {
-            id: "3", 
-            comment: "test3",
-            reasoning: {
-                geneticAlterations: [
-                    {
-                        entrezGeneId: 673,
-                        hugoSymbol: "BRAF",
-                        proteinChange: "V600E"
-                    },
-                    {
-                        entrezGeneId: 675,
-                        hugoSymbol: "BRCA2",
-                        proteinChange: "T3085Nfs*26"
-                    }
-                ]
-            },
-            evidenceLevel: EvidenceLevel.III,
-            modifications: [
-                {
-                    modified: Modified.CREATED,
-                    recommender: {
-                        credentials: "alice"
-                    },
-                    timestamp: "20191210"
-                }
-            ],
-            references: [
-                {
-                    pmid: 30942711,
-                    name: "Developing New Analysis Functions for a Translational Research Platform: Extending the cBioPortal for Cancer Genomics."
-                },
-                {
-                    pmid: 30942707,
-                    name: "A REST Service for the Visualization of Clinical Time Series Data in the Context of Clinical Decision Support."
-                }
-            ],
-            treatments: [
-                {
-                    name: "TEST MED1"
-                },
-                {
-                    name: "TEST MED2"
-                }
-            ]
-        } as ITherapyRecommendation,
-        // {
-        //     id: "4", 
-        //     comment: "test4",
-        //     reasoning: {
-        //         geneticAlterations: [
-        //             {
-        //                 entrezGeneId: 673,
-        //                 hugoSymbol: "BRAF",
-        //                 proteinChange: "V600E"
-        //             }
-        //         ],
-        //         geneticAlterationsMissing: [
-        //             {
-        //                 entrezGeneId: 672,
-        //                 hugoSymbol: "BRCA1"
-        //             }
-        //         ], 
-        //         tmb: 42,
-        //         other: "Other Reasoning"
-        //     },
-        //     evidenceLevel: EvidenceLevel.IV,
-        //     modifications: [
-        //         {
-        //             modified: Modified.CREATED,
-        //             recommender: {
-        //                 credentials: "alice"
-        //             },
-        //             timestamp: "20191210"
-        //         }
-        //     ],
-        //     references: [
-        //         {
-        //             pmid: 30942711,
-        //             name: "Developing New Analysis Functions for a Translational Research Platform: Extending the cBioPortal for Cancer Genomics."
-        //         },
-        //         {
-        //             pmid: 30942707,
-        //             name: "A REST Service for the Visualization of Clinical Time Series Data in the Context of Clinical Decision Support."
-        //         }
-        //     ],
-        //     treatments: [
-        //         {
-        //             name: "Long Medication Name"
-        //         }
-        //     ]
-        // } as ITherapyRecommendation
-    ] as ITherapyRecommendation[];
+    @observable private _therapyRecommendations: ITherapyRecommendation[] = [];
 
-    public therapyRecommendationOnDelete(therapyRecommendationToDelete: ITherapyRecommendation) {
-        this.therapyRecommendations = this.therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDelete.id !== therapyRecommendation.id);
+    @cached get therapyRecommendations():ITherapyRecommendation[] {
+        if(!this._therapyRecommendations || this._therapyRecommendations.length == 0) this.loadTherapyRecommendations();
+        return this._therapyRecommendations;
+    }
+    set therapyRecommendations(value:ITherapyRecommendation[]) {
+        this._therapyRecommendations = value;
+    }
+
+    therapyRecommendationOnDelete = (therapyRecommendationToDelete: ITherapyRecommendation) => {
+        this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDelete.id !== therapyRecommendation.id);
         return true;
         
     }
 
-    public therapyRecommendationOnAddOrEdit(therapyRecommendationToAdd: ITherapyRecommendation) {
-        this.therapyRecommendations = this.therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToAdd.id !== therapyRecommendation.id);
-        this.therapyRecommendations.push(therapyRecommendationToAdd);
+    therapyRecommendationOnAddOrEdit = (therapyRecommendationToAdd: ITherapyRecommendation) => {
+        this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToAdd.id !== therapyRecommendation.id);
+        this._therapyRecommendations.push(therapyRecommendationToAdd);
+        this.writeTherapyRecommendations();
         return true;
+    }
+
+    private loadTherapyRecommendations() {
+        request.get('http://localhost:3001/patients/' + this.getSafePatientId())
+        .end((err, res)=>{
+            if (!err && res.ok) {
+                console.log(JSON.parse(res.text));
+                let patient = JSON.parse(res.text);
+                var therapyRecommendations = Object.keys(patient.therapyRecommendations).map(function(index){
+                    return patient.therapyRecommendations[index];
+                });
+                this._therapyRecommendations = therapyRecommendations;
+            } else {
+                return [] as ITherapyRecommendation[];
+            }
+        });
+    }
+
+    private writeTherapyRecommendations() {
+        request.put('http://localhost:3001/patients/' + this.getSafePatientId())
+        .set('Content-Type', 'application/json')
+        .send(JSON.stringify(({id: this.getSafePatientId(), therapyRecommendations: flattenArray(this._therapyRecommendations)})))
+        .end((err, res)=>{
+            if (!err && res.ok) {
+                console.log("Success PUTting " + this.patientId);
+            } else {
+                console.log("Error PUTting " + this.patientId + "... trying POST");
+                request.post('http://localhost:3001/patients/')
+                .set('Content-Type', 'application/json')
+                .send(JSON.stringify(({id: this.getSafePatientId(), therapyRecommendations: flattenArray(this._therapyRecommendations)})))
+                .end((err, res)=>{
+                    if (!err && res.ok) {
+                        console.log("Success POSTing " + this.patientId);
+                    } else {
+                        console.log("Error POSTing " + this.patientId);
+                    }
+                });
+            }
+        });
+    }
+
+    private getSafePatientId = () => {
+        return this.patientId;
+    }
+
+    private oncoKbTest = () => {
+        console.log(this.oncoKbData);
+        console.log(this.oncoKbData.result);
+        console.log(this.oncoKbEvidenceCache);
+        console.log(this.oncoKbAnnotatedGenes.result);
+
+        if (this.oncoKbData &&
+            this.oncoKbData.result &&
+            !(this.oncoKbData.result instanceof Error) &&
+            this.oncoKbData.status === "complete")
+        {
+            this.mutationData.result.forEach(mut => {
+                // let mut = this.mutationData.result[0];
+                if(!(this.oncoKbData.result instanceof Error)) {
+                    const evidenceQuery = getEvidenceQuery(mut, this.oncoKbData.result);
+                    if (evidenceQuery) {
+                        // const indicator = this.oncoKbData.result.indicatorMap![evidenceQuery.id];
+                        // if (indicator) {
+                        //     console.log(indicator.oncogenic.toLowerCase().trim().includes("oncogenic"));
+                        // }
+                        // let cacheData: ICacheData<IEvidence>|undefined;
+        
+                        const cache = this.oncoKbEvidenceCache.getData([evidenceQuery.id], [evidenceQuery]);
+                        if (cache && cache[evidenceQuery.id] && cache[evidenceQuery.id].data) {
+                            let treatments = (cache[evidenceQuery.id]).data!.treatments; 
+                            if(treatments.sensitivity.length > 0) {
+                                console.log(treatments);
+                                console.log(flattenObject(treatments));
+                            }
+                        }
+                    }
+                }           
+            });
+        }
+    }
+
+    private loadSampleTherapyRecommendation() {
+        this._therapyRecommendations.push(
+            {
+                id: "3", 
+                comment: "test3",
+                reasoning: {
+                    geneticAlterations: [
+                        {
+                            entrezGeneId: 673,
+                            hugoSymbol: "BRAF",
+                            proteinChange: "V600E"
+                        },
+                        {
+                            entrezGeneId: 675,
+                            hugoSymbol: "BRCA2",
+                            proteinChange: "T3085Nfs*26"
+                        }
+                    ]
+                },
+                evidenceLevel: EvidenceLevel.III,
+                modifications: [
+                    {
+                        modified: Modified.CREATED,
+                        recommender: {
+                            credentials: "alice"
+                        },
+                        timestamp: "20191210"
+                    }
+                ],
+                references: [
+                    {
+                        pmid: 30942711,
+                        name: "Developing New Analysis Functions for a Translational Research Platform: Extending the cBioPortal for Cancer Genomics."
+                    },
+                    {
+                        pmid: 30942707,
+                        name: "A REST Service for the Visualization of Clinical Time Series Data in the Context of Clinical Decision Support."
+                    }
+                ],
+                treatments: [
+                    {
+                        name: "TEST MED1"
+                    },
+                    {
+                        name: "TEST MED2"
+                    }
+                ]
+            } as ITherapyRecommendation
+        );
     }
 
 
