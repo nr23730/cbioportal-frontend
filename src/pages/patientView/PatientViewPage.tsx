@@ -56,6 +56,7 @@ import PatientViewMutationsTab from "./mutation/PatientViewMutationsTab";
 import PatientViewGenePanelModal from "./PatientViewGenePanelModal/PatientViewGenePanelModal";
 import TherapyRecommendationTable from "./therapyRecommendation/TherapyRecommendationTable";
 import { PatientViewPageTabs } from "./PatientViewPageTabs";
+import { ClinicalTrialMatchTable } from './clinicalTrialMatch/ClinicalTrialMatchTable';
 
 export interface IPatientViewPageProps {
     params: any; // react route
@@ -713,6 +714,20 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                             </MSKTab>
                         )
                     }
+
+                    <MSKTab
+                        key={8}
+                        id={PatientViewPageTabs.ClinicalTrialsGov}
+                        linkText="ClinicalTrialsGov"
+                    >
+                        <ClinicalTrialMatchTable
+                            store={this.patientViewPageStore}
+                            clinicalTrialMatches={
+                                this.patientViewPageStore
+                                    .clinicalTrialMatches.result
+                            }
+                        />
+                    </MSKTab>
 
                     {/*<MSKTab key={5} id="mutationalSignatures" linkText="Mutational Signature Data" hide={true}>*/}
                         {/*<div className="clearfix">*/}
