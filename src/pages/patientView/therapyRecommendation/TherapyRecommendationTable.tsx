@@ -11,7 +11,7 @@ import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTabl
 import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from "../SampleManager";
 import {DefaultTooltip, placeArrowBottomLeft } from "cbioportal-frontend-commons";
-import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation, flattenStringify, isTherapyRecommendationEmpty, flattenObject } from "./TherapyRecommendationTableUtils";
+import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation, flattenStringify, isTherapyRecommendationEmpty, flattenObject, flattenArray } from "./TherapyRecommendationTableUtils";
 import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
 import { Mutation, ClinicalData } from 'shared/api/generated/CBioPortalAPI';
@@ -240,7 +240,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
 
 
     public openDeleteForm(therapyRecommendation: ITherapyRecommendation) {
-        if(this.props.onDelete(therapyRecommendation)) this.setState(this.props.therapyRecommendations); // this.forceUpdate();
+        if(this.props.onDelete(therapyRecommendation)) this.updateTherapyRecommendationTable();
     }
 
     public openEditForm(therapyRecommendation: ITherapyRecommendation) {
@@ -252,11 +252,20 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     }
 
     public onHideAddEditForm(newTherapyRecommendation?: ITherapyRecommendation) {
-        console.log(flattenObject(newTherapyRecommendation));
+        console.group("On hide add edit form");
+        console.log(flattenStringify(this.props.therapyRecommendations));
+        console.groupEnd();
         this.selectedTherapyRecommendation = undefined;
         if(newTherapyRecommendation == undefined || isTherapyRecommendationEmpty(newTherapyRecommendation)) return;
         newTherapyRecommendation = addModificationToTherapyRecommendation(newTherapyRecommendation);
-        if(this.props.onAddOrEdit(newTherapyRecommendation)) this.setState(this.props.therapyRecommendations); // this.forceUpdate();
+        if(this.props.onAddOrEdit(newTherapyRecommendation)) this.updateTherapyRecommendationTable();
+    }
+
+    public updateTherapyRecommendationTable() {
+        this.setState(this.props.therapyRecommendations);
+        console.group("Updating table");
+        console.log(flattenStringify(this.props.therapyRecommendations));
+        console.groupEnd();
     }
 
     // public getClinicalMatch(clinicalGroupMatch: IClinicalGroupMatch) {

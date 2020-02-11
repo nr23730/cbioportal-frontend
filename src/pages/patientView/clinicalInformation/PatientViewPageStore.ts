@@ -1141,7 +1141,14 @@ export class PatientViewPageStore {
     
     @observable private _therapyRecommendations: ITherapyRecommendation[] = [];
 
-    @cached get therapyRecommendations():ITherapyRecommendation[] {
+    // @cached get therapyRecommendations():ITherapyRecommendation[] {
+    get therapyRecommendations():ITherapyRecommendation[] {
+        console.group("get therapyRecommendations");
+        console.log(this._therapyRecommendations);
+        console.log(!this._therapyRecommendations);
+        console.log(this._therapyRecommendations.length == 0);
+        console.groupEnd();
+        // return this._therapyRecommendations;
         if(!this._therapyRecommendations || this._therapyRecommendations.length == 0) this.loadTherapyRecommendations();
         return this._therapyRecommendations;
     }
@@ -1151,14 +1158,14 @@ export class PatientViewPageStore {
 
     therapyRecommendationOnDelete = (therapyRecommendationToDelete: ITherapyRecommendation) => {
         this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDelete.id !== therapyRecommendation.id);
+        this.writeTherapyRecommendations();
         return true;
-        
     }
 
     therapyRecommendationOnAddOrEdit = (therapyRecommendationToAdd: ITherapyRecommendation) => {
         this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToAdd.id !== therapyRecommendation.id);
         this._therapyRecommendations.push(therapyRecommendationToAdd);
-        this.writeTherapyRecommendations();
+        let x = this.writeTherapyRecommendations();
         return true;
     }
 
@@ -1166,7 +1173,9 @@ export class PatientViewPageStore {
         request.get('http://localhost:3001/patients/' + this.getSafePatientId())
         .end((err, res)=>{
             if (!err && res.ok) {
+                console.group("Success GETting " + this.patientId);
                 console.log(JSON.parse(res.text));
+                console.groupEnd();
                 let patient = JSON.parse(res.text);
                 var therapyRecommendations = Object.keys(patient.therapyRecommendations).map(function(index){
                     return patient.therapyRecommendations[index];
@@ -1185,6 +1194,7 @@ export class PatientViewPageStore {
         .end((err, res)=>{
             if (!err && res.ok) {
                 console.log("Success PUTting " + this.patientId);
+                // return true;
             } else {
                 console.log("Error PUTting " + this.patientId + "... trying POST");
                 request.post('http://localhost:3001/patients/')
@@ -1193,8 +1203,10 @@ export class PatientViewPageStore {
                 .end((err, res)=>{
                     if (!err && res.ok) {
                         console.log("Success POSTing " + this.patientId);
+                        // return true;
                     } else {
                         console.log("Error POSTing " + this.patientId);
+                        // return false;
                     }
                 });
             }
