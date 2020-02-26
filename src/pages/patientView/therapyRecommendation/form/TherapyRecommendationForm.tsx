@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as _ from 'lodash';
-import {Modal} from "react-bootstrap";
+import {Modal, Button} from "react-bootstrap";
 import { ITherapyRecommendation, EvidenceLevel } from "shared/model/TherapyRecommendation";
 import { TherapyRecommendationFormAlterationPositiveInput, TherapyRecommendationFormAlterationNegativeInput } from "./TherapyRecommendationFormAlterationInput";
 import { Mutation, ClinicalData } from "shared/api/generated/CBioPortalAPI";
@@ -8,6 +8,8 @@ import TherapyRecommendationFormDrugInput from "./TherapyRecommendationFormDrugI
 import TherapyRecommendationFormClinicalInput from "./TherapyRecommendationFormClinicalInput";
 import Select from 'react-select';
 import TherapyRecommendationFormReferenceInput from "./TherapyRecommendationFormReferenceInput";
+import styles from '../style/therapyRecommendation.module.scss';
+
 
 interface ITherapyRecommendationFormProps {
     show: boolean;
@@ -16,14 +18,16 @@ interface ITherapyRecommendationFormProps {
     clinicalData: ClinicalData[];
     title: string;
     userEmailAddress: string;
-    onHide: ((newTherapyRecommendation: ITherapyRecommendation) => void);
+    onHide: ((newTherapyRecommendation?: ITherapyRecommendation) => void);
 }
 
 export default class TherapyRecommendationForm extends React.Component<ITherapyRecommendationFormProps, {}> {
     public render() {
         let therapyRecommendation: ITherapyRecommendation = Object.create(this.props.data);
+        // let original: ITherapyRecommendation = Object.create(this.props.data);
         return (
-            <Modal show={this.props.show} onHide={() => {this.props.onHide(therapyRecommendation)}}>
+            // <Modal show={this.props.show} onHide={() => {this.props.onHide(therapyRecommendation)}}>
+            <Modal show={this.props.show} onHide={() => {this.props.onHide(undefined)}}>
                 <Modal.Header closeButton>
                     <Modal.Title>{this.props.title}</Modal.Title>
                 </Modal.Header>
@@ -127,6 +131,10 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
 
                     </form>
                 </Modal.Body>
+                <Modal.Footer>                    
+                    <Button type="button" className={"btn btn-default " + styles.editButton} onClick={() => {this.props.onHide(undefined)}}>Dismiss</Button>
+                    <Button type="button" className={"btn btn-default " + styles.addButton} onClick={() => {this.props.onHide(therapyRecommendation)}}>Save Changes</Button>
+                </Modal.Footer>
             </Modal>
         );
     }

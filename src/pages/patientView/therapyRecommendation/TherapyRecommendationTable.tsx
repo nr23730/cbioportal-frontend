@@ -64,11 +64,12 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     // }
 
     @observable selectedTherapyRecommendation: ITherapyRecommendation | undefined;
+    @observable backupTherapyRecommendation: ITherapyRecommendation | undefined;
 
     private _columns = [{
         name: ColumnKey.THERAPY,
         render: (therapyRecommendation: ITherapyRecommendation) => (
-            <If condition={therapyRecommendation.treatments.length > 0}>
+            <If condition={therapyRecommendation.treatments && therapyRecommendation.treatments.length > 0}>
                 <div>
                     <span>
                         {therapyRecommendation.treatments.map((treatment: ITreatment) => (
@@ -148,7 +149,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     }, {
         name: ColumnKey.REFERENCES,
         render: (therapyRecommendation: ITherapyRecommendation) => (
-            <If condition={therapyRecommendation.references.length > 0}>
+            <If condition={therapyRecommendation.references && therapyRecommendation.references.length > 0}>
             <div>
                     {therapyRecommendation.references.map((reference: IReference) => (
                         <If condition={reference.pmid && reference.pmid > 0}>
@@ -245,6 +246,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
 
     public openEditForm(therapyRecommendation: ITherapyRecommendation) {
         this.selectedTherapyRecommendation = therapyRecommendation;
+        this.backupTherapyRecommendation = { ...therapyRecommendation};
     }
 
     public openAddForm() {
@@ -253,12 +255,23 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
 
     public onHideAddEditForm(newTherapyRecommendation?: ITherapyRecommendation) {
         console.group("On hide add edit form");
-        console.log(flattenStringify(this.props.therapyRecommendations));
+        // console.log(flattenStringify(this.props.therapyRecommendations));
+        console.log(flattenObject(this.selectedTherapyRecommendation));
+        console.log(flattenObject(this.backupTherapyRecommendation));
+        console.log((newTherapyRecommendation));
+        console.log(flattenArray(this.props.therapyRecommendations));
         console.groupEnd();
         this.selectedTherapyRecommendation = undefined;
-        if(newTherapyRecommendation == undefined || isTherapyRecommendationEmpty(newTherapyRecommendation)) return;
-        newTherapyRecommendation = addModificationToTherapyRecommendation(newTherapyRecommendation);
-        if(this.props.onAddOrEdit(newTherapyRecommendation)) this.updateTherapyRecommendationTable();
+        if(!newTherapyRecommendation || isTherapyRecommendationEmpty(newTherapyRecommendation)) {
+            if(this.backupTherapyRecommendation) {
+                this.props.onAddOrEdit(this.backupTherapyRecommendation);
+                this.backupTherapyRecommendation = undefined;
+            }
+        } else {
+            newTherapyRecommendation = addModificationToTherapyRecommendation(newTherapyRecommendation);
+            this.props.onAddOrEdit(newTherapyRecommendation);
+        }
+        this.updateTherapyRecommendationTable();
     }
 
     public updateTherapyRecommendationTable() {
@@ -404,7 +417,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                         data={this.selectedTherapyRecommendation}
                         mutations={this.props.mutations}
                         clinicalData={this.props.clinicalData}
-                        onHide={(therapyRecommendation: ITherapyRecommendation) => {this.onHideAddEditForm(therapyRecommendation)}}
+                        onHide={(therapyRecommendation?: ITherapyRecommendation) => {this.onHideAddEditForm(therapyRecommendation)}}
                         title="Edit therapy recommendation"
                         userEmailAddress={AppConfig.serverConfig.user_email_address}
                     />
