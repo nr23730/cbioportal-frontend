@@ -132,8 +132,8 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                     </form>
                 </Modal.Body>
                 <Modal.Footer>                    
-                    <Button type="button" className={"btn btn-default " + styles.editButton} onClick={() => {this.props.onHide(undefined)}}>Dismiss</Button>
-                    <Button type="button" className={"btn btn-default " + styles.addButton} onClick={() => {this.props.onHide(therapyRecommendation)}}>Save Changes</Button>
+                    <Button type="button" bsStyle="default" onClick={() => {this.props.onHide(undefined)}}>Dismiss</Button>
+                    <Button type="button" bsStyle="primary" onClick={() => {this.props.onHide(therapyRecommendation)}}>Save Changes</Button>
                 </Modal.Footer>
             </Modal>
         );
