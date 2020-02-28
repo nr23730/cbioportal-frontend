@@ -33,7 +33,8 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
         value: alteration, 
         label: alteration.hugoSymbol + " " + alteration.proteinChange
       }));
-    const alterationDefault = this.props.data.reasoning.geneticAlterations && this.props.data.reasoning.geneticAlterations.map((alteration:IGeneticAlteration) => 
+    const alterationDefault = this.props.data.reasoning.geneticAlterations && 
+      this.props.data.reasoning.geneticAlterations.map((alteration:IGeneticAlteration) => 
     ({
       value: alteration, 
       label: alteration.hugoSymbol + " " + alteration.proteinChange
@@ -69,7 +70,8 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
           value: alteration, 
           label: alteration.hugoSymbol + " " + alteration.proteinChange
         }));
-      const alterationDefault = this.props.data.reasoning.geneticAlterationsMissing && this.props.data.reasoning.geneticAlterationsMissing.map((alteration:IGeneticAlteration) => 
+      const alterationDefault = this.props.data.reasoning.geneticAlterationsMissing && 
+        this.props.data.reasoning.geneticAlterationsMissing.map((alteration:IGeneticAlteration) => 
       ({
         value: alteration, 
         label: alteration.hugoSymbol + " " + (alteration.proteinChange || "any")

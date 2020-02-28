@@ -74,7 +74,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
                     <Modal.Body>
                         <form className="form">
                             <div className="form-group">
-                                <h5>Evidence Level:</h5>
+                                <h5>Select OncoKB entry:</h5>
                                 <Select
                                 options={oncoKbResults.map(result => ({
                                         label: result.query.hugoSymbol + " " + result.query.alteration, 

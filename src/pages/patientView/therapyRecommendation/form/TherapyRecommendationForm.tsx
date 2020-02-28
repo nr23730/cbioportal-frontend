@@ -2,7 +2,8 @@ import * as React from "react";
 import * as _ from 'lodash';
 import {Modal, Button} from "react-bootstrap";
 import { ITherapyRecommendation, EvidenceLevel } from "shared/model/TherapyRecommendation";
-import { TherapyRecommendationFormAlterationPositiveInput, TherapyRecommendationFormAlterationNegativeInput } from "./TherapyRecommendationFormAlterationInput";
+import { TherapyRecommendationFormAlterationPositiveInput, 
+    TherapyRecommendationFormAlterationNegativeInput } from "./TherapyRecommendationFormAlterationInput";
 import { Mutation, ClinicalData } from "shared/api/generated/CBioPortalAPI";
 import TherapyRecommendationFormDrugInput from "./TherapyRecommendationFormDrugInput";
 import TherapyRecommendationFormClinicalInput from "./TherapyRecommendationFormClinicalInput";
@@ -24,9 +25,7 @@ interface ITherapyRecommendationFormProps {
 export default class TherapyRecommendationForm extends React.Component<ITherapyRecommendationFormProps, {}> {
     public render() {
         let therapyRecommendation: ITherapyRecommendation = Object.create(this.props.data);
-        // let original: ITherapyRecommendation = Object.create(this.props.data);
         return (
-            // <Modal show={this.props.show} onHide={() => {this.props.onHide(therapyRecommendation)}}>
             <Modal show={this.props.show} onHide={() => {this.props.onHide(undefined)}}>
                 <Modal.Header closeButton>
                     <Modal.Title>{this.props.title}</Modal.Title>
@@ -96,39 +95,6 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                                 onChange={(references) => therapyRecommendation.references = references}
                             />
                         </div>
-
-                        {/* {(this.boxPlotData.isComplete && this.boxPlotData.result.length > 1) && (
-                            <div className="form-group">
-                                <h5>Sort By:</h5>
-
-                                <select className="form-control input-sm" value={this.sortBy}
-                                        onChange={this.handleSortByChange} title="Select profile">
-                                    <option value={"alphabetic"}>Cancer Study</option>
-                                    <option value={"median"}>Median</option>
-                                </select>
-                            </div>
-                        )}
-
-                        <div className="form-group">
-                            <label className="checkbox-inline">
-                                <input type="checkbox" checked={this.logScale}
-                                       onChange={()=>this.logScale = !this.logScale} title="Log scale"/>
-                                Log scale
-                            </label>
-                            { this.mutationDataExists.result && <label className="checkbox-inline">
-                                <input type="checkbox" checked={this.showMutations}
-                                       onChange={() => this.showMutations = !this.showMutations}
-                                       title="Show mutations *"/>
-                                Show mutations *
-                            </label>}
-                            { this.cnaDataExists.result && <label className="checkbox-inline">
-                                <input type="checkbox" checked={this.showCna}
-                                       onChange={() => this.showCna = !this.showCna}
-                                       title="Show copy number alterations"/>
-                                Show copy number alterations
-                            </label>}
-                        </div> */}
-
                     </form>
                 </Modal.Body>
                 <Modal.Footer>                    
@@ -138,6 +104,4 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
             </Modal>
         );
     }
-
-
 }
