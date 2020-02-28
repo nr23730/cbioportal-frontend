@@ -11,12 +11,15 @@ import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTabl
 import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from "../SampleManager";
 import {DefaultTooltip, placeArrowBottomLeft } from "cbioportal-frontend-commons";
-import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation, flattenStringify, isTherapyRecommendationEmpty, flattenObject, flattenArray } from "./TherapyRecommendationTableUtils";
+import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation, flattenStringify, isTherapyRecommendationEmpty, flattenObject, flattenArray, getReferenceName } from "./TherapyRecommendationTableUtils";
 import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
 import { Mutation, ClinicalData } from 'shared/api/generated/CBioPortalAPI';
 import TherapyRecommendationForm from './form/TherapyRecommendationForm';
 import { SimpleCopyDownloadControls } from 'shared/components/copyDownloadControls/SimpleCopyDownloadControls';
+import { IOncoKbDataWrapper, IOncoKbCancerGenesWrapper } from 'shared/model/OncoKB';
+import TherapyRecommendationFormOncoKb from './form/TherapyRecommendationFormOncoKb';
+import { number } from 'prop-types';
 
 export type ITherapyRecommendationProps = {
     patientId: string;
@@ -27,6 +30,13 @@ export type ITherapyRecommendationProps = {
     containerWidth: number;
     onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
     onAddOrEdit: (therapyRecommendation: ITherapyRecommendation) => boolean;
+    oncoKbData?: IOncoKbDataWrapper;
+    oncoKbCancerGenes?: IOncoKbCancerGenesWrapper;
+}
+
+export type ITherapyRecommendationState = {
+    therapyRecommendations: ITherapyRecommendation[],
+    referenceMap: Map<number, string>
 }
 
 enum ColumnKey {
@@ -47,12 +57,33 @@ class TherapyRecommendationTableComponent extends LazyMobXTable<ITherapyRecommen
 }
 
 @observer
-export default class TherapyRecommendationTable extends React.Component<ITherapyRecommendationProps> {
+export default class TherapyRecommendationTable extends React.Component<ITherapyRecommendationProps, ITherapyRecommendationState> {
 
     constructor (props:ITherapyRecommendationProps) {
         super(props);
-        this.state = {therapyRecommendations: props.therapyRecommendations} 
+        this.state = {
+            therapyRecommendations: props.therapyRecommendations,
+            referenceMap: new Map<number, string>()
+        } 
     }
+
+    componentDidUpdate(prevProps: ITherapyRecommendationProps, prevState: ITherapyRecommendationState) {
+        console.group("ComponentDidUpdate");
+        console.log((prevState.therapyRecommendations.length));
+        console.log((this.state.therapyRecommendations.length));
+        console.groupEnd();
+        if (prevState.therapyRecommendations !== this.state.therapyRecommendations) {
+            console.group("ComponentDidUpdate");
+            console.log(prevState.therapyRecommendations);
+            console.log(this.state.therapyRecommendations);
+            console.groupEnd();
+          this.updateReferences();
+        }    
+      }
+
+    // componentDidMount() {
+    //     this.updateReferences();
+    // }
 
     // @computed
     // get columnWidths() {
@@ -65,6 +96,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
 
     @observable selectedTherapyRecommendation: ITherapyRecommendation | undefined;
     @observable backupTherapyRecommendation: ITherapyRecommendation | undefined;
+    @observable showOncoKBForm: boolean;
 
     private _columns = [{
         name: ColumnKey.THERAPY,
@@ -154,7 +186,9 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                     {therapyRecommendation.references.map((reference: IReference) => (
                         <If condition={reference.pmid && reference.pmid > 0}>
                         <Then>
-                            <div><a target="_blank" href={"https://www.ncbi.nlm.nih.gov/pubmed/" + reference.pmid}>[{reference.pmid}] {truncate(reference.name, 40, true)}</a></div>
+                            {/* <div><a target="_blank" href={"https://www.ncbi.nlm.nih.gov/pubmed/" + reference.pmid}>[{reference.pmid}] {truncate(reference.name, 40, true)}</a></div> */}
+                            <div><a target="_blank" href={"https://www.ncbi.nlm.nih.gov/pubmed/" + reference.pmid}>[{reference.pmid}] {this.getNameForReference(reference)}</a></div>
+                            {/* <div><a target="_blank" href={"https://www.ncbi.nlm.nih.gov/pubmed/" + reference.pmid}>[{reference.pmid}] {truncate(this.state.referenceMap.get(reference.pmid!), 40, true)}</a></div> */}
                         </Then>
                         <Else>
                         <div>{truncate(reference.name, 200, true)}</div>
@@ -253,6 +287,16 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         this.selectedTherapyRecommendation = getNewTherapyRecommendation(this.props.patientId);
     }
 
+    private openAddOncoKbForm() {
+        console.group("OncoKB Test");
+        console.log("OncoKB Data " + this.props.oncoKbData!.status);
+        console.log(this.props.oncoKbData!.result);
+        console.log("OncoKB Cancer Genes " + this.props.oncoKbCancerGenes!.status);
+        console.log(this.props.oncoKbCancerGenes!.result);
+        console.groupEnd();
+        this.showOncoKBForm = true;
+    }
+
     public onHideAddEditForm(newTherapyRecommendation?: ITherapyRecommendation) {
         console.group("On hide add edit form");
         // console.log(flattenStringify(this.props.therapyRecommendations));
@@ -271,14 +315,20 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
             newTherapyRecommendation = addModificationToTherapyRecommendation(newTherapyRecommendation);
             this.props.onAddOrEdit(newTherapyRecommendation);
         }
+        this.showOncoKBForm = false;
         this.updateTherapyRecommendationTable();
     }
 
     public updateTherapyRecommendationTable() {
-        this.setState(this.props.therapyRecommendations);
+        this.setState({therapyRecommendations: this.props.therapyRecommendations});
+        this.updateReferences();
         console.group("Updating table");
         console.log(flattenStringify(this.props.therapyRecommendations));
         console.groupEnd();
+    }
+
+    private getNameForReference(reference: IReference): string {
+        return truncate(reference.name, 40, true) || truncate(this.state.referenceMap.get(reference.pmid!), 40, true);
     }
 
     // public getClinicalMatch(clinicalGroupMatch: IClinicalGroupMatch) {
@@ -379,6 +429,26 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         );
     }
 
+    private updateReferences() {
+        console.log("componentDidMount");
+        this.props.therapyRecommendations.map(recommendation => {
+            console.log(recommendation.id);
+            recommendation.references.map(reference => {
+                console.log(reference.name);
+                getReferenceName(reference).then(item => {
+                    // const mapping = {pmid: reference.pmid || 0, name: item};
+                    const newNames = this.state.referenceMap;
+                    if(reference.pmid && !newNames.has(reference.pmid)) newNames.set(reference.pmid, item);
+                    console.group("Reference");
+                    console.log(reference.pmid + "  -  " + item);
+                    console.groupEnd();
+                    this.setState({ referenceMap: newNames });
+                })
+            })
+        })
+    }
+
+
     // public tooltipClinicalContent(data: string[]) {
     //     return (
     //         <div className={styles.tooltip}>
@@ -402,7 +472,12 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     //     return `${preContent} ${genomicAlterationContent} ${postContent}`;
     // }
 
-
+    private test() {
+        console.group("Test");
+        console.log(this.state.referenceMap);
+        this.updateReferences();
+        console.groupEnd();
+    }
 
     render() {
         return (
@@ -410,6 +485,8 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                 <h2 style={{marginBottom: '0'}}>Therapy Recommendations</h2>
                 <p className={styles.edit}>
                     <Button type="button" className={"btn btn-default " + styles.addButton} onClick={() => this.openAddForm()}><i className={`fa fa-plus ${styles.marginLeft}`} aria-hidden="true"></i> Add</Button>
+                    <Button type="button" className={"btn btn-default " + styles.addOncoKbButton} onClick={() => this.openAddOncoKbForm()}><i className={`fa fa-plus ${styles.marginLeft}`} aria-hidden="true"></i> Add from OncoKB</Button>
+                    <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button>
                 </p>
                 {this.selectedTherapyRecommendation &&
                     <TherapyRecommendationForm
@@ -419,6 +496,16 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                         clinicalData={this.props.clinicalData}
                         onHide={(therapyRecommendation?: ITherapyRecommendation) => {this.onHideAddEditForm(therapyRecommendation)}}
                         title="Edit therapy recommendation"
+                        userEmailAddress={AppConfig.serverConfig.user_email_address}
+                    />
+                }
+                {this.showOncoKBForm &&
+                    <TherapyRecommendationFormOncoKb
+                        show={this.showOncoKBForm}
+                        patientID={this.props.patientId}
+                        oncoKbResult={this.props.oncoKbData}
+                        onHide={(therapyRecommendation?: ITherapyRecommendation) => {this.onHideAddEditForm(therapyRecommendation)}}
+                        title="Add therapy recommendation from OncoKB"
                         userEmailAddress={AppConfig.serverConfig.user_email_address}
                     />
                 }

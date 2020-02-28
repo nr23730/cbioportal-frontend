@@ -1,8 +1,11 @@
-import { ITherapyRecommendation, EvidenceLevel, Modified, IRecommender } from "shared/model/TherapyRecommendation";
+import { ITherapyRecommendation, EvidenceLevel, Modified, IRecommender, IReference } from "shared/model/TherapyRecommendation";
 import AppConfig from "appConfig";
 import _ from "lodash";
+import request from "superagent";
 
-export function truncate( s: String, n: number, useWordBoundary: boolean ){
+
+export function truncate( s: string | undefined, n: number, useWordBoundary: boolean ){
+    if(!s) return "";
     if (s.length <= n) { return s; }
     var subString = s.substr(0, n-1);
     return (useWordBoundary 
@@ -61,6 +64,31 @@ export function isTherapyRecommendationEmpty(therapyRecommendation: ITherapyReco
         return false;
     }
 
+}
+
+export function getReferenceName(reference: IReference) : Promise<string> {
+    console.log(reference.name);
+    return new Promise<string>((resolve, reject) => {
+        if(reference.name && reference.name.length !== 0) {
+          return name;
+        } else {
+          const pmid = reference.pmid;
+          // TODO better to separate this call to a configurable client
+          request.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=' + pmid + '&retmode=json')
+              .end((err, res)=>{
+                  if (!err && res.ok) {
+                      const response = JSON.parse(res.text);
+                      const result = response.result;
+                      const uid = result.uids[0];
+                      console.log(result[uid].title);
+                      resolve(result[uid].title);
+                  } else {
+                      resolve("");
+                  }
+              });
+          }
+      });
+      
 }
 
 export function flattenStringify(x: Array<any>) : string {

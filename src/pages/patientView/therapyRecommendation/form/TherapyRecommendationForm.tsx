@@ -8,7 +8,7 @@ import TherapyRecommendationFormDrugInput from "./TherapyRecommendationFormDrugI
 import TherapyRecommendationFormClinicalInput from "./TherapyRecommendationFormClinicalInput";
 import Select from 'react-select';
 import TherapyRecommendationFormReferenceInput from "./TherapyRecommendationFormReferenceInput";
-import styles from '../style/therapyRecommendation.module.scss';
+
 
 
 interface ITherapyRecommendationFormProps {
