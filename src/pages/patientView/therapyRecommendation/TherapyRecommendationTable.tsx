@@ -67,19 +67,21 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         } 
     }
 
-    componentDidUpdate(prevProps: ITherapyRecommendationProps, prevState: ITherapyRecommendationState) {
-        console.group("ComponentDidUpdate");
-        console.log((prevState.therapyRecommendations.length));
-        console.log((this.state.therapyRecommendations.length));
-        console.groupEnd();
-        if (prevState.therapyRecommendations !== this.state.therapyRecommendations) {
-            console.group("ComponentDidUpdate");
-            console.log(prevState.therapyRecommendations);
-            console.log(this.state.therapyRecommendations);
-            console.groupEnd();
-          this.updateReferences();
-        }    
-      }
+    // Function consumes to many resources
+
+    // componentDidUpdate(prevProps: ITherapyRecommendationProps, prevState: ITherapyRecommendationState) {
+    //     console.group("ComponentDidUpdate");
+    //     console.log((prevState.therapyRecommendations.length));
+    //     console.log((this.state.therapyRecommendations.length));
+    //     console.groupEnd();
+    //     if (prevState.therapyRecommendations !== this.state.therapyRecommendations) {
+    //         console.group("ComponentDidUpdate");
+    //         console.log(prevState.therapyRecommendations);
+    //         console.log(this.state.therapyRecommendations);
+    //         console.groupEnd();
+    //       this.updateReferences();
+    //     }    
+    //   }
 
     // componentDidMount() {
     //     this.updateReferences();

@@ -91,6 +91,24 @@ export function getReferenceName(reference: IReference) : Promise<string> {
       
 }
 
+export function getReferenceNameForId(pmid: number) : Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+        // TODO better to separate this call to a configurable client
+        request.get('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=' + pmid + '&retmode=json')
+            .end((err, res)=>{
+                if (!err && res.ok) {
+                    const response = JSON.parse(res.text);
+                    const result = response.result;
+                    const uid = result.uids[0];
+                    console.log(result[uid].title);
+                    resolve(result[uid].title);
+                } else {
+                    resolve("");
+                }
+            });
+    });      
+}
+
 export function flattenStringify(x: Array<any>) : string {
     let y : any = {};
     x.forEach(function(elem, index) {

@@ -6,8 +6,6 @@ import Select from 'react-select';
 import { IndicatorQueryResp, Treatment } from "cbioportal-frontend-commons/dist/api/generated/OncoKbAPI";
 import { getNewTherapyRecommendation } from "../TherapyRecommendationTableUtils";
 import { IOncoKbDataWrapper } from "shared/model/OncoKB";
-import { valueContainerCSS } from "react-select/src/components/containers";
-
 
 
 interface ITherapyRecommendationFormOncoKbProps {
@@ -20,6 +18,8 @@ interface ITherapyRecommendationFormOncoKbProps {
 }
 
 export default class TherapyRecommendationFormOncoKb extends React.Component<ITherapyRecommendationFormOncoKbProps, {}> {
+    
+    
     private getEvidenceLevel(level: string) {
         switch(level.split('_')[1]) {
             case "1": return EvidenceLevel.I;
@@ -32,6 +32,8 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
             default: return EvidenceLevel.NA;
         }
     }
+
+    
 
     public render() {
         let therapyRecommendation: ITherapyRecommendation = getNewTherapyRecommendation(this.props.patientID);
@@ -48,8 +50,23 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
             )
         } else {
             let oncoKbResults: IndicatorQueryResp[] = Object.values(this.props.oncoKbResult.result!.indicatorMap!);
+            const groupStyles = {
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: 18
+            };
+            const groupBadgeStyles = {
+                backgroundColor: '#EBECF0',
+                borderRadius: '2em',
+                color: '#172B4D',
+                display: 'inline-block',
+                fontSize: 12,
+                lineHeight: '1',
+                minWidth: 1,
+                padding: '0.16666666666667em 0.5em'
+            };
             return (
-                // <Modal show={this.props.show} onHide={() => {this.props.onHide(therapyRecommendation)}}>
                 <Modal show={this.props.show} onHide={() => {this.props.onHide(undefined)}}>
                     <Modal.Header closeButton>
                         <Modal.Title>{this.props.title}</Modal.Title>
@@ -65,7 +82,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
                                             label: treatment.drugs.map(drug => drug.drugName).toString() + " (" + treatment.level.replace("_"," ") + ")",
                                             value: {result, treatmentIndex}
                                         }))
-                                    }))}
+                                }))}
                                 name="oncoKBResult"
                                 className="basic-select"
                                 classNamePrefix="select"
@@ -106,6 +123,12 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
 
                                     console.log(selectedOption);
                                 }}
+                                formatGroupLabel={(data: any) => (
+                                    <div style={groupStyles}>
+                                      <span>{data.label}</span>
+                                      <span style={groupBadgeStyles}>{data.options.length}</span>
+                                    </div>
+                                  )}
                                 />
                             </div>
                         </form>
@@ -118,6 +141,4 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
             );
         }
     }
-
-
 }
