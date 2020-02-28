@@ -5,7 +5,6 @@ import * as _ from 'lodash';
 import {
     ITherapyRecommendation, ITreatment, IGeneticAlteration, IReference, IClinicalData
 } from "../../../shared/model/TherapyRecommendation";
-//import styles from './style/TherapyRecommendation.module.scss';
 import { action, computed, observable } from "mobx";
 import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTable";
 import styles from './style/therapyRecommendation.module.scss';
@@ -20,7 +19,7 @@ import TherapyRecommendationForm from './form/TherapyRecommendationForm';
 import { SimpleCopyDownloadControls } from 'shared/components/copyDownloadControls/SimpleCopyDownloadControls';
 import { IOncoKbDataWrapper, IOncoKbCancerGenesWrapper } from 'shared/model/OncoKB';
 import TherapyRecommendationFormOncoKb from './form/TherapyRecommendationFormOncoKb';
-import { number } from 'prop-types';
+
 
 export type ITherapyRecommendationProps = {
     patientId: string;
@@ -144,20 +143,14 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                     </div>
                 </div>
             </div>
-            
+
             <div className={styles.firstRight}>
-            Clinical data:
-            {therapyRecommendation.reasoning.clinicalData && therapyRecommendation.reasoning.clinicalData.map((clinicalDataItem: IClinicalData) => (
-            <div>
-                {clinicalDataItem.attribute + ": " + clinicalDataItem.value}
-            </div>
-            ))}
-            {/* <div>
-                {therapyRecommendation.reasoning.tmb && "TMB: " + therapyRecommendation.reasoning.tmb}
-            </div>
-            <div>
-                {therapyRecommendation.reasoning.other && "Notes: " + therapyRecommendation.reasoning.other}
-            </div> */}
+                Clinical data:
+                {therapyRecommendation.reasoning.clinicalData && therapyRecommendation.reasoning.clinicalData.map((clinicalDataItem: IClinicalData) => (
+                    <div>
+                        {clinicalDataItem.attribute + ": " + clinicalDataItem.value}
+                    </div>
+                ))}
             </div>
         </div>
         </div>
@@ -424,12 +417,10 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                 <h2 style={{marginBottom: '0'}}>Therapy Recommendations</h2>
                 <p className={styles.edit}>
                     <Button type="button" className={"btn btn-default " + styles.addButton} onClick={() => this.openAddForm()}>
-                        <i className={`fa fa-plus ${styles.marginLeft}`} aria-hidden="true"></i> 
-                        Add
+                        <i className={`fa fa-plus ${styles.marginLeft}`} aria-hidden="true"></i> Add
                     </Button>
                     <Button type="button" className={"btn btn-default " + styles.addOncoKbButton} onClick={() => this.openAddOncoKbForm()}>
-                        <i className={`fa fa-plus ${styles.marginLeft}`} aria-hidden="true"></i> 
-                        Add from OncoKB
+                        <i className={`fa fa-plus ${styles.marginLeft}`} aria-hidden="true"></i> Add from OncoKB
                     </Button>
                     <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button>
                 </p>
@@ -460,11 +451,9 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                     showCopyDownload={false}
                 />
                 <SimpleCopyDownloadControls
-                    // className={classnames("pull-right", styles.copyDownloadControls)}
-                    downloadData={() => flattenStringify(this.props.therapyRecommendations)} //JSON.stringify(this.props.therapyRecommendations)} 
+                    downloadData={() => flattenStringify(this.props.therapyRecommendations)}
                     downloadFilename={`TherapyRecommendation_${this.props.patientId}.json`}
                     controlsStyle="BUTTON"
-                    // containerId={this.props.id}
                 />
             </div>
         )
