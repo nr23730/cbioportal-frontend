@@ -29,6 +29,8 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
             case "3A": return EvidenceLevel.IIIA;
             case "3B": return EvidenceLevel.IIIB;
             case "4": return EvidenceLevel.IV;
+            case "R1": return EvidenceLevel.R1;
+            case "R2": return EvidenceLevel.R2;
             default: return EvidenceLevel.NA;
         }
     }
@@ -79,7 +81,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
                                 options={oncoKbResults.map(result => ({
                                         label: result.query.hugoSymbol + " " + result.query.alteration, 
                                         options: result.treatments.map((treatment, treatmentIndex) => ({
-                                            label: treatment.drugs.map(drug => drug.drugName).toString() + " (" + treatment.level.replace("_"," ") + ")",
+                                            label: treatment.drugs.map(drug => drug.drugName).join(' + ') + " (" + treatment.level.replace("_"," ") + ")",
                                             value: {result, treatmentIndex}
                                         }))
                                 }))}
@@ -90,6 +92,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
                                     let treatmentIndex = selectedOption.value.treatmentIndex;
                                     let result = selectedOption.value.result;
                                     let treatment = result.treatments[treatmentIndex];
+                                    let evidenceLevel = this.getEvidenceLevel(treatment.level)
 
                                     // Treatments
                                     treatment.drugs.map(drug => {
@@ -101,7 +104,10 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
                                     });
 
                                     // Comment
-                                    therapyRecommendation.comment = "Recommendation imported from OncoKB"
+                                    therapyRecommendation.comment = "Recommendation imported from OncoKB. "
+                                    if(evidenceLevel === EvidenceLevel.R1 || evidenceLevel === EvidenceLevel.R2) {
+                                        therapyRecommendation.comment += "ATTENTION: Evidence level R1/2 represents resistance to the selected drug."
+                                    }
 
                                     // Reasoning
                                     therapyRecommendation.reasoning.geneticAlterations = [{
@@ -111,7 +117,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
                                     }]
 
                                     // Evidence Level
-                                    therapyRecommendation.evidenceLevel = this.getEvidenceLevel(treatment.level);
+                                    therapyRecommendation.evidenceLevel = evidenceLevel;
 
                                     // References
                                     treatment.pmids.map(reference => {

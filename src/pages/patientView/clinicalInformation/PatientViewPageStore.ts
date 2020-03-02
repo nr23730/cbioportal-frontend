@@ -1169,8 +1169,12 @@ export class PatientViewPageStore {
         return true;
     }
 
+    private getJsonStoreUrl() {
+        return 'http://' + window.location.hostname + ':3001/patients/';
+    }
+
     private loadTherapyRecommendations() {
-        request.get('http://localhost:3001/patients/' + this.getSafePatientId())
+        request.get(this.getJsonStoreUrl() + this.getSafePatientId())
         .end((err, res)=>{
             if (!err && res.ok) {
                 console.group("Success GETting " + this.patientId);
@@ -1188,7 +1192,7 @@ export class PatientViewPageStore {
     }
 
     private writeTherapyRecommendations() {
-        request.put('http://localhost:3001/patients/' + this.getSafePatientId())
+        request.put(this.getJsonStoreUrl() + this.getSafePatientId())
         .set('Content-Type', 'application/json')
         .send(JSON.stringify(({id: this.getSafePatientId(), therapyRecommendations: flattenArray(this._therapyRecommendations)})))
         .end((err, res)=>{
@@ -1197,7 +1201,7 @@ export class PatientViewPageStore {
                 // return true;
             } else {
                 console.log("Error PUTting " + this.patientId + "... trying POST");
-                request.post('http://localhost:3001/patients/')
+                request.post(this.getJsonStoreUrl())
                 .set('Content-Type', 'application/json')
                 .send(JSON.stringify(({id: this.getSafePatientId(), therapyRecommendations: flattenArray(this._therapyRecommendations)})))
                 .end((err, res)=>{
@@ -1215,42 +1219,6 @@ export class PatientViewPageStore {
 
     private getSafePatientId = () => {
         return this.patientId;
-    }
-
-    private oncoKbTest = () => {
-        console.log(this.oncoKbData);
-        console.log(this.oncoKbData.result);
-        console.log(this.oncoKbEvidenceCache);
-        console.log(this.oncoKbAnnotatedGenes.result);
-
-        if (this.oncoKbData &&
-            this.oncoKbData.result &&
-            !(this.oncoKbData.result instanceof Error) &&
-            this.oncoKbData.status === "complete")
-        {
-            this.mutationData.result.forEach(mut => {
-                // let mut = this.mutationData.result[0];
-                if(!(this.oncoKbData.result instanceof Error)) {
-                    const evidenceQuery = getEvidenceQuery(mut, this.oncoKbData.result);
-                    if (evidenceQuery) {
-                        // const indicator = this.oncoKbData.result.indicatorMap![evidenceQuery.id];
-                        // if (indicator) {
-                        //     console.log(indicator.oncogenic.toLowerCase().trim().includes("oncogenic"));
-                        // }
-                        // let cacheData: ICacheData<IEvidence>|undefined;
-        
-                        const cache = this.oncoKbEvidenceCache.getData([evidenceQuery.id], [evidenceQuery]);
-                        if (cache && cache[evidenceQuery.id] && cache[evidenceQuery.id].data) {
-                            let treatments = (cache[evidenceQuery.id]).data!.treatments; 
-                            if(treatments.sensitivity.length > 0) {
-                                console.log(treatments);
-                                console.log(flattenObject(treatments));
-                            }
-                        }
-                    }
-                }           
-            });
-        }
     }
 
     private loadSampleTherapyRecommendation() {

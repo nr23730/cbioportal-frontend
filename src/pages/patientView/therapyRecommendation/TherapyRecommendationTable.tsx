@@ -406,6 +406,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
 
     private test() {
         console.group("Test");
+        console.log(window.location);
         console.log(this.state.referenceMap);
         this.updateReferences();
         console.groupEnd();
