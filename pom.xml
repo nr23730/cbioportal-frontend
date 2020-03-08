@@ -40,7 +40,7 @@
                             <goal>yarn</goal>
                         </goals>
                         <configuration>
-                            <arguments>--production=true --frozen-lockfile</arguments>
+                            <arguments>--production=true</arguments>
                         </configuration>
 
                     </execution>
