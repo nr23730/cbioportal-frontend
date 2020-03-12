@@ -6,12 +6,15 @@ import Select from 'react-select';
 import { IndicatorQueryResp, Treatment } from "cbioportal-frontend-commons/dist/api/generated/OncoKbAPI";
 import { getNewTherapyRecommendation } from "../TherapyRecommendationTableUtils";
 import { IOncoKbDataWrapper } from "shared/model/OncoKB";
+import PubMedCache from "shared/cache/PubMedCache";
+import { ICache } from "cbioportal-frontend-commons";
 
 
 interface ITherapyRecommendationFormOncoKbProps {
     show: boolean;
     patientID: string;
     oncoKbResult?: IOncoKbDataWrapper;
+    pubMedCache?: PubMedCache;
     title: string;
     userEmailAddress: string;
     onHide: ((newTherapyRecommendation?: ITherapyRecommendation) => void);
@@ -35,10 +38,30 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
         }
     }
 
+    public get pmidData(): ICache<any>
+    {
+        if(this.props.pubMedCache && this.props.pubMedCache.cache && this.props.oncoKbResult && this.props.oncoKbResult.result && !(this.props.oncoKbResult.result instanceof Error)) {
+            let oncoKbResults: IndicatorQueryResp[] = Object.values(this.props.oncoKbResult.result!.indicatorMap!);
+            let pmids = [] as string[];
+            oncoKbResults.map(result => (
+                result.treatments.map((treatment, treatmentIndex) => (
+                    pmids.push(...treatment.pmids)
+                ))
+            ))
+
+            for (const pmid of pmids) {
+                this.props.pubMedCache.get(+pmid);
+            }
+        }
+
+        return (this.props.pubMedCache && this.props.pubMedCache.cache) || {};
+    }
+
     
 
     public render() {
-        let therapyRecommendation: ITherapyRecommendation = getNewTherapyRecommendation(this.props.patientID);
+        let selectedTherapyRecommendation: ITherapyRecommendation;
+        this.pmidData;
         if(!this.props.oncoKbResult || !this.props.oncoKbResult.result || this.props.oncoKbResult.result instanceof Error) {
             return (
                 <Modal show={this.props.show} onHide={() => {this.props.onHide(undefined)}}>
@@ -89,6 +112,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
                                 className="basic-select"
                                 classNamePrefix="select"
                                 onChange={(selectedOption: {label: string, value: {result: IndicatorQueryResp, treatmentIndex: number}}) => {
+                                    let therapyRecommendation: ITherapyRecommendation = getNewTherapyRecommendation(this.props.patientID);
                                     let treatmentIndex = selectedOption.value.treatmentIndex;
                                     let result = selectedOption.value.result;
                                     let treatment = result.treatments[treatmentIndex];
@@ -121,13 +145,19 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
 
                                     // References
                                     treatment.pmids.map(reference => {
+                                        const cacheData = this.pmidData[reference];
+                                        const articleContent = cacheData ? cacheData.data : null;
+                                        console.group("Get Reference Title")
+                                        console.log(articleContent);
+                                        console.groupEnd();
                                         therapyRecommendation.references.push({
                                             pmid: _.toInteger(reference),
-                                            name: ""
+                                            name: articleContent ? articleContent.title : "" //this.props.pubMedCache ? this.props.pubMedCache.get(_.toInteger(reference)) : 
                                         })
                                     })
 
                                     console.log(selectedOption);
+                                    selectedTherapyRecommendation = therapyRecommendation;
                                 }}
                                 formatGroupLabel={(data: any) => (
                                     <div style={groupStyles}>
@@ -141,7 +171,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
                     </Modal.Body>
                     <Modal.Footer>                    
                         <Button type="button" bsStyle="default" onClick={() => {this.props.onHide(undefined)}}>Dismiss</Button>
-                        <Button type="button" bsStyle="primary" onClick={() => {this.props.onHide(therapyRecommendation)}}>Save Changes</Button>
+                        <Button type="button" bsStyle="primary" onClick={() => {this.props.onHide(selectedTherapyRecommendation)}}>Save Changes</Button>
                     </Modal.Footer>
                 </Modal>
             );

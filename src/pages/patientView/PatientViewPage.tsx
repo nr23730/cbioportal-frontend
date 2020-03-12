@@ -697,6 +697,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                                     onAddOrEdit={this.patientViewPageStore.therapyRecommendationOnAddOrEdit}
                                     oncoKbData={this.patientViewPageStore.oncoKbData}
                                     oncoKbCancerGenes={this.patientViewPageStore.oncoKbCancerGenes}
+                                    pubMedCache={this.patientViewPageStore.pubMedCache}
                                 />
                             </MSKTab>
                         )
