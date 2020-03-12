@@ -9,6 +9,7 @@ import TherapyRecommendationFormDrugInput from "./TherapyRecommendationFormDrugI
 import TherapyRecommendationFormClinicalInput from "./TherapyRecommendationFormClinicalInput";
 import Select from 'react-select';
 import TherapyRecommendationFormReferenceInput from "./TherapyRecommendationFormReferenceInput";
+import TherapyRecommendationFormCommentInput from "./TherapyRecommendationFormCommentInput";
 
 
 
@@ -42,12 +43,16 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
 
                         <div className="form-group">
                             <h5>Comment:</h5>
-                            <input
+                            <TherapyRecommendationFormCommentInput
+                                data={therapyRecommendation}
+                                onChange={(comments) => therapyRecommendation.comment = comments}
+                            />
+                            {/* <input
                             type="text"
                             defaultValue={therapyRecommendation.comment}
                             onChange={(e) => therapyRecommendation.comment = e.target.value}
                             className="form-control"
-                            />
+                            /> */}
                         </div>
 
                         <div className="form-group">

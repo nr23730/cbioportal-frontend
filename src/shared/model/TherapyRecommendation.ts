@@ -44,7 +44,7 @@ export interface IRecommendation {
 
 export interface ITherapyRecommendation {
     id: string;
-    comment: string;
+    comment: string[];
     reasoning: IReasoning;
     evidenceLevel: EvidenceLevel;
     modifications: IModification[];

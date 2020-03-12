@@ -14,6 +14,7 @@ interface ITherapyRecommendationFormOncoKbProps {
     show: boolean;
     patientID: string;
     oncoKbResult?: IOncoKbDataWrapper;
+    cnaOncoKbResult?: IOncoKbDataWrapper;
     pubMedCache?: PubMedCache;
     title: string;
     userEmailAddress: string;
@@ -40,20 +41,27 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
 
     public get pmidData(): ICache<any>
     {
-        if(this.props.pubMedCache && this.props.pubMedCache.cache && this.props.oncoKbResult && this.props.oncoKbResult.result && !(this.props.oncoKbResult.result instanceof Error)) {
-            let oncoKbResults: IndicatorQueryResp[] = Object.values(this.props.oncoKbResult.result!.indicatorMap!);
-            let pmids = [] as string[];
-            oncoKbResults.map(result => (
-                result.treatments.map((treatment, treatmentIndex) => (
-                    pmids.push(...treatment.pmids)
+        let oncoKbResults: IndicatorQueryResp[] = []; 
+        let pmids = [] as string[];
+        if(this.props.pubMedCache && this.props.pubMedCache.cache) {
+            if(this.props.oncoKbResult && this.props.oncoKbResult.result && !(this.props.oncoKbResult.result instanceof Error)) {
+                oncoKbResults.push(...Object.values(this.props.oncoKbResult.result!.indicatorMap!))
+            }
+            if(this.props.cnaOncoKbResult && this.props.cnaOncoKbResult.result && !(this.props.cnaOncoKbResult.result instanceof Error)) {
+                oncoKbResults.push(...Object.values(this.props.cnaOncoKbResult.result!.indicatorMap!))
+            }
+            
+            if(oncoKbResults && oncoKbResults.length > 0) {
+                oncoKbResults.map(result => (
+                    result.treatments.map((treatment, treatmentIndex) => (
+                        pmids.push(...treatment.pmids)
+                    ))
                 ))
-            ))
-
-            for (const pmid of pmids) {
-                this.props.pubMedCache.get(+pmid);
+                for (const pmid of pmids) {
+                    this.props.pubMedCache.get(+pmid);
+                }
             }
         }
-
         return (this.props.pubMedCache && this.props.pubMedCache.cache) || {};
     }
 
@@ -62,7 +70,8 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
     public render() {
         let selectedTherapyRecommendation: ITherapyRecommendation;
         this.pmidData;
-        if(!this.props.oncoKbResult || !this.props.oncoKbResult.result || this.props.oncoKbResult.result instanceof Error) {
+        if(!this.props.oncoKbResult || !this.props.oncoKbResult.result || this.props.oncoKbResult.result instanceof Error ||
+            !this.props.cnaOncoKbResult || !this.props.cnaOncoKbResult.result || this.props.cnaOncoKbResult.result instanceof Error) {
             return (
                 <Modal show={this.props.show} onHide={() => {this.props.onHide(undefined)}}>
                 <Modal.Header closeButton>
@@ -74,7 +83,10 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
             </Modal>
             )
         } else {
-            let oncoKbResults: IndicatorQueryResp[] = Object.values(this.props.oncoKbResult.result!.indicatorMap!);
+            let oncoKbResults: IndicatorQueryResp[] = []; 
+            oncoKbResults.push(...Object.values(this.props.oncoKbResult.result!.indicatorMap!));
+            oncoKbResults.push(...Object.values(this.props.cnaOncoKbResult.result!.indicatorMap!));
+            // let oncoKbResults: IndicatorQueryResp[] = Object.values(this.props.oncoKbResult.result!.indicatorMap!);
             const groupStyles = {
                 display: 'flex',
                 alignItems: 'center',
@@ -128,9 +140,10 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
                                     });
 
                                     // Comment
-                                    therapyRecommendation.comment = "Recommendation imported from OncoKB. "
+                                    therapyRecommendation.comment.push("Recommendation imported from OncoKB.");
+                                    therapyRecommendation.comment.push(...treatment.approvedIndications)
                                     if(evidenceLevel === EvidenceLevel.R1 || evidenceLevel === EvidenceLevel.R2) {
-                                        therapyRecommendation.comment += "ATTENTION: Evidence level R1/2 represents resistance to the selected drug."
+                                        therapyRecommendation.comment.push("ATTENTION: Evidence level R1/2 represents resistance to the selected drug.");
                                     }
 
                                     // Reasoning

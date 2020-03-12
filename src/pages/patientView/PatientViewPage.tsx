@@ -684,7 +684,8 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                         this.shouldShowTherapyRecommendation(this.patientViewPageStore) && 
                         this.patientViewPageStore.mutationData.isComplete && 
                         this.patientViewPageStore.oncoKbCancerGenes.isComplete && 
-                        this.patientViewPageStore.oncoKbData.isComplete && (
+                        this.patientViewPageStore.oncoKbData.isComplete &&
+                        this.patientViewPageStore.cnaOncoKbData.isComplete && (
                             <MSKTab key={8} id={PatientViewPageTabs.TherapyRecommendation} linkText="Therapy Recommendation">
                                 <TherapyRecommendationTable
                                     patientId={this.patientViewPageStore.patientId}
@@ -696,6 +697,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                                     onDelete={this.patientViewPageStore.therapyRecommendationOnDelete}
                                     onAddOrEdit={this.patientViewPageStore.therapyRecommendationOnAddOrEdit}
                                     oncoKbData={this.patientViewPageStore.oncoKbData}
+                                    cnaOncoKbData={this.patientViewPageStore.cnaOncoKbData}
                                     oncoKbCancerGenes={this.patientViewPageStore.oncoKbCancerGenes}
                                     pubMedCache={this.patientViewPageStore.pubMedCache}
                                 />

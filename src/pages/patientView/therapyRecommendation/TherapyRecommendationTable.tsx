@@ -32,6 +32,7 @@ export type ITherapyRecommendationProps = {
     onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
     onAddOrEdit: (therapyRecommendation: ITherapyRecommendation) => boolean;
     oncoKbData?: IOncoKbDataWrapper;
+    cnaOncoKbData?: IOncoKbDataWrapper;
     oncoKbCancerGenes?: IOncoKbCancerGenesWrapper;
     pubMedCache?: PubMedCache;
 }
@@ -113,7 +114,9 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         name: ColumnKey.COMMENT,
         render: (therapyRecommendation: ITherapyRecommendation) => (
             <div>
-                {therapyRecommendation.comment}
+                {therapyRecommendation.comment.map((comment: string) => (
+                    <p>{comment}</p>
+                ))}
             </div>
         ),
         // width: this.columnWidths[ColumnKey.COMMENT]
@@ -443,6 +446,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                         show={this.showOncoKBForm}
                         patientID={this.props.patientId}
                         oncoKbResult={this.props.oncoKbData}
+                        cnaOncoKbResult={this.props.cnaOncoKbData}
                         pubMedCache={this.props.pubMedCache}
                         onHide={(therapyRecommendation?: ITherapyRecommendation) => {this.onHideAddEditForm(therapyRecommendation)}}
                         title="Add therapy recommendation from OncoKB"

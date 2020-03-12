@@ -1225,7 +1225,7 @@ export class PatientViewPageStore {
         this._therapyRecommendations.push(
             {
                 id: "3", 
-                comment: "test3",
+                comment: ["test3"],
                 reasoning: {
                     geneticAlterations: [
                         {

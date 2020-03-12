@@ -19,7 +19,7 @@ export function getNewTherapyRecommendation(patientId: string): ITherapyRecommen
     let timeId = now.getTime();
     let therapyRecommendation: ITherapyRecommendation = {
         id: (patientId + "_" + timeId), 
-        comment: "",
+        comment: [],
         reasoning: {},
         evidenceLevel: EvidenceLevel.NA,
         modifications: [
@@ -53,7 +53,8 @@ export function addModificationToTherapyRecommendation(therapyRecommendation: IT
 
 export function isTherapyRecommendationEmpty(therapyRecommendation: ITherapyRecommendation) : boolean {
     if(
-    therapyRecommendation.comment === "" &&
+    therapyRecommendation.comment === [] &&
+    therapyRecommendation.comment.every(s => s === "") &&
     therapyRecommendation.evidenceLevel === EvidenceLevel.NA &&
     _.isEmpty(therapyRecommendation.reasoning) &&
     therapyRecommendation.treatments.length === 0 &&
