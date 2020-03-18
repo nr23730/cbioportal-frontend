@@ -20,6 +20,8 @@ import { SimpleCopyDownloadControls } from 'shared/components/copyDownloadContro
 import { IOncoKbDataWrapper, IOncoKbCancerGenesWrapper } from 'shared/model/OncoKB';
 import TherapyRecommendationFormOncoKb from './form/TherapyRecommendationFormOncoKb';
 import PubMedCache from 'shared/cache/PubMedCache';
+import LabeledCheckbox from 'shared/components/labeledCheckbox/LabeledCheckbox';
+import { debounceAsync } from 'mobxpromise';
 
 
 export type ITherapyRecommendationProps = {
@@ -29,9 +31,15 @@ export type ITherapyRecommendationProps = {
     clinicalData: ClinicalData[];
     sampleManager: SampleManager | null;
     therapyRecommendations: ITherapyRecommendation[];
+    geneticCounselingRecommended: boolean;
+    rebiopsyRecommended: boolean;
+    commentRecommendation: string;
     containerWidth: number;
     onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
     onAddOrEdit: (therapyRecommendation: ITherapyRecommendation) => boolean;
+    onEditGeneticCounselingRecommended: (geneticCounselingRecommended: boolean) => void;
+    onEditRebiopsyRecommended: (rebiopsyRecommended: boolean) => void;
+    onEditCommentRecommendation: (commentRecommendation: string) => void;
     oncoKbData?: IOncoKbDataWrapper;
     cnaOncoKbData?: IOncoKbDataWrapper;
     oncoKbCancerGenes?: IOncoKbCancerGenesWrapper;
@@ -446,9 +454,42 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         console.groupEnd();
     }
 
+    // @observable private flagTest = false;
+    // @observable private commentTest = "test123";
+
     render() {
         return (
             <div>
+                <div style={{ marginBottom: "20px"}}>
+                <h2 style={{marginBottom: "5px"}}>Recommendations</h2>
+                    <div style={{ fontSize: 16, display: "flex"}}>
+                        <LabeledCheckbox
+                            checked={this.props.geneticCounselingRecommended}
+                            onChange={()=>{ this.props.onEditGeneticCounselingRecommended(!this.props.geneticCounselingRecommended); }}
+                            labelProps={{style:{ marginRight:10}}}
+                            // inputProps={{"data-test":"HeatmapCluster"}}
+                        >
+                            <span style={{marginTop: "-2px"}}>Genetic Counseling</span>
+                        </LabeledCheckbox>
+                        <LabeledCheckbox
+                            checked={this.props.rebiopsyRecommended}
+                            onChange={()=>{ this.props.onEditRebiopsyRecommended(!this.props.rebiopsyRecommended); }}
+                            labelProps={{style:{ marginRight:10}}}
+                            // inputProps={{"data-test":"HeatmapCluster"}}
+                        >
+                            <span style={{marginTop: "-2px"}}>Rebiopsy</span>
+                        </LabeledCheckbox>
+                    </div>
+                    <h5 style={{marginTop: "5px"}}>Comments</h5>
+                    <textarea 
+                            title="Comments"
+                            rows={2}
+                            cols={80}
+                            value={this.props.commentRecommendation}
+                            onChange={event => this.props.onEditCommentRecommendation(event.currentTarget.value)}
+                            // data-test='CustomCaseSetInput'
+                        />
+                </div>
                 <h2 style={{marginBottom: '0'}}>Therapy Recommendations</h2>
                 <p className={styles.edit}>
                     <Button type="button" className={"btn btn-default " + styles.addButton} onClick={() => this.openAddForm()}>
@@ -457,7 +498,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                     <Button type="button" className={"btn btn-default " + styles.addOncoKbButton} onClick={() => this.openAddOncoKbForm()}>
                         <i className={`fa fa-plus ${styles.marginLeft}`} aria-hidden="true"></i> Add from OncoKB
                     </Button>
-                    <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button>
+                    {/* <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button> */}
                 </p>
                 {this.selectedTherapyRecommendation &&
                     <TherapyRecommendationForm

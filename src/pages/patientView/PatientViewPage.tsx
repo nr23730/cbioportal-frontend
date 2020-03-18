@@ -695,9 +695,15 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                                     clinicalData={this.patientViewPageStore.clinicalDataPatient.result.concat(this.patientViewPageStore.clinicalDataForSamples.result)}
                                     sampleManager={sampleManager}
                                     therapyRecommendations={this.patientViewPageStore.therapyRecommendations}
+                                    geneticCounselingRecommended={this.patientViewPageStore.geneticCounselingRecommended}
+                                    rebiopsyRecommended={this.patientViewPageStore.rebiopsyRecommended}
+                                    commentRecommendation={this.patientViewPageStore.commentRecommendation}
                                     containerWidth={WindowStore.size.width-20}
                                     onDelete={this.patientViewPageStore.therapyRecommendationOnDelete}
                                     onAddOrEdit={this.patientViewPageStore.therapyRecommendationOnAddOrEdit}
+                                    onEditGeneticCounselingRecommended={this.patientViewPageStore.setGeneticCounselingRecommended}
+                                    onEditRebiopsyRecommended={this.patientViewPageStore.setRebiopsyRecommended}
+                                    onEditCommentRecommendation={this.patientViewPageStore.setCommentRecommendation}
                                     oncoKbData={this.patientViewPageStore.oncoKbData}
                                     cnaOncoKbData={this.patientViewPageStore.cnaOncoKbData}
                                     oncoKbCancerGenes={this.patientViewPageStore.oncoKbCancerGenes}

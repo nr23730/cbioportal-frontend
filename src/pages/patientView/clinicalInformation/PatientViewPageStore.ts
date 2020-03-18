@@ -1140,6 +1140,24 @@ export class PatientViewPageStore {
     }, []);
     
     @observable private _therapyRecommendations: ITherapyRecommendation[] = [];
+    @observable public geneticCounselingRecommended: boolean = false;
+    @observable public rebiopsyRecommended: boolean = false;
+    @observable public commentRecommendation: string = "";
+
+    setGeneticCounselingRecommended = (value: boolean) => {
+        this.geneticCounselingRecommended = value;
+        this.writeTherapyRecommendations();
+    }
+
+    setRebiopsyRecommended = (value: boolean) => {
+        this.rebiopsyRecommended = value;
+        this.writeTherapyRecommendations();
+    }
+
+    setCommentRecommendation = (value: string) => {
+        this.commentRecommendation = value;
+        this.writeTherapyRecommendations();
+    }
 
     // @cached get therapyRecommendations():ITherapyRecommendation[] {
     get therapyRecommendations():ITherapyRecommendation[] {
@@ -1181,6 +1199,9 @@ export class PatientViewPageStore {
                 console.log(JSON.parse(res.text));
                 console.groupEnd();
                 let patient = JSON.parse(res.text);
+                this.geneticCounselingRecommended = patient.geneticCounselingRecommended;
+                this.rebiopsyRecommended = patient.rebiopsyRecommended;
+                this.commentRecommendation = patient.comment;
                 var therapyRecommendations = Object.keys(patient.therapyRecommendations).map(function(index){
                     return patient.therapyRecommendations[index];
                 });
@@ -1194,7 +1215,14 @@ export class PatientViewPageStore {
     private writeTherapyRecommendations() {
         request.put(this.getJsonStoreUrl() + this.getSafePatientId())
         .set('Content-Type', 'application/json')
-        .send(JSON.stringify(({id: this.getSafePatientId(), therapyRecommendations: flattenArray(this._therapyRecommendations)})))
+        .send(JSON.stringify(
+            ({
+                id: this.getSafePatientId(), 
+                geneticCounselingRecommended: this.geneticCounselingRecommended,
+                rebiopsyRecommended: this.rebiopsyRecommended,
+                comment: this.commentRecommendation,
+                therapyRecommendations: flattenArray(this._therapyRecommendations)
+            })))
         .end((err, res)=>{
             if (!err && res.ok) {
                 console.log("Success PUTting " + this.patientId);
@@ -1203,7 +1231,14 @@ export class PatientViewPageStore {
                 console.log("Error PUTting " + this.patientId + "... trying POST");
                 request.post(this.getJsonStoreUrl())
                 .set('Content-Type', 'application/json')
-                .send(JSON.stringify(({id: this.getSafePatientId(), therapyRecommendations: flattenArray(this._therapyRecommendations)})))
+                .send(JSON.stringify(
+                    ({
+                        id: this.getSafePatientId(), 
+                        geneticCounselingRecommended: this.geneticCounselingRecommended,
+                        rebiopsyRecommended: this.rebiopsyRecommended,
+                        comment: this.commentRecommendation,
+                        therapyRecommendations: flattenArray(this._therapyRecommendations)
+                    })))
                 .end((err, res)=>{
                     if (!err && res.ok) {
                         console.log("Success POSTing " + this.patientId);
