@@ -22,7 +22,7 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
     let allAlterations = this.props.mutations.map((mutation:Mutation) =>{
         return ({
           hugoSymbol: mutation.gene.hugoGeneSymbol, 
-          proteinChange: mutation.proteinChange,
+          alteration: mutation.proteinChange,
           entrezGeneId: mutation.entrezGeneId
         }) as IGeneticAlteration;
     });
@@ -31,13 +31,13 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
     let alterationOptions = allAlterations.map((alteration:IGeneticAlteration) => 
       ({
         value: alteration, 
-        label: alteration.hugoSymbol + " " + alteration.proteinChange
+        label: alteration.hugoSymbol + " " + alteration.alteration
       }));
     const alterationDefault = this.props.data.reasoning.geneticAlterations && 
       this.props.data.reasoning.geneticAlterations.map((alteration:IGeneticAlteration) => 
     ({
       value: alteration, 
-      label: alteration.hugoSymbol + " " + alteration.proteinChange
+      label: alteration.hugoSymbol + " " + alteration.alteration
     }));
       return (
         <Select
@@ -68,13 +68,13 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
       let alterationOptions = allAlterations.map((alteration:IGeneticAlteration) => 
         ({
           value: alteration, 
-          label: alteration.hugoSymbol + " " + alteration.proteinChange
+          label: alteration.hugoSymbol + " " + alteration.alteration
         }));
       const alterationDefault = this.props.data.reasoning.geneticAlterationsMissing && 
         this.props.data.reasoning.geneticAlterationsMissing.map((alteration:IGeneticAlteration) => 
       ({
         value: alteration, 
-        label: alteration.hugoSymbol + " " + (alteration.proteinChange || "any")
+        label: alteration.hugoSymbol + " " + (alteration.alteration || "any")
       }));
         return (
           <CreatableSelect
@@ -89,7 +89,7 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
                 this.props.onChange(selectedOption.map(option => {
                   if (_.isString(option.value)) {
                     let geneString = option.value.toString().split(' ');
-                    return {hugoSymbol: geneString[0], proteinChange: geneString[1]} as IGeneticAlteration;
+                    return {hugoSymbol: geneString[0], alteration: geneString[1]} as IGeneticAlteration;
                   } else {
                     return option.value as IGeneticAlteration;
                   }

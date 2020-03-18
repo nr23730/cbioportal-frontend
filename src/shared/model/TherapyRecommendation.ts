@@ -72,7 +72,6 @@ export interface IClinicalData {
 export interface IReasoning {
     geneticAlterations?: IGeneticAlteration[];
     geneticAlterationsMissing?: IGeneticAlteration[];
-    copyNumberAlterations?: ICopyNumberAlteration[];
     clinicalData?: IClinicalData[];
     tmb?: number;
     other?: string;
@@ -81,11 +80,5 @@ export interface IReasoning {
 export interface IGeneticAlteration {
     entrezGeneId?: number;
     hugoSymbol: string;
-    proteinChange?: string;
-};
-
-export interface ICopyNumberAlteration {
-    entrezGeneId?: number;
-    hugoSymbol: string;
-    alteration?: number;
+    alteration?: string;
 };

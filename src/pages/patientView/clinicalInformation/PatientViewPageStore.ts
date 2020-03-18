@@ -1231,12 +1231,12 @@ export class PatientViewPageStore {
                         {
                             entrezGeneId: 673,
                             hugoSymbol: "BRAF",
-                            proteinChange: "V600E"
+                            alteration: "V600E"
                         },
                         {
                             entrezGeneId: 675,
                             hugoSymbol: "BRCA2",
-                            proteinChange: "T3085Nfs*26"
+                            alteration: "T3085Nfs*26"
                         }
                     ]
                 },

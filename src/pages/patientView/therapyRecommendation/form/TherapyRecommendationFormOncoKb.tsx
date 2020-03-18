@@ -150,7 +150,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
                                     therapyRecommendation.reasoning.geneticAlterations = [{
                                         hugoSymbol: result.query.hugoSymbol,
                                         entrezGeneId: result.query.entrezGeneId,
-                                        proteinChange: result.query.alteration
+                                        alteration: result.query.alteration
                                     }]
 
                                     // Evidence Level

@@ -14,7 +14,7 @@ import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommen
     isTherapyRecommendationEmpty, flattenObject, flattenArray, getReferenceName } from "./TherapyRecommendationTableUtils";
 import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
-import { Mutation, ClinicalData } from 'shared/api/generated/CBioPortalAPI';
+import { Mutation, ClinicalData, DiscreteCopyNumberData } from 'shared/api/generated/CBioPortalAPI';
 import TherapyRecommendationForm from './form/TherapyRecommendationForm';
 import { SimpleCopyDownloadControls } from 'shared/components/copyDownloadControls/SimpleCopyDownloadControls';
 import { IOncoKbDataWrapper, IOncoKbCancerGenesWrapper } from 'shared/model/OncoKB';
@@ -25,6 +25,7 @@ import PubMedCache from 'shared/cache/PubMedCache';
 export type ITherapyRecommendationProps = {
     patientId: string;
     mutations: Mutation[];
+    cna: DiscreteCopyNumberData[];
     clinicalData: ClinicalData[];
     sampleManager: SampleManager | null;
     therapyRecommendations: ITherapyRecommendation[];
@@ -52,7 +53,12 @@ enum ColumnKey {
 }
 
 enum ColumnWidth {
-    ID = 140
+    THERAPY = 140,
+    COMMENT = 340,
+    REASONING = 240,
+    REFERENCES = 140,
+    EVIDENCE = 20,
+    EDIT = 60,
 }
 
 class TherapyRecommendationTableComponent extends LazyMobXTable<ITherapyRecommendation> {
@@ -80,14 +86,14 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     //     } 
     // }
 
-    // @computed
-    // get columnWidths() {
-    //     return {
-    //         [ColumnKey.ID]: ColumnWidth.ID,
-    //         [ColumnKey.COMMENT]: 1 * (this.props.containerWidth - ColumnWidth.ID),
-    //         //[ColumnKey.MATCHING_CRITERIA]: 0.65 * (this.props.containerWidth - ColumnWidth.ID)
-    //     };
-    // }
+    @computed
+    get columnWidths() {
+        return {
+            [ColumnKey.COMMENT]: ColumnWidth.COMMENT,
+            // [ColumnKey.COMMENT]: 1 * (this.props.containerWidth - ColumnWidth.ID),
+            //[ColumnKey.MATCHING_CRITERIA]: 0.65 * (this.props.containerWidth - ColumnWidth.ID)
+        };
+    }
 
     @observable selectedTherapyRecommendation: ITherapyRecommendation | undefined;
     @observable backupTherapyRecommendation: ITherapyRecommendation | undefined;
@@ -119,7 +125,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                 ))}
             </div>
         ),
-        // width: this.columnWidths[ColumnKey.COMMENT]
+        width: this.columnWidths[ColumnKey.COMMENT]
     }, {
         name: ColumnKey.REASONING,
         render: (therapyRecommendation: ITherapyRecommendation) => (
@@ -227,16 +233,39 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         );
     }
 
+    private getAllAlterationsOfPatient() {
+        let allMutations = this.props.mutations.map((mutation: Mutation) => {
+            return ({
+                hugoSymbol: mutation.gene.hugoGeneSymbol, 
+                alteration: mutation.proteinChange,
+                entrezGeneId: mutation.entrezGeneId,
+                sampleId: mutation.sampleId
+            });
+        });
+        let allCna = this.props.cna.map((alt: DiscreteCopyNumberData) => {
+            return ({
+                hugoSymbol: alt.gene.hugoGeneSymbol, 
+                alteration: alt.alteration === -2 ? "Deletion" : "Amplification",
+                entrezGeneId: alt.entrezGeneId,
+                sampleId: alt.sampleId
+            });
+        });
+        allMutations.push(...allCna);
+        return allMutations;
+    }
+
+
     public getSamplesForPostiveAlterations(geneticAlterations: IGeneticAlteration[]) {
         if(!geneticAlterations || geneticAlterations.length == 0) return;
         let alterationIds = geneticAlterations.map((geneticAlteration : IGeneticAlteration) => 
-            (geneticAlteration.entrezGeneId || "") + (geneticAlteration.proteinChange || ""));
-        let groupedMutations = (_.groupBy(this.props.mutations, (mutation: Mutation) => mutation.sampleId));
+            (geneticAlteration.entrezGeneId || "") + (geneticAlteration.alteration || ""));
+        let allAlterationsOfPatient = this.getAllAlterationsOfPatient();
+        let groupedMutations = (_.groupBy(allAlterationsOfPatient, (alteration: any) => alteration.sampleId));
         let fittingSampleIds : string[] = [];
         for (let sampleId in groupedMutations) {
-            let mutations = groupedMutations[sampleId];
-            if(alterationIds.every((alterationId:string) => (mutations.map((mutation:Mutation) => 
-                mutation.entrezGeneId + mutation.proteinChange)).includes(alterationId))) {
+            let allAlterationsOfSample = groupedMutations[sampleId];
+            if(alterationIds.every((alterationId:string) => (allAlterationsOfSample.map((alt: any) => 
+                alt.entrezGeneId + alt.alteration)).includes(alterationId))) {
                 fittingSampleIds.push(sampleId)
             }
         };
@@ -246,13 +275,13 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
 
     public getSamplesForNegativeAlteration(geneticAlteration: IGeneticAlteration) {
         if(!geneticAlteration || !geneticAlteration.hugoSymbol) return;
-        let groupedMutations = (_.groupBy(this.props.mutations, (mutation: Mutation) => mutation.sampleId));
+        let allAlterationsOfPatient = this.getAllAlterationsOfPatient();
+        let groupedMutations = (_.groupBy(allAlterationsOfPatient, (alteration: any) => alteration.sampleId));
         let fittingSampleIds : string[] = [];
         for (let sampleId in groupedMutations) {
-            let mutations = groupedMutations[sampleId];
-            if((mutations.map((mutation:Mutation) => 
-                mutation.gene.hugoGeneSymbol + mutation.proteinChange)).includes((geneticAlteration.hugoSymbol || "") + 
-                (geneticAlteration.proteinChange || ""))) {
+            let allAlterationsOfSample = groupedMutations[sampleId];
+            if((allAlterationsOfSample.map((alt: any) => 
+                alt.hugoGeneSymbol + alt.alteration)).includes((geneticAlteration.hugoSymbol || "") + (geneticAlteration.alteration || ""))) {
                 fittingSampleIds.push(sampleId)
             }
         };
@@ -366,7 +395,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         return (
             <React.Fragment>
                 <div>
-                    <span style={{'marginRight': 5}}><b>{geneticAlteration.hugoSymbol}</b> {geneticAlteration.proteinChange || "any"}</span>
+                    <span style={{'marginRight': 5}}><b>{geneticAlteration.hugoSymbol}</b> {geneticAlteration.alteration || "any"}</span>
                     <DefaultTooltip
                         placement='bottomLeft'
                         trigger={['hover', 'focus']}
@@ -384,7 +413,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         return (
             <div className={styles.tooltip}>
                 <div>Genomic selection specified in the therapy recommendation:</div>
-                <div><b>{geneticAlteration.hugoSymbol}</b> (ID: {geneticAlteration.entrezGeneId}) {geneticAlteration.proteinChange || "any"}</div>
+                <div><b>{geneticAlteration.hugoSymbol}</b> (ID: {geneticAlteration.entrezGeneId}) {geneticAlteration.alteration || "any"}</div>
             </div>
         );
     }

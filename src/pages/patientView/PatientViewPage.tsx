@@ -683,6 +683,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                     {
                         this.shouldShowTherapyRecommendation(this.patientViewPageStore) && 
                         this.patientViewPageStore.mutationData.isComplete && 
+                        this.patientViewPageStore.discreteCNAData.isComplete && 
                         this.patientViewPageStore.oncoKbCancerGenes.isComplete && 
                         this.patientViewPageStore.oncoKbData.isComplete &&
                         this.patientViewPageStore.cnaOncoKbData.isComplete && (
@@ -690,6 +691,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                                 <TherapyRecommendationTable
                                     patientId={this.patientViewPageStore.patientId}
                                     mutations={this.patientViewPageStore.mutationData.result}
+                                    cna={this.patientViewPageStore.discreteCNAData.result}
                                     clinicalData={this.patientViewPageStore.clinicalDataPatient.result.concat(this.patientViewPageStore.clinicalDataForSamples.result)}
                                     sampleManager={sampleManager}
                                     therapyRecommendations={this.patientViewPageStore.therapyRecommendations}
