@@ -505,6 +505,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                         show={!!this.selectedTherapyRecommendation}
                         data={this.selectedTherapyRecommendation}
                         mutations={this.props.mutations}
+                        cna={this.props.cna}
                         clinicalData={this.props.clinicalData}
                         onHide={(therapyRecommendation?: ITherapyRecommendation) => {this.onHideAddEditForm(therapyRecommendation)}}
                         title="Edit therapy recommendation"

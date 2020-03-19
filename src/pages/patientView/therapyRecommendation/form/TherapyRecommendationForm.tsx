@@ -4,7 +4,7 @@ import {Modal, Button} from "react-bootstrap";
 import { ITherapyRecommendation, EvidenceLevel } from "shared/model/TherapyRecommendation";
 import { TherapyRecommendationFormAlterationPositiveInput, 
     TherapyRecommendationFormAlterationNegativeInput } from "./TherapyRecommendationFormAlterationInput";
-import { Mutation, ClinicalData } from "shared/api/generated/CBioPortalAPI";
+import { Mutation, ClinicalData, DiscreteCopyNumberData } from "shared/api/generated/CBioPortalAPI";
 import TherapyRecommendationFormDrugInput from "./TherapyRecommendationFormDrugInput";
 import TherapyRecommendationFormClinicalInput from "./TherapyRecommendationFormClinicalInput";
 import Select from 'react-select';
@@ -17,6 +17,7 @@ interface ITherapyRecommendationFormProps {
     show: boolean;
     data: ITherapyRecommendation;
     mutations: Mutation[];
+    cna: DiscreteCopyNumberData[];
     clinicalData: ClinicalData[];
     title: string;
     userEmailAddress: string;
@@ -61,12 +62,14 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                             <TherapyRecommendationFormAlterationPositiveInput
                                 data={therapyRecommendation}
                                 mutations={this.props.mutations}
+                                cna={this.props.cna}
                                 onChange={(alterations) => therapyRecommendation.reasoning.geneticAlterations = alterations}
                             />
                             <h6>Negative for alterations:</h6>
                             <TherapyRecommendationFormAlterationNegativeInput
                                 data={therapyRecommendation}
                                 mutations={this.props.mutations}
+                                cna={this.props.cna}
                                 onChange={(alterations) => therapyRecommendation.reasoning.geneticAlterationsMissing = alterations}
                             />
                             <h6>Clinical data:</h6>

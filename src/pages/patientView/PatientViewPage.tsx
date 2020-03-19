@@ -686,6 +686,7 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                         this.patientViewPageStore.discreteCNAData.isComplete && 
                         this.patientViewPageStore.oncoKbCancerGenes.isComplete && 
                         this.patientViewPageStore.oncoKbData.isComplete &&
+                        // this.patientViewPageStore.therapyRecommendation.isComplete && 
                         this.patientViewPageStore.cnaOncoKbData.isComplete && (
                             <MSKTab key={8} id={PatientViewPageTabs.TherapyRecommendation} linkText="Therapy Recommendation">
                                 <TherapyRecommendationTable

@@ -94,10 +94,11 @@ import { getGeneFilterDefault } from './PatientViewPageStoreUtil';
 import {checkNonProfiledGenesExist} from "../PatientViewPageUtils";
 
 
-import { ITherapyRecommendation, IGeneticAlteration, EvidenceLevel, Modified } from "../../../shared/model/TherapyRecommendation";
+import { ITherapyRecommendation, IGeneticAlteration, EvidenceLevel, Modified, IRecommendation } from "../../../shared/model/TherapyRecommendation";
 import { flattenStringify, flattenObject, flattenArray } from '../therapyRecommendation/TherapyRecommendationTableUtils';
 import { Query } from 'react-mutation-mapper/dist/model/OncoKb';
 import { getEvidenceQuery } from 'shared/lib/OncoKbUtils';
+import { fetchTherapyRecommendationUsingGET, writeTherapyRecommendation } from 'shared/api/TherapyRecommendationAPI';
 
 
 type PageMode = 'patient' | 'sample';
@@ -1139,6 +1140,22 @@ export class PatientViewPageStore {
         }
     }, []);
     
+    // therapyRecommendation = remoteData<IRecommendation>({
+    //     invoke: async () => {
+    //         return fetchTherapyRecommendationUsingGET(this.patientId);
+    //     }
+    // })
+
+    // private writeTherapyRecommendations() {
+    //     let recommendation: IRecommendation = {
+    //         geneticCounselingRecommendation: this.geneticCounselingRecommended,
+    //         rebiopsyRecommendation: this.rebiopsyRecommended,
+    //         generalRecommendation: this.commentRecommendation,
+    //         therapyRecommendations: this._therapyRecommendations
+    //     }
+    //     writeTherapyRecommendation(this.patientId, recommendation)
+    // }
+
     @observable private _therapyRecommendations: ITherapyRecommendation[] = [];
     @observable public geneticCounselingRecommended: boolean = false;
     @observable public rebiopsyRecommended: boolean = false;
@@ -1166,7 +1183,13 @@ export class PatientViewPageStore {
         console.log(!this._therapyRecommendations);
         console.log(this._therapyRecommendations.length == 0);
         console.groupEnd();
-        // return this._therapyRecommendations;
+        
+        // if(this.therapyRecommendation && this.therapyRecommendation.result && !(this.therapyRecommendation.result instanceof Error)) {
+        //     return this.therapyRecommendation.result.therapyRecommendations;
+        // } else {
+        //     return [];
+        // }
+                
         if(!this._therapyRecommendations || this._therapyRecommendations.length == 0) this.loadTherapyRecommendations();
         return this._therapyRecommendations;
     }
@@ -1253,7 +1276,7 @@ export class PatientViewPageStore {
     }
 
     private getSafePatientId = () => {
-        return this.patientId;
+        return encodeURIComponent(this.patientId);
     }
 
     private loadSampleTherapyRecommendation() {

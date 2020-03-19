@@ -1,14 +1,16 @@
 import React from "react";
 import { ITherapyRecommendation, IGeneticAlteration } from "shared/model/TherapyRecommendation";
-import { Mutation } from "shared/api/generated/CBioPortalAPI";
+import { Mutation, DiscreteCopyNumberData } from "shared/api/generated/CBioPortalAPI";
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import _ from "lodash";
 import { ResistenceGenes } from "./data/ResistenceGenes";
+import { flattenArray } from "../TherapyRecommendationTableUtils";
 
 interface TherapyRecommendationFormAlterationInputProps {
   data: ITherapyRecommendation;
   mutations: Mutation[];
+  cna: DiscreteCopyNumberData[];
   onChange: ((alterations: IGeneticAlteration[]) => void);
 }
 
@@ -26,7 +28,27 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
           entrezGeneId: mutation.entrezGeneId
         }) as IGeneticAlteration;
     });
-    allAlterations = _.uniqBy(allAlterations, "proteinChange");
+
+    let allCna = this.props.cna.map((alt:DiscreteCopyNumberData) =>{
+      return ({
+        hugoSymbol: alt.gene.hugoGeneSymbol, 
+        alteration: alt.alteration === -2 ? "Deletion" : "Amplification",
+        entrezGeneId: alt.entrezGeneId
+      }) as IGeneticAlteration;
+    });
+
+    allAlterations.push(...allCna);
+
+    console.group("Alteration Input");
+    console.log(flattenArray(allAlterations));
+    console.groupEnd();
+
+    allAlterations = _.uniqBy(allAlterations, item => [item.hugoSymbol, item.alteration].join());
+    
+
+    console.group("Alteration Input Unique");
+    console.log(flattenArray(allAlterations));
+    console.groupEnd();
 
     let alterationOptions = allAlterations.map((alteration:IGeneticAlteration) => 
       ({
