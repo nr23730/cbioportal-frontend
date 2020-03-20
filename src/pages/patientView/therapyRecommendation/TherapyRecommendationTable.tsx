@@ -329,6 +329,14 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         this.showOncoKBForm = true;
     }
 
+    public onHideOncoKbForm(newTherapyRecommendations?: ITherapyRecommendation | ITherapyRecommendation[]) {
+        if(!_.isArray(newTherapyRecommendations)) {
+            this.onHideAddEditForm(newTherapyRecommendations);
+        } else {
+            newTherapyRecommendations.map((therapyRecommendation: ITherapyRecommendation) => this.onHideAddEditForm(therapyRecommendation));
+        }
+    }
+
     public onHideAddEditForm(newTherapyRecommendation?: ITherapyRecommendation) {
         console.group("On hide add edit form");
         // console.log(flattenStringify(this.props.therapyRecommendations));
@@ -519,7 +527,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                         oncoKbResult={this.props.oncoKbData}
                         cnaOncoKbResult={this.props.cnaOncoKbData}
                         pubMedCache={this.props.pubMedCache}
-                        onHide={(therapyRecommendation?: ITherapyRecommendation) => {this.onHideAddEditForm(therapyRecommendation)}}
+                        onHide={(therapyRecommendations?: ITherapyRecommendation | ITherapyRecommendation[]) => {this.onHideOncoKbForm(therapyRecommendations)}}
                         title="Add therapy recommendation from OncoKB"
                         userEmailAddress={AppConfig.serverConfig.user_email_address}
                     />
