@@ -3,7 +3,7 @@ import { If, Then, Else } from 'react-if';
 import {observer} from "mobx-react";
 import * as _ from 'lodash';
 import {
-    ITherapyRecommendation, ITreatment, IGeneticAlteration, IReference, IClinicalData
+    ITherapyRecommendation, ITreatment, IGeneticAlteration, IReference, IClinicalData, EvidenceLevel
 } from "../../../shared/model/TherapyRecommendation";
 import { action, computed, observable } from "mobx";
 import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTable";
@@ -11,7 +11,7 @@ import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from "../SampleManager";
 import {DefaultTooltip, placeArrowBottomLeft } from "cbioportal-frontend-commons";
 import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation, flattenStringify, 
-    isTherapyRecommendationEmpty, flattenObject, flattenArray, getReferenceName } from "./TherapyRecommendationTableUtils";
+    isTherapyRecommendationEmpty, flattenObject, flattenArray, getOncoKbLevelDesc } from "./TherapyRecommendationTableUtils";
 import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
 import { Mutation, ClinicalData, DiscreteCopyNumberData } from 'shared/api/generated/CBioPortalAPI';
@@ -83,16 +83,6 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
             referenceMap: new Map<number, string>()
         } 
     }
-
-    // componentWillReceiveProps(nextProps: ITherapyRecommendationProps) {
-    //     if(this.props.therapyRecommendations !== nextProps.therapyRecommendations) {
-    //         console.group("ComponentWillReceiveProps");
-    //         console.log((this.props.therapyRecommendations.length));
-    //         console.log((nextProps.therapyRecommendations.length));
-    //         console.groupEnd();
-    //         this.updateReferences();
-    //     } 
-    // }
 
     @computed
     get columnWidths() {
@@ -167,7 +157,8 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                 Clinical data:
                 {therapyRecommendation.reasoning.clinicalData && therapyRecommendation.reasoning.clinicalData.map((clinicalDataItem: IClinicalData) => (
                     <div>
-                        {clinicalDataItem.attribute + ": " + clinicalDataItem.value}
+                        {/* {clinicalDataItem.attribute + ": " + clinicalDataItem.value} */}
+                        {this.getTextForClinicalDataItem(clinicalDataItem)}
                     </div>
                 ))}
             </div>
@@ -180,7 +171,18 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     }, {
         name: ColumnKey.EVIDENCE,
         render: (therapyRecommendation: ITherapyRecommendation) => (
-            <div>Level <b>{therapyRecommendation.evidenceLevel}</b>
+            <div> 
+            <span style={{'marginRight': 5}}>Level <b>{therapyRecommendation.evidenceLevel}</b></span>
+            <If condition={therapyRecommendation.evidenceLevel && therapyRecommendation.evidenceLevel !== EvidenceLevel.NA}>
+            <DefaultTooltip
+                placement='bottomLeft'
+                trigger={['hover', 'focus']}
+                overlay={this.tooltipEvidenceContent(therapyRecommendation.evidenceLevel)}
+                destroyTooltipOnHide={false}
+                onPopupAlign={placeArrowBottomLeft}>
+                <i className={'fa fa-info-circle ' + styles.icon}></i>
+            </DefaultTooltip>
+            </If>
             </div>
         ),
         // width: this.columnWidths[ColumnKey.EVIDENCE]
@@ -339,7 +341,6 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
 
     public onHideAddEditForm(newTherapyRecommendation?: ITherapyRecommendation) {
         console.group("On hide add edit form");
-        // console.log(flattenStringify(this.props.therapyRecommendations));
         console.log(flattenObject(this.selectedTherapyRecommendation));
         console.log(flattenObject(this.backupTherapyRecommendation));
         console.log((newTherapyRecommendation));
@@ -361,16 +362,10 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
 
     public updateTherapyRecommendationTable() {
         this.setState({therapyRecommendations: this.props.therapyRecommendations});
-        // this.updateReferences();
-        console.group("Updating table");
-        console.log(flattenStringify(this.props.therapyRecommendations));
-        console.groupEnd();
+        // console.group("Updating table");
+        // console.log(flattenStringify(this.props.therapyRecommendations));
+        // console.groupEnd();
     }
-
-    // private getNameForReference(reference: IReference): string {
-    //     return truncate(reference.name, 40, true) || truncate(this.state.referenceMap.get(reference.pmid!), 40, true);
-    // }
-
 
     public getGeneticAlterations(geneticAlterations: IGeneticAlteration[]) {
         return (
@@ -425,7 +420,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         );
     }
 
-    public tooltipGenomicContent(geneticAlteration: IGeneticAlteration) {
+    private tooltipGenomicContent(geneticAlteration: IGeneticAlteration) {
         return (
             <div className={styles.tooltip}>
                 <div>Genomic selection specified in the therapy recommendation:</div>
@@ -434,25 +429,21 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         );
     }
 
-    // private updateReferences() {
-    //     console.log("componentDidMount");
-    //     this.props.therapyRecommendations.map(recommendation => {
-    //         console.log(recommendation.id);
-    //         recommendation.references.map(reference => {
-    //             console.log(reference.name);
-    //             getReferenceName(reference).then(item => {
-    //                 // const mapping = {pmid: reference.pmid || 0, name: item};
-    //                 const newNames = this.state.referenceMap;
-    //                 if(reference.pmid && !newNames.has(reference.pmid)) newNames.set(reference.pmid, item);
-    //                 console.group("Reference");
-    //                 console.log(reference.pmid + "  -  " + item);
-    //                 console.groupEnd();
-    //                 this.setState({ referenceMap: newNames });
-    //             })
-    //         })
-    //     })
-    // }
+    private tooltipEvidenceContent(evidenceLevel: string) {
+        return (
+            <div className={styles.tooltip} style={{maxWidth: "200px"}}>
+                {getOncoKbLevelDesc()[evidenceLevel]}
+            </div>
+        );
+    }
 
+    private getTextForClinicalDataItem(item: IClinicalData): string {
+        let text = "";
+        if(item.attribute) text += item.attribute;
+        if(item.attribute && item.value) text += ": ";
+        if(item.value) text += item.value;
+        return text;
+    }
 
     private test() {
         console.group("Test");

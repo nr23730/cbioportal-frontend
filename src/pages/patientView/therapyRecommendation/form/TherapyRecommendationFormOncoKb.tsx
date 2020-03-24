@@ -39,6 +39,13 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
         }
     }
 
+    private indicationSort(a: string, b: string): number {
+        // Increase ascii code of parentheses to put these entries after text in the sort order
+        a = a.trim().replace('(','{');
+        b = b.trim().replace('(','{');
+        return (a < b ? -1 : 1);
+    }
+
     private get pmidData(): ICache<any> {
         let oncoKbResults: IndicatorQueryResp[] = []; 
         let pmids = [] as string[];
@@ -80,7 +87,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
 
         // Comment
         therapyRecommendation.comment.push("Recommendation imported from OncoKB.");
-        therapyRecommendation.comment.push(...treatment.approvedIndications)
+        therapyRecommendation.comment.push(...(treatment.approvedIndications.sort(this.indicationSort)))
         if(evidenceLevel === EvidenceLevel.R1 || evidenceLevel === EvidenceLevel.R2) {
             therapyRecommendation.comment.push("ATTENTION: Evidence level R1/2 represents resistance to the selected drug.");
         }
@@ -104,7 +111,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
             console.groupEnd();
             therapyRecommendation.references.push({
                 pmid: _.toInteger(reference),
-                name: articleContent ? articleContent.title : "" //this.props.pubMedCache ? this.props.pubMedCache.get(_.toInteger(reference)) : 
+                name: articleContent ? articleContent.title : ""
             })
         })
 
@@ -142,7 +149,6 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
             let oncoKbResults: IndicatorQueryResp[] = []; 
             oncoKbResults.push(...Object.values(this.props.oncoKbResult.result!.indicatorMap!));
             oncoKbResults.push(...Object.values(this.props.cnaOncoKbResult.result!.indicatorMap!));
-            // let oncoKbResults: IndicatorQueryResp[] = Object.values(this.props.oncoKbResult.result!.indicatorMap!);
             const groupStyles = {
                 display: 'flex',
                 alignItems: 'center',
@@ -193,7 +199,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
                                         // onClick={(e: any) => {
                                         //     e.stopPropagation();
                                         //     e.preventDefault();
-                                        //     console.log('A multi value has been clicked', data);
+                                        //     console.log('Group heading clicked', data);
                                         // }}
                                     >
                                       <span>{data.label}</span>

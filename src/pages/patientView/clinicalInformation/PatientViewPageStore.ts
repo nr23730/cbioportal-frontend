@@ -1222,12 +1222,19 @@ export class PatientViewPageStore {
                 console.log(JSON.parse(res.text));
                 console.groupEnd();
                 let patient = JSON.parse(res.text);
-                this.geneticCounselingRecommended = patient.geneticCounselingRecommended;
-                this.rebiopsyRecommended = patient.rebiopsyRecommended;
-                this.commentRecommendation = patient.comment;
+                this.geneticCounselingRecommended = patient.geneticCounselingRecommended || false;
+                this.rebiopsyRecommended = patient.rebiopsyRecommended || false;
+                this.commentRecommendation = patient.comment || "";
                 var therapyRecommendations = Object.keys(patient.therapyRecommendations).map(function(index){
+                    // console.group("Read Recommendation");
+                    // console.log(flattenObject(patient.therapyRecommendations[index]));
+                    // console.log(!_.isEmpty(patient.therapyRecommendations[index]));
+                    // console.groupEnd();
+                    // if(!_.isEmpty(patient.therapyRecommendations[index])) 
                     return patient.therapyRecommendations[index];
-                });
+                }).filter(item => !_.isEmpty(item));
+                console.log(patient.therapyRecommendations);
+                console.log(therapyRecommendations);
                 this._therapyRecommendations = therapyRecommendations;
             } else {
                 return [] as ITherapyRecommendation[];
