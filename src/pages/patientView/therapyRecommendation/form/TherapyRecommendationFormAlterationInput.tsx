@@ -1,14 +1,16 @@
 import React from "react";
 import { ITherapyRecommendation, IGeneticAlteration } from "shared/model/TherapyRecommendation";
-import { Mutation } from "shared/api/generated/CBioPortalAPI";
+import { Mutation, DiscreteCopyNumberData } from "shared/api/generated/CBioPortalAPI";
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import _ from "lodash";
 import { ResistenceGenes } from "./data/ResistenceGenes";
+import { flattenArray } from "../TherapyRecommendationTableUtils";
 
 interface TherapyRecommendationFormAlterationInputProps {
   data: ITherapyRecommendation;
   mutations: Mutation[];
+  cna: DiscreteCopyNumberData[];
   onChange: ((alterations: IGeneticAlteration[]) => void);
 }
 
@@ -22,22 +24,42 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
     let allAlterations = this.props.mutations.map((mutation:Mutation) =>{
         return ({
           hugoSymbol: mutation.gene.hugoGeneSymbol, 
-          proteinChange: mutation.proteinChange,
+          alteration: mutation.proteinChange,
           entrezGeneId: mutation.entrezGeneId
         }) as IGeneticAlteration;
     });
-    allAlterations = _.uniqBy(allAlterations, "proteinChange");
+
+    let allCna = this.props.cna.map((alt:DiscreteCopyNumberData) =>{
+      return ({
+        hugoSymbol: alt.gene.hugoGeneSymbol, 
+        alteration: alt.alteration === -2 ? "Deletion" : "Amplification",
+        entrezGeneId: alt.entrezGeneId
+      }) as IGeneticAlteration;
+    });
+
+    allAlterations.push(...allCna);
+
+    console.group("Alteration Input");
+    console.log(flattenArray(allAlterations));
+    console.groupEnd();
+
+    allAlterations = _.uniqBy(allAlterations, item => [item.hugoSymbol, item.alteration].join());
+    
+
+    console.group("Alteration Input Unique");
+    console.log(flattenArray(allAlterations));
+    console.groupEnd();
 
     let alterationOptions = allAlterations.map((alteration:IGeneticAlteration) => 
       ({
         value: alteration, 
-        label: alteration.hugoSymbol + " " + alteration.proteinChange
+        label: alteration.hugoSymbol + " " + alteration.alteration
       }));
     const alterationDefault = this.props.data.reasoning.geneticAlterations && 
       this.props.data.reasoning.geneticAlterations.map((alteration:IGeneticAlteration) => 
     ({
       value: alteration, 
-      label: alteration.hugoSymbol + " " + alteration.proteinChange
+      label: alteration.hugoSymbol + " " + alteration.alteration
     }));
       return (
         <Select
@@ -68,13 +90,13 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
       let alterationOptions = allAlterations.map((alteration:IGeneticAlteration) => 
         ({
           value: alteration, 
-          label: alteration.hugoSymbol + " " + alteration.proteinChange
+          label: alteration.hugoSymbol + " " + alteration.alteration
         }));
       const alterationDefault = this.props.data.reasoning.geneticAlterationsMissing && 
         this.props.data.reasoning.geneticAlterationsMissing.map((alteration:IGeneticAlteration) => 
       ({
         value: alteration, 
-        label: alteration.hugoSymbol + " " + (alteration.proteinChange || "any")
+        label: alteration.hugoSymbol + " " + (alteration.alteration || "any")
       }));
         return (
           <CreatableSelect
@@ -89,7 +111,7 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
                 this.props.onChange(selectedOption.map(option => {
                   if (_.isString(option.value)) {
                     let geneString = option.value.toString().split(' ');
-                    return {hugoSymbol: geneString[0], proteinChange: geneString[1]} as IGeneticAlteration;
+                    return {hugoSymbol: geneString[0], alteration: geneString[1]} as IGeneticAlteration;
                   } else {
                     return option.value as IGeneticAlteration;
                   }

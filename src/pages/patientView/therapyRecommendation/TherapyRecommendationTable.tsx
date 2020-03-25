@@ -3,7 +3,7 @@ import { If, Then, Else } from 'react-if';
 import {observer} from "mobx-react";
 import * as _ from 'lodash';
 import {
-    ITherapyRecommendation, ITreatment, IGeneticAlteration, IReference, IClinicalData
+    ITherapyRecommendation, ITreatment, IGeneticAlteration, IReference, IClinicalData, EvidenceLevel
 } from "../../../shared/model/TherapyRecommendation";
 import { action, computed, observable } from "mobx";
 import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTable";
@@ -11,27 +11,39 @@ import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from "../SampleManager";
 import {DefaultTooltip, placeArrowBottomLeft } from "cbioportal-frontend-commons";
 import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommendation, flattenStringify, 
-    isTherapyRecommendationEmpty, flattenObject, flattenArray, getReferenceName } from "./TherapyRecommendationTableUtils";
+    isTherapyRecommendationEmpty, flattenObject, flattenArray, getOncoKbLevelDesc } from "./TherapyRecommendationTableUtils";
 import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
-import { Mutation, ClinicalData } from 'shared/api/generated/CBioPortalAPI';
+import { Mutation, ClinicalData, DiscreteCopyNumberData } from 'shared/api/generated/CBioPortalAPI';
 import TherapyRecommendationForm from './form/TherapyRecommendationForm';
 import { SimpleCopyDownloadControls } from 'shared/components/copyDownloadControls/SimpleCopyDownloadControls';
 import { IOncoKbDataWrapper, IOncoKbCancerGenesWrapper } from 'shared/model/OncoKB';
 import TherapyRecommendationFormOncoKb from './form/TherapyRecommendationFormOncoKb';
+import PubMedCache from 'shared/cache/PubMedCache';
+import LabeledCheckbox from 'shared/components/labeledCheckbox/LabeledCheckbox';
+import { debounceAsync } from 'mobxpromise';
 
 
 export type ITherapyRecommendationProps = {
     patientId: string;
     mutations: Mutation[];
+    cna: DiscreteCopyNumberData[];
     clinicalData: ClinicalData[];
     sampleManager: SampleManager | null;
     therapyRecommendations: ITherapyRecommendation[];
+    geneticCounselingRecommended: boolean;
+    rebiopsyRecommended: boolean;
+    commentRecommendation: string;
     containerWidth: number;
     onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
     onAddOrEdit: (therapyRecommendation: ITherapyRecommendation) => boolean;
+    onEditGeneticCounselingRecommended: (geneticCounselingRecommended: boolean) => void;
+    onEditRebiopsyRecommended: (rebiopsyRecommended: boolean) => void;
+    onEditCommentRecommendation: (commentRecommendation: string) => void;
     oncoKbData?: IOncoKbDataWrapper;
+    cnaOncoKbData?: IOncoKbDataWrapper;
     oncoKbCancerGenes?: IOncoKbCancerGenesWrapper;
+    pubMedCache?: PubMedCache;
 }
 
 export type ITherapyRecommendationState = {
@@ -49,7 +61,12 @@ enum ColumnKey {
 }
 
 enum ColumnWidth {
-    ID = 140
+    THERAPY = 140,
+    COMMENT = 340,
+    REASONING = 240,
+    REFERENCES = 140,
+    EVIDENCE = 20,
+    EDIT = 60,
 }
 
 class TherapyRecommendationTableComponent extends LazyMobXTable<ITherapyRecommendation> {
@@ -67,24 +84,14 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         } 
     }
 
-    componentWillReceiveProps(nextProps: ITherapyRecommendationProps) {
-        if(this.props.therapyRecommendations !== nextProps.therapyRecommendations) {
-            console.group("ComponentWillReceiveProps");
-            console.log((this.props.therapyRecommendations.length));
-            console.log((nextProps.therapyRecommendations.length));
-            console.groupEnd();
-            this.updateReferences();
-        } 
+    @computed
+    get columnWidths() {
+        return {
+            [ColumnKey.COMMENT]: ColumnWidth.COMMENT,
+            // [ColumnKey.COMMENT]: 1 * (this.props.containerWidth - ColumnWidth.ID),
+            //[ColumnKey.MATCHING_CRITERIA]: 0.65 * (this.props.containerWidth - ColumnWidth.ID)
+        };
     }
-
-    // @computed
-    // get columnWidths() {
-    //     return {
-    //         [ColumnKey.ID]: ColumnWidth.ID,
-    //         [ColumnKey.COMMENT]: 1 * (this.props.containerWidth - ColumnWidth.ID),
-    //         //[ColumnKey.MATCHING_CRITERIA]: 0.65 * (this.props.containerWidth - ColumnWidth.ID)
-    //     };
-    // }
 
     @observable selectedTherapyRecommendation: ITherapyRecommendation | undefined;
     @observable backupTherapyRecommendation: ITherapyRecommendation | undefined;
@@ -111,10 +118,12 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         name: ColumnKey.COMMENT,
         render: (therapyRecommendation: ITherapyRecommendation) => (
             <div>
-                {therapyRecommendation.comment}
+                {therapyRecommendation.comment.map((comment: string) => (
+                    <p>{comment}</p>
+                ))}
             </div>
         ),
-        // width: this.columnWidths[ColumnKey.COMMENT]
+        width: this.columnWidths[ColumnKey.COMMENT]
     }, {
         name: ColumnKey.REASONING,
         render: (therapyRecommendation: ITherapyRecommendation) => (
@@ -148,7 +157,8 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                 Clinical data:
                 {therapyRecommendation.reasoning.clinicalData && therapyRecommendation.reasoning.clinicalData.map((clinicalDataItem: IClinicalData) => (
                     <div>
-                        {clinicalDataItem.attribute + ": " + clinicalDataItem.value}
+                        {/* {clinicalDataItem.attribute + ": " + clinicalDataItem.value} */}
+                        {this.getTextForClinicalDataItem(clinicalDataItem)}
                     </div>
                 ))}
             </div>
@@ -161,7 +171,18 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
     }, {
         name: ColumnKey.EVIDENCE,
         render: (therapyRecommendation: ITherapyRecommendation) => (
-            <div>Level <b>{therapyRecommendation.evidenceLevel}</b>
+            <div> 
+            <span style={{'marginRight': 5}}>Level <b>{therapyRecommendation.evidenceLevel}</b></span>
+            <If condition={therapyRecommendation.evidenceLevel && therapyRecommendation.evidenceLevel !== EvidenceLevel.NA}>
+            <DefaultTooltip
+                placement='bottomLeft'
+                trigger={['hover', 'focus']}
+                overlay={this.tooltipEvidenceContent(therapyRecommendation.evidenceLevel)}
+                destroyTooltipOnHide={false}
+                onPopupAlign={placeArrowBottomLeft}>
+                <i className={'fa fa-info-circle ' + styles.icon}></i>
+            </DefaultTooltip>
+            </If>
             </div>
         ),
         // width: this.columnWidths[ColumnKey.EVIDENCE]
@@ -174,7 +195,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                     <If condition={reference.pmid && reference.pmid > 0}>
                     <Then>
                         <div><a target="_blank" href={"https://www.ncbi.nlm.nih.gov/pubmed/" + reference.pmid}>
-                            [{reference.pmid}] {this.getNameForReference(reference)}
+                            [{reference.pmid}] {truncate(reference.name, 40, true)}
                         </a></div>
                     </Then>
                     <Else>
@@ -222,16 +243,39 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         );
     }
 
+    private getAllAlterationsOfPatient() {
+        let allMutations = this.props.mutations.map((mutation: Mutation) => {
+            return ({
+                hugoSymbol: mutation.gene.hugoGeneSymbol, 
+                alteration: mutation.proteinChange,
+                entrezGeneId: mutation.entrezGeneId,
+                sampleId: mutation.sampleId
+            });
+        });
+        let allCna = this.props.cna.map((alt: DiscreteCopyNumberData) => {
+            return ({
+                hugoSymbol: alt.gene.hugoGeneSymbol, 
+                alteration: alt.alteration === -2 ? "Deletion" : "Amplification",
+                entrezGeneId: alt.entrezGeneId,
+                sampleId: alt.sampleId
+            });
+        });
+        allMutations.push(...allCna);
+        return allMutations;
+    }
+
+
     public getSamplesForPostiveAlterations(geneticAlterations: IGeneticAlteration[]) {
         if(!geneticAlterations || geneticAlterations.length == 0) return;
         let alterationIds = geneticAlterations.map((geneticAlteration : IGeneticAlteration) => 
-            (geneticAlteration.entrezGeneId || "") + (geneticAlteration.proteinChange || ""));
-        let groupedMutations = (_.groupBy(this.props.mutations, (mutation: Mutation) => mutation.sampleId));
+            (geneticAlteration.entrezGeneId || "") + (geneticAlteration.alteration || ""));
+        let allAlterationsOfPatient = this.getAllAlterationsOfPatient();
+        let groupedMutations = (_.groupBy(allAlterationsOfPatient, (alteration: any) => alteration.sampleId));
         let fittingSampleIds : string[] = [];
         for (let sampleId in groupedMutations) {
-            let mutations = groupedMutations[sampleId];
-            if(alterationIds.every((alterationId:string) => (mutations.map((mutation:Mutation) => 
-                mutation.entrezGeneId + mutation.proteinChange)).includes(alterationId))) {
+            let allAlterationsOfSample = groupedMutations[sampleId];
+            if(alterationIds.every((alterationId:string) => (allAlterationsOfSample.map((alt: any) => 
+                alt.entrezGeneId + alt.alteration)).includes(alterationId))) {
                 fittingSampleIds.push(sampleId)
             }
         };
@@ -241,13 +285,13 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
 
     public getSamplesForNegativeAlteration(geneticAlteration: IGeneticAlteration) {
         if(!geneticAlteration || !geneticAlteration.hugoSymbol) return;
-        let groupedMutations = (_.groupBy(this.props.mutations, (mutation: Mutation) => mutation.sampleId));
+        let allAlterationsOfPatient = this.getAllAlterationsOfPatient();
+        let groupedMutations = (_.groupBy(allAlterationsOfPatient, (alteration: any) => alteration.sampleId));
         let fittingSampleIds : string[] = [];
         for (let sampleId in groupedMutations) {
-            let mutations = groupedMutations[sampleId];
-            if((mutations.map((mutation:Mutation) => 
-                mutation.gene.hugoGeneSymbol + mutation.proteinChange)).includes((geneticAlteration.hugoSymbol || "") + 
-                (geneticAlteration.proteinChange || ""))) {
+            let allAlterationsOfSample = groupedMutations[sampleId];
+            if((allAlterationsOfSample.map((alt: any) => 
+                alt.hugoGeneSymbol + alt.alteration)).includes((geneticAlteration.hugoSymbol || "") + (geneticAlteration.alteration || ""))) {
                 fittingSampleIds.push(sampleId)
             }
         };
@@ -287,9 +331,16 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         this.showOncoKBForm = true;
     }
 
+    public onHideOncoKbForm(newTherapyRecommendations?: ITherapyRecommendation | ITherapyRecommendation[]) {
+        if(!_.isArray(newTherapyRecommendations)) {
+            this.onHideAddEditForm(newTherapyRecommendations);
+        } else {
+            newTherapyRecommendations.map((therapyRecommendation: ITherapyRecommendation) => this.onHideAddEditForm(therapyRecommendation));
+        }
+    }
+
     public onHideAddEditForm(newTherapyRecommendation?: ITherapyRecommendation) {
         console.group("On hide add edit form");
-        // console.log(flattenStringify(this.props.therapyRecommendations));
         console.log(flattenObject(this.selectedTherapyRecommendation));
         console.log(flattenObject(this.backupTherapyRecommendation));
         console.log((newTherapyRecommendation));
@@ -311,16 +362,10 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
 
     public updateTherapyRecommendationTable() {
         this.setState({therapyRecommendations: this.props.therapyRecommendations});
-        this.updateReferences();
-        console.group("Updating table");
-        console.log(flattenStringify(this.props.therapyRecommendations));
-        console.groupEnd();
+        // console.group("Updating table");
+        // console.log(flattenStringify(this.props.therapyRecommendations));
+        // console.groupEnd();
     }
-
-    private getNameForReference(reference: IReference): string {
-        return truncate(reference.name, 40, true) || truncate(this.state.referenceMap.get(reference.pmid!), 40, true);
-    }
-
 
     public getGeneticAlterations(geneticAlterations: IGeneticAlteration[]) {
         return (
@@ -361,7 +406,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         return (
             <React.Fragment>
                 <div>
-                    <span style={{'marginRight': 5}}><b>{geneticAlteration.hugoSymbol}</b> {geneticAlteration.proteinChange || "any"}</span>
+                    <span style={{'marginRight': 5}}><b>{geneticAlteration.hugoSymbol}</b> {geneticAlteration.alteration || "any"}</span>
                     <DefaultTooltip
                         placement='bottomLeft'
                         trigger={['hover', 'focus']}
@@ -375,46 +420,75 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         );
     }
 
-    public tooltipGenomicContent(geneticAlteration: IGeneticAlteration) {
+    private tooltipGenomicContent(geneticAlteration: IGeneticAlteration) {
         return (
             <div className={styles.tooltip}>
                 <div>Genomic selection specified in the therapy recommendation:</div>
-                <div><b>{geneticAlteration.hugoSymbol}</b> (ID: {geneticAlteration.entrezGeneId}) {geneticAlteration.proteinChange || "any"}</div>
+                <div><b>{geneticAlteration.hugoSymbol}</b> (ID: {geneticAlteration.entrezGeneId}) {geneticAlteration.alteration || "any"}</div>
             </div>
         );
     }
 
-    private updateReferences() {
-        console.log("componentDidMount");
-        this.props.therapyRecommendations.map(recommendation => {
-            console.log(recommendation.id);
-            recommendation.references.map(reference => {
-                console.log(reference.name);
-                getReferenceName(reference).then(item => {
-                    // const mapping = {pmid: reference.pmid || 0, name: item};
-                    const newNames = this.state.referenceMap;
-                    if(reference.pmid && !newNames.has(reference.pmid)) newNames.set(reference.pmid, item);
-                    console.group("Reference");
-                    console.log(reference.pmid + "  -  " + item);
-                    console.groupEnd();
-                    this.setState({ referenceMap: newNames });
-                })
-            })
-        })
+    private tooltipEvidenceContent(evidenceLevel: string) {
+        return (
+            <div className={styles.tooltip} style={{maxWidth: "200px"}}>
+                {getOncoKbLevelDesc()[evidenceLevel]}
+            </div>
+        );
     }
 
+    private getTextForClinicalDataItem(item: IClinicalData): string {
+        let text = "";
+        if(item.attribute) text += item.attribute;
+        if(item.attribute && item.value) text += ": ";
+        if(item.value) text += item.value;
+        return text;
+    }
 
     private test() {
         console.group("Test");
         console.log(window.location);
-        console.log(this.state.referenceMap);
-        this.updateReferences();
+        // console.log(this.state.referenceMap);
+        // this.updateReferences();
         console.groupEnd();
     }
+
+    // @observable private flagTest = false;
+    // @observable private commentTest = "test123";
 
     render() {
         return (
             <div>
+                <div style={{ marginBottom: "20px"}}>
+                <h2 style={{marginBottom: "5px"}}>Recommendations</h2>
+                    <div style={{ fontSize: 16, display: "flex"}}>
+                        <LabeledCheckbox
+                            checked={this.props.geneticCounselingRecommended}
+                            onChange={()=>{ this.props.onEditGeneticCounselingRecommended(!this.props.geneticCounselingRecommended); }}
+                            labelProps={{style:{ marginRight:10}}}
+                            // inputProps={{"data-test":"HeatmapCluster"}}
+                        >
+                            <span style={{marginTop: "-2px"}}>Genetic Counseling</span>
+                        </LabeledCheckbox>
+                        <LabeledCheckbox
+                            checked={this.props.rebiopsyRecommended}
+                            onChange={()=>{ this.props.onEditRebiopsyRecommended(!this.props.rebiopsyRecommended); }}
+                            labelProps={{style:{ marginRight:10}}}
+                            // inputProps={{"data-test":"HeatmapCluster"}}
+                        >
+                            <span style={{marginTop: "-2px"}}>Rebiopsy</span>
+                        </LabeledCheckbox>
+                    </div>
+                    <h5 style={{marginTop: "5px"}}>Comments</h5>
+                    <textarea 
+                            title="Comments"
+                            rows={2}
+                            cols={80}
+                            value={this.props.commentRecommendation}
+                            onChange={event => this.props.onEditCommentRecommendation(event.currentTarget.value)}
+                            // data-test='CustomCaseSetInput'
+                        />
+                </div>
                 <h2 style={{marginBottom: '0'}}>Therapy Recommendations</h2>
                 <p className={styles.edit}>
                     <Button type="button" className={"btn btn-default " + styles.addButton} onClick={() => this.openAddForm()}>
@@ -423,13 +497,14 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                     <Button type="button" className={"btn btn-default " + styles.addOncoKbButton} onClick={() => this.openAddOncoKbForm()}>
                         <i className={`fa fa-plus ${styles.marginLeft}`} aria-hidden="true"></i> Add from OncoKB
                     </Button>
-                    <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button>
+                    {/* <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button> */}
                 </p>
                 {this.selectedTherapyRecommendation &&
                     <TherapyRecommendationForm
                         show={!!this.selectedTherapyRecommendation}
                         data={this.selectedTherapyRecommendation}
                         mutations={this.props.mutations}
+                        cna={this.props.cna}
                         clinicalData={this.props.clinicalData}
                         onHide={(therapyRecommendation?: ITherapyRecommendation) => {this.onHideAddEditForm(therapyRecommendation)}}
                         title="Edit therapy recommendation"
@@ -441,7 +516,9 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
                         show={this.showOncoKBForm}
                         patientID={this.props.patientId}
                         oncoKbResult={this.props.oncoKbData}
-                        onHide={(therapyRecommendation?: ITherapyRecommendation) => {this.onHideAddEditForm(therapyRecommendation)}}
+                        cnaOncoKbResult={this.props.cnaOncoKbData}
+                        pubMedCache={this.props.pubMedCache}
+                        onHide={(therapyRecommendations?: ITherapyRecommendation | ITherapyRecommendation[]) => {this.onHideOncoKbForm(therapyRecommendations)}}
                         title="Add therapy recommendation from OncoKB"
                         userEmailAddress={AppConfig.serverConfig.user_email_address}
                     />

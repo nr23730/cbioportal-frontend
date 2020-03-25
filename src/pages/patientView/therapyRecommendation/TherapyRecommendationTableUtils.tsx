@@ -2,7 +2,7 @@ import { ITherapyRecommendation, EvidenceLevel, Modified, IRecommender, IReferen
 import AppConfig from "appConfig";
 import _ from "lodash";
 import request from "superagent";
-
+import * as React from 'react';
 
 export function truncate( s: string | undefined, n: number, useWordBoundary: boolean ){
     if(!s) return "";
@@ -19,7 +19,7 @@ export function getNewTherapyRecommendation(patientId: string): ITherapyRecommen
     let timeId = now.getTime();
     let therapyRecommendation: ITherapyRecommendation = {
         id: (patientId + "_" + timeId), 
-        comment: "",
+        comment: [],
         reasoning: {},
         evidenceLevel: EvidenceLevel.NA,
         modifications: [
@@ -53,7 +53,8 @@ export function addModificationToTherapyRecommendation(therapyRecommendation: IT
 
 export function isTherapyRecommendationEmpty(therapyRecommendation: ITherapyRecommendation) : boolean {
     if(
-    therapyRecommendation.comment === "" &&
+    therapyRecommendation.comment === [] &&
+    therapyRecommendation.comment.every(s => s === "") &&
     therapyRecommendation.evidenceLevel === EvidenceLevel.NA &&
     _.isEmpty(therapyRecommendation.reasoning) &&
     therapyRecommendation.treatments.length === 0 &&
@@ -148,4 +149,19 @@ export function flattenObject(x: any) : any {
         y[i] = x[i];
     }
     return y;
+}
+
+export function getOncoKbLevelDesc() {
+    const levelMap: {[level:string]: JSX.Element} = { 
+        '1': (<span><b>FDA-recognized</b> biomarker predictive of response to an <b>FDA-approved</b> drug <b>in this indication</b></span>),
+        '2': (<span><b>Standard care</b> biomarker recommended by the NCCN or other expert panels predictive of response to an <b>FDA-approved drug</b> in this indication</span>),
+        '2A': (<span><b>Standard care</b> biomarker predictive of response to an <b>FDA-approved</b> drug <b>in this indication</b></span>),
+        '2B': (<span><b>Standard care</b> biomarker predictive of response to an <b>FDA-approved</b> drug <b>in another indication</b>, but not standard care for this indication</span>),
+        '3A': (<span><b>Compelling clinical evidence</b> supports the biomarker as being predictive of response to a drug <b>in this indication</b></span>),
+        '3B': (<span><b>Compelling clinical evidence</b> supports the biomarker as being predictive of response to a drug <b>in another indication</b></span>),
+        '4': (<span><b>Compelling biological evidence</b> supports the biomarker as being predictive of response to a drug</span>),
+        'R1': (<span><b>Standard care</b> biomarker predictive of <b>resistance</b> to an <b>FDA-approved</b> drug <b>in this indication</b></span>),
+        'R2': (<span><b>Compelling clinical evidence</b> supports the biomarker as being predictive of <b>resistance</b> to a drug</span>)
+    };
+    return levelMap;
 }

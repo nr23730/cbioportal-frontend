@@ -35,9 +35,16 @@ interface IModification {
     timestamp: string;
 }
 
+export interface IRecommendation {
+    therapyRecommendations: ITherapyRecommendation[];
+    geneticCounselingRecommendation: Boolean;
+    rebiopsyRecommendation: Boolean;
+    generalRecommendation: string;
+}
+
 export interface ITherapyRecommendation {
     id: string;
-    comment: string;
+    comment: string[];
     reasoning: IReasoning;
     evidenceLevel: EvidenceLevel;
     modifications: IModification[];
@@ -73,5 +80,5 @@ export interface IReasoning {
 export interface IGeneticAlteration {
     entrezGeneId?: number;
     hugoSymbol: string;
-    proteinChange?: string;
+    alteration?: string;
 };

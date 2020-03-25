@@ -94,10 +94,11 @@ import { getGeneFilterDefault } from './PatientViewPageStoreUtil';
 import {checkNonProfiledGenesExist} from "../PatientViewPageUtils";
 
 
-import { ITherapyRecommendation, IGeneticAlteration, EvidenceLevel, Modified } from "../../../shared/model/TherapyRecommendation";
+import { ITherapyRecommendation, IGeneticAlteration, EvidenceLevel, Modified, IRecommendation } from "../../../shared/model/TherapyRecommendation";
 import { flattenStringify, flattenObject, flattenArray } from '../therapyRecommendation/TherapyRecommendationTableUtils';
 import { Query } from 'react-mutation-mapper/dist/model/OncoKb';
 import { getEvidenceQuery } from 'shared/lib/OncoKbUtils';
+import { fetchTherapyRecommendationUsingGET, writeTherapyRecommendation } from 'shared/api/TherapyRecommendationAPI';
 
 
 type PageMode = 'patient' | 'sample';
@@ -1139,7 +1140,41 @@ export class PatientViewPageStore {
         }
     }, []);
     
+    // therapyRecommendation = remoteData<IRecommendation>({
+    //     invoke: async () => {
+    //         return fetchTherapyRecommendationUsingGET(this.patientId);
+    //     }
+    // })
+
+    // private writeTherapyRecommendations() {
+    //     let recommendation: IRecommendation = {
+    //         geneticCounselingRecommendation: this.geneticCounselingRecommended,
+    //         rebiopsyRecommendation: this.rebiopsyRecommended,
+    //         generalRecommendation: this.commentRecommendation,
+    //         therapyRecommendations: this._therapyRecommendations
+    //     }
+    //     writeTherapyRecommendation(this.patientId, recommendation)
+    // }
+
     @observable private _therapyRecommendations: ITherapyRecommendation[] = [];
+    @observable public geneticCounselingRecommended: boolean = false;
+    @observable public rebiopsyRecommended: boolean = false;
+    @observable public commentRecommendation: string = "";
+
+    setGeneticCounselingRecommended = (value: boolean) => {
+        this.geneticCounselingRecommended = value;
+        this.writeTherapyRecommendations();
+    }
+
+    setRebiopsyRecommended = (value: boolean) => {
+        this.rebiopsyRecommended = value;
+        this.writeTherapyRecommendations();
+    }
+
+    setCommentRecommendation = (value: string) => {
+        this.commentRecommendation = value;
+        this.writeTherapyRecommendations();
+    }
 
     // @cached get therapyRecommendations():ITherapyRecommendation[] {
     get therapyRecommendations():ITherapyRecommendation[] {
@@ -1148,7 +1183,13 @@ export class PatientViewPageStore {
         console.log(!this._therapyRecommendations);
         console.log(this._therapyRecommendations.length == 0);
         console.groupEnd();
-        // return this._therapyRecommendations;
+        
+        // if(this.therapyRecommendation && this.therapyRecommendation.result && !(this.therapyRecommendation.result instanceof Error)) {
+        //     return this.therapyRecommendation.result.therapyRecommendations;
+        // } else {
+        //     return [];
+        // }
+                
         if(!this._therapyRecommendations || this._therapyRecommendations.length == 0) this.loadTherapyRecommendations();
         return this._therapyRecommendations;
     }
@@ -1181,9 +1222,19 @@ export class PatientViewPageStore {
                 console.log(JSON.parse(res.text));
                 console.groupEnd();
                 let patient = JSON.parse(res.text);
+                this.geneticCounselingRecommended = patient.geneticCounselingRecommended || false;
+                this.rebiopsyRecommended = patient.rebiopsyRecommended || false;
+                this.commentRecommendation = patient.comment || "";
                 var therapyRecommendations = Object.keys(patient.therapyRecommendations).map(function(index){
+                    // console.group("Read Recommendation");
+                    // console.log(flattenObject(patient.therapyRecommendations[index]));
+                    // console.log(!_.isEmpty(patient.therapyRecommendations[index]));
+                    // console.groupEnd();
+                    // if(!_.isEmpty(patient.therapyRecommendations[index])) 
                     return patient.therapyRecommendations[index];
-                });
+                }).filter(item => !_.isEmpty(item));
+                console.log(patient.therapyRecommendations);
+                console.log(therapyRecommendations);
                 this._therapyRecommendations = therapyRecommendations;
             } else {
                 return [] as ITherapyRecommendation[];
@@ -1194,7 +1245,14 @@ export class PatientViewPageStore {
     private writeTherapyRecommendations() {
         request.put(this.getJsonStoreUrl() + this.getSafePatientId())
         .set('Content-Type', 'application/json')
-        .send(JSON.stringify(({id: this.getSafePatientId(), therapyRecommendations: flattenArray(this._therapyRecommendations)})))
+        .send(JSON.stringify(
+            ({
+                id: this.getSafePatientId(), 
+                geneticCounselingRecommended: this.geneticCounselingRecommended,
+                rebiopsyRecommended: this.rebiopsyRecommended,
+                comment: this.commentRecommendation,
+                therapyRecommendations: flattenArray(this._therapyRecommendations)
+            })))
         .end((err, res)=>{
             if (!err && res.ok) {
                 console.log("Success PUTting " + this.patientId);
@@ -1203,7 +1261,14 @@ export class PatientViewPageStore {
                 console.log("Error PUTting " + this.patientId + "... trying POST");
                 request.post(this.getJsonStoreUrl())
                 .set('Content-Type', 'application/json')
-                .send(JSON.stringify(({id: this.getSafePatientId(), therapyRecommendations: flattenArray(this._therapyRecommendations)})))
+                .send(JSON.stringify(
+                    ({
+                        id: this.getSafePatientId(), 
+                        geneticCounselingRecommended: this.geneticCounselingRecommended,
+                        rebiopsyRecommended: this.rebiopsyRecommended,
+                        comment: this.commentRecommendation,
+                        therapyRecommendations: flattenArray(this._therapyRecommendations)
+                    })))
                 .end((err, res)=>{
                     if (!err && res.ok) {
                         console.log("Success POSTing " + this.patientId);
@@ -1218,25 +1283,25 @@ export class PatientViewPageStore {
     }
 
     private getSafePatientId = () => {
-        return this.patientId;
+        return encodeURIComponent(this.patientId);
     }
 
     private loadSampleTherapyRecommendation() {
         this._therapyRecommendations.push(
             {
                 id: "3", 
-                comment: "test3",
+                comment: ["test3"],
                 reasoning: {
                     geneticAlterations: [
                         {
                             entrezGeneId: 673,
                             hugoSymbol: "BRAF",
-                            proteinChange: "V600E"
+                            alteration: "V600E"
                         },
                         {
                             entrezGeneId: 675,
                             hugoSymbol: "BRCA2",
-                            proteinChange: "T3085Nfs*26"
+                            alteration: "T3085Nfs*26"
                         }
                     ]
                 },

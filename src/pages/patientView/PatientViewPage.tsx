@@ -683,20 +683,32 @@ export default class PatientViewPage extends React.Component<IPatientViewPagePro
                     {
                         this.shouldShowTherapyRecommendation(this.patientViewPageStore) && 
                         this.patientViewPageStore.mutationData.isComplete && 
+                        this.patientViewPageStore.discreteCNAData.isComplete && 
                         this.patientViewPageStore.oncoKbCancerGenes.isComplete && 
-                        this.patientViewPageStore.oncoKbData.isComplete && (
+                        this.patientViewPageStore.oncoKbData.isComplete &&
+                        // this.patientViewPageStore.therapyRecommendation.isComplete && 
+                        this.patientViewPageStore.cnaOncoKbData.isComplete && (
                             <MSKTab key={8} id={PatientViewPageTabs.TherapyRecommendation} linkText="Therapy Recommendation">
                                 <TherapyRecommendationTable
                                     patientId={this.patientViewPageStore.patientId}
                                     mutations={this.patientViewPageStore.mutationData.result}
+                                    cna={this.patientViewPageStore.discreteCNAData.result}
                                     clinicalData={this.patientViewPageStore.clinicalDataPatient.result.concat(this.patientViewPageStore.clinicalDataForSamples.result)}
                                     sampleManager={sampleManager}
                                     therapyRecommendations={this.patientViewPageStore.therapyRecommendations}
+                                    geneticCounselingRecommended={this.patientViewPageStore.geneticCounselingRecommended}
+                                    rebiopsyRecommended={this.patientViewPageStore.rebiopsyRecommended}
+                                    commentRecommendation={this.patientViewPageStore.commentRecommendation}
                                     containerWidth={WindowStore.size.width-20}
                                     onDelete={this.patientViewPageStore.therapyRecommendationOnDelete}
                                     onAddOrEdit={this.patientViewPageStore.therapyRecommendationOnAddOrEdit}
+                                    onEditGeneticCounselingRecommended={this.patientViewPageStore.setGeneticCounselingRecommended}
+                                    onEditRebiopsyRecommended={this.patientViewPageStore.setRebiopsyRecommended}
+                                    onEditCommentRecommendation={this.patientViewPageStore.setCommentRecommendation}
                                     oncoKbData={this.patientViewPageStore.oncoKbData}
+                                    cnaOncoKbData={this.patientViewPageStore.cnaOncoKbData}
                                     oncoKbCancerGenes={this.patientViewPageStore.oncoKbCancerGenes}
+                                    pubMedCache={this.patientViewPageStore.pubMedCache}
                                 />
                             </MSKTab>
                         )
