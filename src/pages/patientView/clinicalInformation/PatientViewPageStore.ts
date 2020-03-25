@@ -1225,16 +1225,9 @@ export class PatientViewPageStore {
                 this.geneticCounselingRecommended = patient.geneticCounselingRecommended || false;
                 this.rebiopsyRecommended = patient.rebiopsyRecommended || false;
                 this.commentRecommendation = patient.comment || "";
-                var therapyRecommendations = Object.keys(patient.therapyRecommendations).map(function(index){
-                    // console.group("Read Recommendation");
-                    // console.log(flattenObject(patient.therapyRecommendations[index]));
-                    // console.log(!_.isEmpty(patient.therapyRecommendations[index]));
-                    // console.groupEnd();
-                    // if(!_.isEmpty(patient.therapyRecommendations[index])) 
-                    return patient.therapyRecommendations[index];
-                }).filter(item => !_.isEmpty(item));
-                console.log(patient.therapyRecommendations);
-                console.log(therapyRecommendations);
+                var therapyRecommendations = Object.keys(patient.therapyRecommendations)
+                    .map(function(index){return patient.therapyRecommendations[index];})
+                    .filter(item => !_.isEmpty(item));
                 this._therapyRecommendations = therapyRecommendations;
             } else {
                 return [] as ITherapyRecommendation[];

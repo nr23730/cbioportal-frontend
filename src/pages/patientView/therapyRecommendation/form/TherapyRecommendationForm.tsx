@@ -91,7 +91,7 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
                             className="basic-select"
                             classNamePrefix="select"
                             onChange={(selectedOption: {label: string, value: EvidenceLevel}) => {
-                                therapyRecommendation.evidenceLevel = EvidenceLevel[selectedOption.value as keyof typeof EvidenceLevel]
+                                therapyRecommendation.evidenceLevel = EvidenceLevel[selectedOption.label as keyof typeof EvidenceLevel]
                             }}
                             />
                         </div>
