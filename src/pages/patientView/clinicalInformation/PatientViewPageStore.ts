@@ -1198,14 +1198,16 @@ export class PatientViewPageStore {
     }
 
     therapyRecommendationOnDelete = (therapyRecommendationToDelete: ITherapyRecommendation) => {
-        this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDelete.id !== therapyRecommendation.id);
+        let therapyRecommendationToDeleteFlattened = flattenObject(therapyRecommendationToDelete);
+        this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDeleteFlattened.id !== therapyRecommendation.id);
         this.writeTherapyRecommendations();
         return true;
     }
 
     therapyRecommendationOnAddOrEdit = (therapyRecommendationToAdd: ITherapyRecommendation) => {
-        this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToAdd.id !== therapyRecommendation.id);
-        this._therapyRecommendations.push(therapyRecommendationToAdd);
+        let therapyRecommendationToAddFlattened = flattenObject(therapyRecommendationToAdd);
+        this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToAddFlattened.id !== therapyRecommendation.id);
+        this._therapyRecommendations.push(therapyRecommendationToAddFlattened);
         let x = this.writeTherapyRecommendations();
         return true;
     }
@@ -1244,7 +1246,7 @@ export class PatientViewPageStore {
                 geneticCounselingRecommended: this.geneticCounselingRecommended,
                 rebiopsyRecommended: this.rebiopsyRecommended,
                 comment: this.commentRecommendation,
-                therapyRecommendations: flattenArray(this._therapyRecommendations)
+                therapyRecommendations: this._therapyRecommendations
             })))
         .end((err, res)=>{
             if (!err && res.ok) {
@@ -1260,7 +1262,7 @@ export class PatientViewPageStore {
                         geneticCounselingRecommended: this.geneticCounselingRecommended,
                         rebiopsyRecommended: this.rebiopsyRecommended,
                         comment: this.commentRecommendation,
-                        therapyRecommendations: flattenArray(this._therapyRecommendations)
+                        therapyRecommendations: this._therapyRecommendations
                     })))
                 .end((err, res)=>{
                     if (!err && res.ok) {

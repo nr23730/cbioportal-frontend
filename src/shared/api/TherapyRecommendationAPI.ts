@@ -61,7 +61,7 @@ export async function writeTherapyRecommendation(id:string, recommendation: IRec
             geneticCounselingRecommendation: recommendation.geneticCounselingRecommendation,
             rebiopsyRecommendation: recommendation.rebiopsyRecommendation,
             generalRecommendation: recommendation.generalRecommendation,
-            therapyRecommendations: flattenArray(recommendation.therapyRecommendations)
+            therapyRecommendations: recommendation.therapyRecommendations
         })))
     .end((err, res)=>{
         if (!err && res.ok) {
@@ -76,7 +76,7 @@ export async function writeTherapyRecommendation(id:string, recommendation: IRec
                     geneticCounselingRecommendation: recommendation.geneticCounselingRecommendation,
                     rebiopsyRecommendation: recommendation.rebiopsyRecommendation,
                     generalRecommendation: recommendation.generalRecommendation,
-                    therapyRecommendations: flattenArray(recommendation.therapyRecommendations)
+                    therapyRecommendations: recommendation.therapyRecommendations
                 })))
             .end((err, res)=>{
                 if (!err && res.ok) {
