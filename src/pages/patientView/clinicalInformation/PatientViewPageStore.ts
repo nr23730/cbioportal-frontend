@@ -1205,10 +1205,15 @@ export class PatientViewPageStore {
     }
 
     therapyRecommendationOnAddOrEdit = (therapyRecommendationToAdd: ITherapyRecommendation) => {
+        const lengthBefore = this._therapyRecommendations.length;
         let therapyRecommendationToAddFlattened = flattenObject(therapyRecommendationToAdd);
         this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToAddFlattened.id !== therapyRecommendation.id);
         this._therapyRecommendations.push(therapyRecommendationToAddFlattened);
-        let x = this.writeTherapyRecommendations();
+        if(lengthBefore == this._therapyRecommendations.length) {
+            this.editTherapyRecommendation(therapyRecommendationToAddFlattened);
+        } else {
+            //this.addTherapyRecommendation(therapyRecommendationToAddFlattened);
+        }
         return true;
     }
 
@@ -1274,6 +1279,22 @@ export class PatientViewPageStore {
                         // return false;
                     }
                 });
+            }
+        });
+    }
+
+    private editTherapyRecommendation(therapyRecommendation : ITherapyRecommendation) {
+        request.put(this.getJsonStoreUrl() + this.getSafePatientId() + '/therapyRecommendation/' + therapyRecommendation.id)
+        .set('Content-Type', 'application/json')
+        .send(JSON.stringify(
+            (
+                therapyRecommendation
+            )))
+        .end((err, res)=>{
+            if (!err && res.ok) {
+                console.log("Success editing therapyRecommendation " + therapyRecommendation.id);
+            } else {
+                console.log("Error editing therapyRecommendation " + therapyRecommendation.id);
             }
         });
     }
