@@ -98,8 +98,6 @@ import { ITherapyRecommendation, IGeneticAlteration, EvidenceLevel, Modified, IR
 import { flattenStringify, flattenObject, flattenArray } from '../therapyRecommendation/TherapyRecommendationTableUtils';
 import { Query } from 'react-mutation-mapper/dist/model/OncoKb';
 import { getEvidenceQuery } from 'shared/lib/OncoKbUtils';
-import { fetchTherapyRecommendationUsingGET, writeTherapyRecommendation } from 'shared/api/TherapyRecommendationAPI';
-
 
 type PageMode = 'patient' | 'sample';
 
@@ -1146,16 +1144,6 @@ export class PatientViewPageStore {
     //     }
     // })
 
-    // private writeTherapyRecommendations() {
-    //     let recommendation: IRecommendation = {
-    //         geneticCounselingRecommendation: this.geneticCounselingRecommended,
-    //         rebiopsyRecommendation: this.rebiopsyRecommended,
-    //         generalRecommendation: this.commentRecommendation,
-    //         therapyRecommendations: this._therapyRecommendations
-    //     }
-    //     writeTherapyRecommendation(this.patientId, recommendation)
-    // }
-
     @observable private _therapyRecommendations: ITherapyRecommendation[] = [];
     @observable public geneticCounselingRecommended: boolean = false;
     @observable public rebiopsyRecommended: boolean = false;
@@ -1163,17 +1151,53 @@ export class PatientViewPageStore {
 
     setGeneticCounselingRecommended = (value: boolean) => {
         this.geneticCounselingRecommended = value;
-        this.writeTherapyRecommendations();
+        request.put(this.getJsonStoreUrl() + this.getSafePatientId() + '/geneticCounselingRecommended')
+        .set('Content-Type', 'application/json')
+        .send(JSON.stringify(
+            (
+                {geneticCounselingRecommended: value }
+            )))
+        .end((err, res)=>{
+            if (!err && res.status === 200) {
+                console.log("Success editing genetic counseling " + this.getSafePatientId());
+            } else {
+                console.log("Error editing genetic counseling " + this.getSafePatientId());
+            }
+        });
     }
 
     setRebiopsyRecommended = (value: boolean) => {
         this.rebiopsyRecommended = value;
-        this.writeTherapyRecommendations();
+        request.put(this.getJsonStoreUrl() + this.getSafePatientId() + '/rebiopsyRecommended')
+        .set('Content-Type', 'application/json')
+        .send(JSON.stringify(
+            (
+                { rebiopsyRecommended: value }
+            )))
+        .end((err, res)=>{
+            if (!err && res.status === 200) {
+                console.log("Success editing rebiopsy recommendation " + this.getSafePatientId());
+            } else {
+                console.log("Error editing rebiopsy recommendation " + this.getSafePatientId());
+            }
+        });
     }
 
     setCommentRecommendation = (value: string) => {
         this.commentRecommendation = value;
-        this.writeTherapyRecommendations();
+        request.put(this.getJsonStoreUrl() + this.getSafePatientId() + '/comment')
+        .set('Content-Type', 'application/json')
+        .send(JSON.stringify(
+            (
+                { comment: value }
+            )))
+        .end((err, res)=>{
+            if (!err && res.status === 200) {
+                console.log("Success editing comment " + this.getSafePatientId());
+            } else {
+                console.log("Error editing comment " + this.getSafePatientId());
+            }
+        });
     }
 
     // @cached get therapyRecommendations():ITherapyRecommendation[] {
@@ -1198,26 +1222,34 @@ export class PatientViewPageStore {
     }
 
     therapyRecommendationOnDelete = (therapyRecommendationToDelete: ITherapyRecommendation) => {
-        this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDelete.id !== therapyRecommendation.id);
-        this.writeTherapyRecommendations();
+        let therapyRecommendationToDeleteFlattened = flattenObject(therapyRecommendationToDelete);
+        this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDeleteFlattened.id !== therapyRecommendation.id);
+        this.deleteTherapyRecommendation(therapyRecommendationToDeleteFlattened.id);
         return true;
     }
 
     therapyRecommendationOnAddOrEdit = (therapyRecommendationToAdd: ITherapyRecommendation) => {
-        this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToAdd.id !== therapyRecommendation.id);
-        this._therapyRecommendations.push(therapyRecommendationToAdd);
-        let x = this.writeTherapyRecommendations();
+        const lengthBefore = this._therapyRecommendations.length;
+        let therapyRecommendationToAddFlattened = flattenObject(therapyRecommendationToAdd);
+        this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToAddFlattened.id !== therapyRecommendation.id);
+        this._therapyRecommendations.push(therapyRecommendationToAddFlattened);
+        if(lengthBefore == this._therapyRecommendations.length) {
+            this.editTherapyRecommendation(therapyRecommendationToAddFlattened);
+        } else {
+            this.addTherapyRecommendation(therapyRecommendationToAddFlattened);
+        }
         return true;
     }
 
     private getJsonStoreUrl() {
-        return 'http://' + window.location.hostname + ':3001/patients/';
+        // @ts-ignore: ENV_* are defined in webpack.config.js
+        return (`${ENV_FHIRSPARK_BASE}` || 'http://' + window.location.hostname + ':3001/patients') + '/';
     }
 
     private loadTherapyRecommendations() {
         request.get(this.getJsonStoreUrl() + this.getSafePatientId())
         .end((err, res)=>{
-            if (!err && res.ok) {
+            if (!err && res.status === 200) {
                 console.group("Success GETting " + this.patientId);
                 console.log(JSON.parse(res.text));
                 console.groupEnd();
@@ -1225,16 +1257,9 @@ export class PatientViewPageStore {
                 this.geneticCounselingRecommended = patient.geneticCounselingRecommended || false;
                 this.rebiopsyRecommended = patient.rebiopsyRecommended || false;
                 this.commentRecommendation = patient.comment || "";
-                var therapyRecommendations = Object.keys(patient.therapyRecommendations).map(function(index){
-                    // console.group("Read Recommendation");
-                    // console.log(flattenObject(patient.therapyRecommendations[index]));
-                    // console.log(!_.isEmpty(patient.therapyRecommendations[index]));
-                    // console.groupEnd();
-                    // if(!_.isEmpty(patient.therapyRecommendations[index])) 
-                    return patient.therapyRecommendations[index];
-                }).filter(item => !_.isEmpty(item));
-                console.log(patient.therapyRecommendations);
-                console.log(therapyRecommendations);
+                var therapyRecommendations = Object.keys(patient.therapyRecommendations)
+                    .map(function(index){return patient.therapyRecommendations[index];})
+                    .filter(item => !_.isEmpty(item));
                 this._therapyRecommendations = therapyRecommendations;
             } else {
                 return [] as ITherapyRecommendation[];
@@ -1242,42 +1267,45 @@ export class PatientViewPageStore {
         });
     }
 
-    private writeTherapyRecommendations() {
-        request.put(this.getJsonStoreUrl() + this.getSafePatientId())
+    private addTherapyRecommendation(therapyRecommendation : ITherapyRecommendation) {
+        request.post(this.getJsonStoreUrl() + this.getSafePatientId() + "/therapyRecommendation")
         .set('Content-Type', 'application/json')
         .send(JSON.stringify(
-            ({
-                id: this.getSafePatientId(), 
-                geneticCounselingRecommended: this.geneticCounselingRecommended,
-                rebiopsyRecommended: this.rebiopsyRecommended,
-                comment: this.commentRecommendation,
-                therapyRecommendations: flattenArray(this._therapyRecommendations)
-            })))
+            (
+                therapyRecommendation
+            )))
         .end((err, res)=>{
-            if (!err && res.ok) {
-                console.log("Success PUTting " + this.patientId);
-                // return true;
+            if (!err && res.status === 201) {
+                console.log("Success adding therapyRecommendation " + therapyRecommendation.id);
             } else {
-                console.log("Error PUTting " + this.patientId + "... trying POST");
-                request.post(this.getJsonStoreUrl())
-                .set('Content-Type', 'application/json')
-                .send(JSON.stringify(
-                    ({
-                        id: this.getSafePatientId(), 
-                        geneticCounselingRecommended: this.geneticCounselingRecommended,
-                        rebiopsyRecommended: this.rebiopsyRecommended,
-                        comment: this.commentRecommendation,
-                        therapyRecommendations: flattenArray(this._therapyRecommendations)
-                    })))
-                .end((err, res)=>{
-                    if (!err && res.ok) {
-                        console.log("Success POSTing " + this.patientId);
-                        // return true;
-                    } else {
-                        console.log("Error POSTing " + this.patientId);
-                        // return false;
-                    }
-                });
+                console.log("Error adding therapy recommendation " + therapyRecommendation.id);
+            }
+        });
+    }
+
+    private editTherapyRecommendation(therapyRecommendation : ITherapyRecommendation) {
+        request.put(this.getJsonStoreUrl() + this.getSafePatientId() + '/therapyRecommendation/' + therapyRecommendation.id)
+        .set('Content-Type', 'application/json')
+        .send(JSON.stringify(
+            (
+                therapyRecommendation
+            )))
+        .end((err, res)=>{
+            if (!err && res.status === 200) {
+                console.log("Success editing therapy recommendation " + therapyRecommendation.id);
+            } else {
+                console.log("Error editing therapy recommendation " + therapyRecommendation.id);
+            }
+        });
+    }
+
+    private deleteTherapyRecommendation(deleteId : string) {
+        request.delete(this.getJsonStoreUrl() + this.getSafePatientId() + '/therapyRecommendation/' + deleteId)
+        .end((err, res)=>{
+            if (!err && res.status === 200) {
+                console.log("Success deleting therapy recommendation " + deleteId);
+            } else {
+                console.log("Error deleting therapy recommendation " + deleteId);
             }
         });
     }
