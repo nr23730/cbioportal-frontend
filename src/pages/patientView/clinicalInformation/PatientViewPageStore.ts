@@ -1200,7 +1200,7 @@ export class PatientViewPageStore {
     therapyRecommendationOnDelete = (therapyRecommendationToDelete: ITherapyRecommendation) => {
         let therapyRecommendationToDeleteFlattened = flattenObject(therapyRecommendationToDelete);
         this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToDeleteFlattened.id !== therapyRecommendation.id);
-        this.writeTherapyRecommendations();
+        this.deleteTherapyRecommendation(therapyRecommendationToDeleteFlattened.id);
         return true;
     }
 
@@ -1274,6 +1274,17 @@ export class PatientViewPageStore {
                         // return false;
                     }
                 });
+            }
+        });
+    }
+
+    private deleteTherapyRecommendation(deleteId : string) {
+        request.delete(this.getJsonStoreUrl() + this.getSafePatientId() + '/therapyRecommendation/' + deleteId)
+        .end((err, res)=>{
+            if (!err && res.ok) {
+                console.log("Success deleting therapy recommendation " + deleteId);
+            } else {
+                console.log("Error deleting therapy recommendation " + deleteId);
             }
         });
     }
