@@ -1163,17 +1163,53 @@ export class PatientViewPageStore {
 
     setGeneticCounselingRecommended = (value: boolean) => {
         this.geneticCounselingRecommended = value;
-        this.writeTherapyRecommendations();
+        request.put(this.getJsonStoreUrl() + this.getSafePatientId() + '/geneticCounselingRecommended')
+        .set('Content-Type', 'application/json')
+        .send(JSON.stringify(
+            (
+                {geneticCounselingRecommended: value }
+            )))
+        .end((err, res)=>{
+            if (!err && res.ok) {
+                console.log("Success editing genetic counseling " + this.getSafePatientId());
+            } else {
+                console.log("Error editing genetic counseling " + this.getSafePatientId());
+            }
+        });
     }
 
     setRebiopsyRecommended = (value: boolean) => {
         this.rebiopsyRecommended = value;
-        this.writeTherapyRecommendations();
+        request.put(this.getJsonStoreUrl() + this.getSafePatientId() + '/rebiopsyRecommended')
+        .set('Content-Type', 'application/json')
+        .send(JSON.stringify(
+            (
+                { rebiopsyRecommended: value }
+            )))
+        .end((err, res)=>{
+            if (!err && res.ok) {
+                console.log("Success editing rebiopsy recommendation " + this.getSafePatientId());
+            } else {
+                console.log("Error editing rebiopsy recommendation " + this.getSafePatientId());
+            }
+        });
     }
 
     setCommentRecommendation = (value: string) => {
         this.commentRecommendation = value;
-        this.writeTherapyRecommendations();
+        request.put(this.getJsonStoreUrl() + this.getSafePatientId() + '/comment')
+        .set('Content-Type', 'application/json')
+        .send(JSON.stringify(
+            (
+                { comment: value }
+            )))
+        .end((err, res)=>{
+            if (!err && res.ok) {
+                console.log("Success editing comment " + this.getSafePatientId());
+            } else {
+                console.log("Error editing comment " + this.getSafePatientId());
+            }
+        });
     }
 
     // @cached get therapyRecommendations():ITherapyRecommendation[] {
