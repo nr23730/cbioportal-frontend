@@ -145,6 +145,7 @@ var config = {
             'IS_DEV_MODE': isDev,
             'ENV_CBIOPORTAL_URL': process.env.CBIOPORTAL_URL? JSON.stringify(cleanAndValidateUrl(process.env.CBIOPORTAL_URL)) : '"replace_me_env_cbioportal_url"',
             'ENV_GENOME_NEXUS_URL': process.env.GENOME_NEXUS_URL? JSON.stringify(cleanAndValidateUrl(process.env.GENOME_NEXUS_URL)) : '"replace_me_env_genome_nexus_url"',
+            'ENV_FHIRSPARK_BASE': JSON.stringify(process.env.FHIRSPARK_BASE)
         }),
         new HtmlWebpackPlugin({cache: false, template: 'my-index.ejs'}),
         WebpackFailPlugin,

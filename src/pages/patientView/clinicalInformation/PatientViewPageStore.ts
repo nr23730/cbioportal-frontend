@@ -1213,7 +1213,8 @@ export class PatientViewPageStore {
     }
 
     private getJsonStoreUrl() {
-        return 'http://' + window.location.hostname + ':3001/patients/';
+        // @ts-ignore: ENV_* are defined in webpack.config.js
+        return (`${ENV_FHIRSPARK_BASE}` || 'http://' + window.location.hostname + ':3001/patients') + '/';
     }
 
     private loadTherapyRecommendations() {
