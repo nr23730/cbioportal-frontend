@@ -1212,7 +1212,7 @@ export class PatientViewPageStore {
         if(lengthBefore == this._therapyRecommendations.length) {
             this.editTherapyRecommendation(therapyRecommendationToAddFlattened);
         } else {
-            //this.addTherapyRecommendation(therapyRecommendationToAddFlattened);
+            this.addTherapyRecommendation(therapyRecommendationToAddFlattened);
         }
         return true;
     }
@@ -1243,42 +1243,18 @@ export class PatientViewPageStore {
         });
     }
 
-    private writeTherapyRecommendations() {
-        request.put(this.getJsonStoreUrl() + this.getSafePatientId())
+    private addTherapyRecommendation(therapyRecommendation : ITherapyRecommendation) {
+        request.post(this.getJsonStoreUrl() + this.getSafePatientId() + "/therapyRecommendation")
         .set('Content-Type', 'application/json')
         .send(JSON.stringify(
-            ({
-                id: this.getSafePatientId(), 
-                geneticCounselingRecommended: this.geneticCounselingRecommended,
-                rebiopsyRecommended: this.rebiopsyRecommended,
-                comment: this.commentRecommendation,
-                therapyRecommendations: this._therapyRecommendations
-            })))
+            (
+                therapyRecommendation
+            )))
         .end((err, res)=>{
             if (!err && res.ok) {
-                console.log("Success PUTting " + this.patientId);
-                // return true;
+                console.log("Success adding therapyRecommendation" + therapyRecommendation.id);
             } else {
-                console.log("Error PUTting " + this.patientId + "... trying POST");
-                request.post(this.getJsonStoreUrl())
-                .set('Content-Type', 'application/json')
-                .send(JSON.stringify(
-                    ({
-                        id: this.getSafePatientId(), 
-                        geneticCounselingRecommended: this.geneticCounselingRecommended,
-                        rebiopsyRecommended: this.rebiopsyRecommended,
-                        comment: this.commentRecommendation,
-                        therapyRecommendations: this._therapyRecommendations
-                    })))
-                .end((err, res)=>{
-                    if (!err && res.ok) {
-                        console.log("Success POSTing " + this.patientId);
-                        // return true;
-                    } else {
-                        console.log("Error POSTing " + this.patientId);
-                        // return false;
-                    }
-                });
+                console.log("Error adding therapy recommendation" + therapyRecommendation.id);
             }
         });
     }
@@ -1292,9 +1268,9 @@ export class PatientViewPageStore {
             )))
         .end((err, res)=>{
             if (!err && res.ok) {
-                console.log("Success editing therapyRecommendation " + therapyRecommendation.id);
+                console.log("Success editing therapy recommendation " + therapyRecommendation.id);
             } else {
-                console.log("Error editing therapyRecommendation " + therapyRecommendation.id);
+                console.log("Error editing therapy recommendation " + therapyRecommendation.id);
             }
         });
     }
