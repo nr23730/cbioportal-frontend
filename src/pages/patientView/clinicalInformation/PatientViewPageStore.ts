@@ -98,8 +98,6 @@ import { ITherapyRecommendation, IGeneticAlteration, EvidenceLevel, Modified, IR
 import { flattenStringify, flattenObject, flattenArray } from '../therapyRecommendation/TherapyRecommendationTableUtils';
 import { Query } from 'react-mutation-mapper/dist/model/OncoKb';
 import { getEvidenceQuery } from 'shared/lib/OncoKbUtils';
-import { fetchTherapyRecommendationUsingGET, writeTherapyRecommendation } from 'shared/api/TherapyRecommendationAPI';
-
 
 type PageMode = 'patient' | 'sample';
 
@@ -1146,16 +1144,6 @@ export class PatientViewPageStore {
     //     }
     // })
 
-    // private writeTherapyRecommendations() {
-    //     let recommendation: IRecommendation = {
-    //         geneticCounselingRecommendation: this.geneticCounselingRecommended,
-    //         rebiopsyRecommendation: this.rebiopsyRecommended,
-    //         generalRecommendation: this.commentRecommendation,
-    //         therapyRecommendations: this._therapyRecommendations
-    //     }
-    //     writeTherapyRecommendation(this.patientId, recommendation)
-    // }
-
     @observable private _therapyRecommendations: ITherapyRecommendation[] = [];
     @observable public geneticCounselingRecommended: boolean = false;
     @observable public rebiopsyRecommended: boolean = false;
@@ -1288,9 +1276,9 @@ export class PatientViewPageStore {
             )))
         .end((err, res)=>{
             if (!err && res.ok) {
-                console.log("Success adding therapyRecommendation" + therapyRecommendation.id);
+                console.log("Success adding therapyRecommendation " + therapyRecommendation.id);
             } else {
-                console.log("Error adding therapy recommendation" + therapyRecommendation.id);
+                console.log("Error adding therapy recommendation " + therapyRecommendation.id);
             }
         });
     }
