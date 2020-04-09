@@ -1158,7 +1158,7 @@ export class PatientViewPageStore {
                 {geneticCounselingRecommended: value }
             )))
         .end((err, res)=>{
-            if (!err && res.ok) {
+            if (!err && res.status === 200) {
                 console.log("Success editing genetic counseling " + this.getSafePatientId());
             } else {
                 console.log("Error editing genetic counseling " + this.getSafePatientId());
@@ -1175,7 +1175,7 @@ export class PatientViewPageStore {
                 { rebiopsyRecommended: value }
             )))
         .end((err, res)=>{
-            if (!err && res.ok) {
+            if (!err && res.status === 200) {
                 console.log("Success editing rebiopsy recommendation " + this.getSafePatientId());
             } else {
                 console.log("Error editing rebiopsy recommendation " + this.getSafePatientId());
@@ -1192,7 +1192,7 @@ export class PatientViewPageStore {
                 { comment: value }
             )))
         .end((err, res)=>{
-            if (!err && res.ok) {
+            if (!err && res.status === 200) {
                 console.log("Success editing comment " + this.getSafePatientId());
             } else {
                 console.log("Error editing comment " + this.getSafePatientId());
@@ -1249,7 +1249,7 @@ export class PatientViewPageStore {
     private loadTherapyRecommendations() {
         request.get(this.getJsonStoreUrl() + this.getSafePatientId())
         .end((err, res)=>{
-            if (!err && res.ok) {
+            if (!err && res.status === 200) {
                 console.group("Success GETting " + this.patientId);
                 console.log(JSON.parse(res.text));
                 console.groupEnd();
@@ -1275,7 +1275,7 @@ export class PatientViewPageStore {
                 therapyRecommendation
             )))
         .end((err, res)=>{
-            if (!err && res.ok) {
+            if (!err && res.status === 201) {
                 console.log("Success adding therapyRecommendation " + therapyRecommendation.id);
             } else {
                 console.log("Error adding therapy recommendation " + therapyRecommendation.id);
@@ -1291,7 +1291,7 @@ export class PatientViewPageStore {
                 therapyRecommendation
             )))
         .end((err, res)=>{
-            if (!err && res.ok) {
+            if (!err && res.status === 200) {
                 console.log("Success editing therapy recommendation " + therapyRecommendation.id);
             } else {
                 console.log("Error editing therapy recommendation " + therapyRecommendation.id);
@@ -1302,7 +1302,7 @@ export class PatientViewPageStore {
     private deleteTherapyRecommendation(deleteId : string) {
         request.delete(this.getJsonStoreUrl() + this.getSafePatientId() + '/therapyRecommendation/' + deleteId)
         .end((err, res)=>{
-            if (!err && res.ok) {
+            if (!err && res.status === 200) {
                 console.log("Success deleting therapy recommendation " + deleteId);
             } else {
                 console.log("Error deleting therapy recommendation " + deleteId);
