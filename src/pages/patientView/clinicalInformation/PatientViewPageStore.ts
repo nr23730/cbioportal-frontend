@@ -1242,8 +1242,7 @@ export class PatientViewPageStore {
     }
 
     private getJsonStoreUrl() {
-        // @ts-ignore: ENV_* are defined in webpack.config.js
-        return (`${ENV_FHIRSPARK_BASE}` || 'http://' + window.location.hostname + ':3001/patients') + '/';
+        return 'http://' + window.location.hostname + ':3001/patients/';
     }
 
     private loadTherapyRecommendations() {
