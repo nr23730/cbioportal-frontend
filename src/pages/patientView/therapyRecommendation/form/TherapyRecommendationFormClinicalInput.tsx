@@ -18,7 +18,8 @@ export default class TherapyRecommendationFormClinicalInput extends React.Compon
     
     let allClinicalData = this.props.clinicalData.map((clinicalDataItem: ClinicalData) =>{
       return ({
-        attribute: clinicalDataItem.clinicalAttribute.displayName,
+        attributeId: clinicalDataItem.clinicalAttribute.clinicalAttributeId,
+        attributeName: clinicalDataItem.clinicalAttribute.displayName,
         value: clinicalDataItem.value
       }) as IClinicalData;
   });
@@ -27,14 +28,14 @@ export default class TherapyRecommendationFormClinicalInput extends React.Compon
   let clinicalDataOptions = allClinicalData.map((clinicalDataItem: IClinicalData) => 
     ({
       value: clinicalDataItem, 
-      label: clinicalDataItem.attribute + ": " + clinicalDataItem.value
+      label: clinicalDataItem.attributeName + ": " + clinicalDataItem.value
     }));
     
 
     const clinicalDataDefault = this.props.data.reasoning.clinicalData && this.props.data.reasoning.clinicalData.map((clinicalDataItem: IClinicalData) => 
     ({
       value: clinicalDataItem, 
-      label: clinicalDataItem.attribute + ": " + clinicalDataItem.value
+      label: clinicalDataItem.attributeName + ": " + clinicalDataItem.value
     }));
       return (
         <CreatableSelect
@@ -49,8 +50,8 @@ export default class TherapyRecommendationFormClinicalInput extends React.Compon
             if (Array.isArray(selectedOption)) {
               this.props.onChange(selectedOption.map(option => {
                 if (_.isString(option.value)) {
-                  let clinicalDataString = option.value.toString().split(':');
-                  return {attribute: clinicalDataString[0], value: clinicalDataString[1]} as IClinicalData;
+                  let clinicalDataString = option.value.toString().split(': ');
+                  return {attributeName: clinicalDataString[0], value: clinicalDataString[1]} as IClinicalData;
                 } else {
                   return option.value as IClinicalData;
                 }
