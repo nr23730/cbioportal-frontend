@@ -65,7 +65,8 @@ export interface ITreatment {
 }
 
 export interface IClinicalData {
-    attribute: string;
+    attributeId?: string;
+    attributeName?: string;
     value: string;
 }
 
