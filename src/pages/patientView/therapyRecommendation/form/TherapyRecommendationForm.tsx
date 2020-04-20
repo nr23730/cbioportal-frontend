@@ -28,7 +28,7 @@ export default class TherapyRecommendationForm extends React.Component<ITherapyR
     public render() {
         let therapyRecommendation: ITherapyRecommendation = Object.create(this.props.data);
         return (
-            <Modal show={this.props.show} onHide={() => {this.props.onHide(undefined)}}>
+            <Modal show={this.props.show} onHide={() => {this.props.onHide(undefined)}} backdrop={'static'}>
                 <Modal.Header closeButton>
                     <Modal.Title>{this.props.title}</Modal.Title>
                 </Modal.Header>

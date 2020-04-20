@@ -136,7 +136,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
         if(!this.props.oncoKbResult || !this.props.oncoKbResult.result || this.props.oncoKbResult.result instanceof Error ||
             !this.props.cnaOncoKbResult || !this.props.cnaOncoKbResult.result || this.props.cnaOncoKbResult.result instanceof Error) {
             return (
-                <Modal show={this.props.show} onHide={() => {this.props.onHide(undefined)}}>
+                <Modal show={this.props.show} onHide={() => {this.props.onHide(undefined)}} backdrop={'static'}>
                 <Modal.Header closeButton>
                     <Modal.Title>{this.props.title}</Modal.Title>
                 </Modal.Header>
@@ -166,7 +166,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<ITh
                 padding: '0.16666666666667em 0.5em'
             };
             return (
-                <Modal show={this.props.show} onHide={() => {this.props.onHide(undefined)}}>
+                <Modal show={this.props.show} onHide={() => {this.props.onHide(undefined)}} backdrop={'static'}>
                     <Modal.Header closeButton>
                         <Modal.Title>{this.props.title}</Modal.Title>
                     </Modal.Header>
