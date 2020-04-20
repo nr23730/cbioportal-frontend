@@ -36,7 +36,7 @@ export type ITherapyRecommendationProps = {
     commentRecommendation: string;
     containerWidth: number;
     onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
-    onAddOrEdit: (therapyRecommendation: ITherapyRecommendation) => boolean;
+    onAddOrEdit: (therapyRecommendation?: ITherapyRecommendation) => boolean;
     onEditGeneticCounselingRecommended: (geneticCounselingRecommended: boolean) => void;
     onEditRebiopsyRecommended: (rebiopsyRecommended: boolean) => void;
     onEditCommentRecommendation: (commentRecommendation: string) => void;
@@ -349,7 +349,7 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
         this.selectedTherapyRecommendation = undefined;
         if(!newTherapyRecommendation || isTherapyRecommendationEmpty(newTherapyRecommendation)) {
             if(this.backupTherapyRecommendation) {
-                this.props.onAddOrEdit(this.backupTherapyRecommendation);
+                this.props.onAddOrEdit(undefined);
                 this.backupTherapyRecommendation = undefined;
             }
         } else {
@@ -439,8 +439,8 @@ export default class TherapyRecommendationTable extends React.Component<ITherapy
 
     private getTextForClinicalDataItem(item: IClinicalData): string {
         let text = "";
-        if(item.attribute) text += item.attribute;
-        if(item.attribute && item.value) text += ": ";
+        if(item.attributeName) text += item.attributeName;
+        if(item.attributeName && item.value) text += ": ";
         if(item.value) text += item.value;
         return text;
     }

@@ -1228,7 +1228,9 @@ export class PatientViewPageStore {
         return true;
     }
 
-    therapyRecommendationOnAddOrEdit = (therapyRecommendationToAdd: ITherapyRecommendation) => {
+    therapyRecommendationOnAddOrEdit = (therapyRecommendationToAdd?: ITherapyRecommendation) => {
+        if(therapyRecommendationToAdd === undefined)
+            return false;
         const lengthBefore = this._therapyRecommendations.length;
         let therapyRecommendationToAddFlattened = flattenObject(therapyRecommendationToAdd);
         this._therapyRecommendations = this._therapyRecommendations.filter((therapyRecommendation:ITherapyRecommendation) => therapyRecommendationToAddFlattened.id !== therapyRecommendation.id);
