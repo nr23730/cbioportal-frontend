@@ -1211,8 +1211,13 @@ export class PatientViewPageStore {
     }
 
     private getJsonStoreUrl() {
-        // @ts-ignore: ENV_* are defined in webpack.config.js
-        return (`${ENV_FHIRSPARK_BASE}` || 'http://' + window.location.hostname + ':3001/patients') + '/';
+        let host = window.location.hostname;
+        let port = '3001';
+        if (AppConfig.fhirspark && AppConfig.fhirspark.host && AppConfig.fhirspark.host !== 'undefined')
+            host = AppConfig.fhirspark.host;
+        if (AppConfig.fhirspark && AppConfig.fhirspark.port && AppConfig.fhirspark.port !== 'undefined')
+        port = AppConfig.fhirspark.port;
+            return 'http://' + host + ':' + port + '/patients/';
     }
 
     private loadTherapyRecommendations() {

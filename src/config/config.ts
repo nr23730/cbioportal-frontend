@@ -98,6 +98,11 @@ export function setServerConfig(serverConfig:{[key:string]:any }){
         config.apiRoot = `${frontendOverride.apiRoot}`;
     }
 
+    if (frontendOverride.fhirspark) {
+        console.log(`Overriding fhirspark with: `, frontendOverride.fhirspark);
+        config.fhirspark = frontendOverride.fhirspark;
+    }
+
     // allow any hardcoded serverConfig props to override those from service
     const mergedConfig = Object.assign({}, serverConfig, frontendOverride , config.serverConfig || {});
 
@@ -194,6 +199,13 @@ export function initializeConfiguration() {
     const frontendUrl = config.frontendUrl || `//${win.location.host}/`;
 
     const configServiceUrl = config.configurationServiceUrl || `${APIROOT}config_service.jsp`;
+
+    config.fhirspark = {};
+    // @ts-ignore: ENV_* are defined in webpack.config.js
+    config.fhirspark.host = `${ENV_FHIRSPARK_HOST || config.fhirspark.host}`;
+
+    // @ts-ignore: ENV_* are defined in webpack.config.js
+    config.fhirspark.port = `${ENV_FHIRSPARK_PORT || config.fhirspark.port}`;
 
     // should override both when in dev mode and when serving compiled source
     // code outside of legacy project
