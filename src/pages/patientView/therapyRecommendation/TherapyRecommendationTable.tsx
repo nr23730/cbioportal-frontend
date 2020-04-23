@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 import {
     ITherapyRecommendation, ITreatment, IGeneticAlteration, IReference, IClinicalData, EvidenceLevel
 } from "../../../shared/model/TherapyRecommendation";
-import { action, computed, observable } from "mobx";
+import { computed, observable } from "mobx";
 import LazyMobXTable from "../../../shared/components/lazyMobXTable/LazyMobXTable";
 import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from "../SampleManager";
@@ -14,15 +14,15 @@ import { truncate, getNewTherapyRecommendation, addModificationToTherapyRecommen
     isTherapyRecommendationEmpty, flattenObject, flattenArray, getOncoKbLevelDesc } from "./TherapyRecommendationTableUtils";
 import AppConfig from 'appConfig';
 import { Button } from "react-bootstrap";
-import { Mutation, ClinicalData, DiscreteCopyNumberData } from 'shared/api/generated/CBioPortalAPI';
+import { Mutation, ClinicalData, DiscreteCopyNumberData } from 'cbioportal-ts-api-client';
 import TherapyRecommendationForm from './form/TherapyRecommendationForm';
 import { SimpleCopyDownloadControls } from 'shared/components/copyDownloadControls/SimpleCopyDownloadControls';
-import { IOncoKbDataWrapper, IOncoKbCancerGenesWrapper } from 'shared/model/OncoKB';
+import { RemoteData } from 'react-mutation-mapper';
+import { IOncoKbData } from 'cbioportal-frontend-commons';
+import { CancerGene } from 'oncokb-ts-api-client';
 import TherapyRecommendationFormOncoKb from './form/TherapyRecommendationFormOncoKb';
 import PubMedCache from 'shared/cache/PubMedCache';
 import LabeledCheckbox from 'shared/components/labeledCheckbox/LabeledCheckbox';
-import { debounceAsync } from 'mobxpromise';
-
 
 export type ITherapyRecommendationProps = {
     patientId: string;
@@ -40,9 +40,9 @@ export type ITherapyRecommendationProps = {
     onEditGeneticCounselingRecommended: (geneticCounselingRecommended: boolean) => void;
     onEditRebiopsyRecommended: (rebiopsyRecommended: boolean) => void;
     onEditCommentRecommendation: (commentRecommendation: string) => void;
-    oncoKbData?: IOncoKbDataWrapper;
-    cnaOncoKbData?: IOncoKbDataWrapper;
-    oncoKbCancerGenes?: IOncoKbCancerGenesWrapper;
+    oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
+    cnaOncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
+    oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>;
     pubMedCache?: PubMedCache;
 }
 

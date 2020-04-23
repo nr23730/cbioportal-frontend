@@ -2,7 +2,6 @@ import * as React from 'react';
 import { action, computed, observable } from 'mobx';
 import { PatientViewPageStore } from '../clinicalInformation/PatientViewPageStore';
 import { observer } from 'mobx-react';
-import { Mutation } from '../../../shared/api/generated/CBioPortalAPI';
 import {
     searchStudiesForKeyword,
     searchStudiesForKeywordAsString,

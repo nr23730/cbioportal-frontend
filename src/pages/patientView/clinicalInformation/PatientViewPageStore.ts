@@ -133,8 +133,6 @@ import {
     flattenObject,
     flattenArray,
 } from '../therapyRecommendation/TherapyRecommendationTableUtils';
-import { Query } from 'react-mutation-mapper/dist/model/OncoKb';
-import { getEvidenceQuery } from 'shared/lib/OncoKbUtils';
 import {
     StudyListEntry,
     StudyList,
