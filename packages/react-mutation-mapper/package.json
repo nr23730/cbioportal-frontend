@@ -1,6 +1,6 @@
 {
   "name": "react-mutation-mapper",
-  "version": "0.4.3",
+  "version": "0.5.7",
   "description": "Generic Mutation Mapper",
   "main": "dist/index.js",
   "module": "dist/index.es.js",
@@ -15,18 +15,18 @@
     "dist"
   ],
   "author": "cBioPortal",
-  "license": "GNU Affero General Public License v3.0",
+  "license": "AGPL-3.0-or-later",
   "repository": "cBioPortal/cbioportal-frontend",
   "scripts": {
-      "build": "cross-env NODE_ENV=production NODE_OPTIONS=--max-old-space-size=2048 yarn run rollup",
-      "start": "yarn run watch",
-      "watch": "yarn run rollup:watch",
-      "watchSSL": "yarn run watch",
-      "rollup": "rollup -c rollup.config.ts",
-      "rollup:watch": "rollup -c rollup.config.ts -w",
-      "prepare": "yarn run build",
-      "test": "cross-env CI=1 react-scripts-ts test --env=jsdom",
-      "test:watch": "yarn run test -- --watch"
+    "build": "cross-env NODE_ENV=production NODE_OPTIONS=--max-old-space-size=2048 yarn run rollup",
+    "start": "yarn run watch",
+    "watch": "yarn run rollup:watch",
+    "watchSSL": "yarn run watch",
+    "rollup": "rollup -c rollup.config.ts",
+    "rollup:watch": "rollup -c rollup.config.ts -w",
+    "prepare": "yarn run build",
+    "test": "cross-env CI=1 react-scripts-ts test --env=jsdom",
+    "test:watch": "yarn run test -- --watch"
   },
   "peerDependencies": {
     "mobx": "^3.0.0 || ^4.0.0 || ^5.0.0",
@@ -38,12 +38,14 @@
   },
   "dependencies": {
     "autobind-decorator": "^2.1.0",
-    "cbioportal-frontend-commons": "^0.1.1",
+    "cbioportal-frontend-commons": "^0.2.7",
     "classnames": "^2.2.5",
+    "genome-nexus-ts-api-client": "^1.1.2-beta.0",
     "jquery": "^3.2.1",
     "lodash": "^4.17.11",
     "mobxpromise": "github:cbioportal/mobxpromise#v1.0.2",
     "oncokb-styles": "~0.1.2",
+    "oncokb-ts-api-client": "^1.0.0",
     "react-collapse": "^4.0.3",
     "react-motion": "^0.5.2",
     "react-rangeslider": "^2.2.0",
@@ -55,7 +57,6 @@
   },
   "devDependencies": {
     "@testing-library/react": "^9.3.2",
-    "@types/react-table": "^6.8.1",
     "react-scripts-ts": "^3.1.0"
   }
 }

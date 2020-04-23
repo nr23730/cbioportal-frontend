@@ -17,14 +17,14 @@ import {
     Gene,
     Sample,
     SampleFilter,
-} from '../../api/generated/CBioPortalAPI';
-import { Geneset } from '../../api/generated/CBioPortalAPIInternal';
+} from 'cbioportal-ts-api-client';
+import { Geneset } from 'cbioportal-ts-api-client';
 import CancerStudyTreeData from './CancerStudyTreeData';
 import {
     getBrowserWindow,
     remoteData,
     stringListToIndexSet,
-    stringListToSet
+    stringListToSet,
 } from 'cbioportal-frontend-commons';
 import { labelMobxPromises, cached, debounceAsync } from 'mobxpromise';
 import internalClient from '../../api/cbioportalInternalClientInstance';
@@ -42,7 +42,6 @@ import { buildCBioPortalPageUrl, redirectToStudyView } from '../../api/urls';
 import StudyListLogic from './StudyListLogic';
 import chunkMapReduce from 'shared/lib/chunkMapReduce';
 import {
-    NonMolecularProfileQueryParams,
     currentQueryParams,
     profileAvailability,
     categorizedSamplesCount,
@@ -63,7 +62,10 @@ import SampleListsInStudyCache from 'shared/cache/SampleListsInStudyCache';
 import formSubmit from '../../lib/formSubmit';
 import { ServerConfigHelpers } from '../../../config/config';
 import { AlterationTypeConstants } from '../../../pages/resultsView/ResultsViewPageStore';
-import {ResultsViewURLQuery, ResultsViewURLQueryEnum} from "pages/resultsView/ResultsViewURLWrapper";
+import {
+    ResultsViewURLQuery,
+    ResultsViewURLQueryEnum,
+} from 'pages/resultsView/ResultsViewURLWrapper';
 import { getFilteredCustomCaseSets } from './CaseSetSelectorUtils';
 
 // interface for communicating
@@ -85,13 +87,12 @@ export type CancerStudyQueryUrlParams = {
     case_ids: string;
     gene_list: string;
     geneset_list?: string;
-    treatment_list?: string;
     tab_index: 'tab_download' | 'tab_visualize';
     transpose_matrix?: 'on';
     Action: 'Submit';
     patient_enrichments?: string;
-    show_samples?:string;
-    exclude_germline_mutations?:string;
+    show_samples?: string;
+    exclude_germline_mutations?: string;
 };
 
 export type GeneReplacement = { alias: string; genes: Gene[] };
@@ -149,12 +150,6 @@ export enum Focus {
 
 // mobx observable
 export class QueryStore {
-    public initialQueryParams: {
-        pathname: string;
-        nonMolecularProfileParams: NonMolecularProfileQueryParams;
-        molecularProfileIds: ReadonlyArray<string>;
-    };
-
     constructor(urlWithInitialParams?: string) {
         this.initialize(urlWithInitialParams);
     }
@@ -1801,10 +1796,14 @@ export class QueryStore {
         }
 
         if (sampleListId === CUSTOM_CASE_LIST_ID) {
-            return this.caseIds ? Math.max(this.caseIds.trim().split(/\s+/g).length, 1) : 1;
+            return this.caseIds
+                ? Math.max(this.caseIds.trim().split(/\s+/g).length, 1)
+                : 1;
         }
 
-        const sampleList = this.sampleLists.result.find((l) => l.sampleListId === sampleListId);
+        const sampleList = this.sampleLists.result.find(
+            l => l.sampleListId === sampleListId
+        );
         if (sampleList) {
             return sampleList.sampleCount;
         }
@@ -1824,7 +1823,9 @@ export class QueryStore {
     }
 
     @computed get geneLimit(): number {
-        return Math.floor(AppConfig.serverConfig.query_product_limit / this.approxSampleCount);
+        return Math.floor(
+            AppConfig.serverConfig.query_product_limit / this.approxSampleCount
+        );
     }
 
     @computed get submitError() {
@@ -1943,12 +1944,17 @@ export class QueryStore {
             return 'Please edit the gene symbols.';
 
         // TDOD: remove this condition once multiple entrez gene ids is supported
-        const hugoGeneSymbolSet = _.groupBy(this.genes.result.found, gene => gene.hugoGeneSymbol);
-        const hasGenesWithMultipleEntrezGeneIds = _.some(hugoGeneSymbolSet, genes => genes.length > 1);
+        const hugoGeneSymbolSet = _.groupBy(
+            this.genes.result.found,
+            gene => gene.hugoGeneSymbol
+        );
+        const hasGenesWithMultipleEntrezGeneIds = _.some(
+            hugoGeneSymbolSet,
+            genes => genes.length > 1
+        );
         if (hasGenesWithMultipleEntrezGeneIds) {
             return 'Please edit the gene symbols.';
         }
-
     }
 
     private readonly dict_molecularAlterationType_filenameSuffix: {
@@ -2039,7 +2045,8 @@ export class QueryStore {
             : (profileIds.filter(_.identity) as string[]);
         this.zScoreThreshold = params.Z_SCORE_THRESHOLD || '2.0';
         this.rppaScoreThreshold = params.RPPA_SCORE_THRESHOLD || '2.0';
-        this.dataTypePriorityCode = params.data_priority || params.profileFilter ||  '0';
+        this.dataTypePriorityCode =
+            params.data_priority || params.profileFilter || '0';
         this.selectedSampleListId = params.case_set_id
             ? params.case_set_id.toString()
             : ''; // must be a string even though it's integer
@@ -2049,7 +2056,9 @@ export class QueryStore {
             decodeURIComponent(params.gene_list || '')
         );
         this.genesetQuery = normalizeQuery(
-            decodeURIComponent(params[ResultsViewURLQueryEnum.geneset_list] || '')
+            decodeURIComponent(
+                params[ResultsViewURLQueryEnum.geneset_list] || ''
+            )
         );
         this.forDownloadTab = params.tab_index === 'tab_download';
         this.initiallySelected.profileIds = true;

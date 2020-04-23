@@ -7,7 +7,7 @@ import {
     Focus,
 } from 'shared/components/query/QueryStore';
 import { action, computed } from '../../../../node_modules/mobx';
-import { Gene } from 'shared/api/generated/CBioPortalAPI';
+import { Gene } from 'cbioportal-ts-api-client';
 import 'react-select1/dist/react-select.css';
 import { remoteData } from 'cbioportal-frontend-commons';
 import client from 'shared/api/cbioportalClientInstance';
@@ -33,7 +33,8 @@ export interface IGeneSymbolValidatorProps {
         oql: OQL
     ) => void;
     wrap?: boolean;
-    replaceGene:(oldSymbol: string, newSymbol: string)=>void;
+    replaceGene: (oldSymbol: string, newSymbol: string) => void;
+    highlightError?: (oql: OQL) => void;
 }
 
 export type GeneValidationResult = {
@@ -153,20 +154,7 @@ export default class GeneSymbolValidator extends React.Component<
         if (!this.oql.error) {
             return this.oql;
         }
-
-        if (this.props.focus !== null && this.props.focus !== undefined) {
-            if (this.props.focus === Focus.Unfocused) {
-                return new Error(
-                    "Please click 'Submit' to see location of error."
-                );
-            } else {
-                return new Error(
-                    'OQL syntax error at selected character; please fix and submit again.'
-                );
-            }
-        }
-
-        return new Error(this.oql.error.message);
+        return new Error(`OQL error at character ${this.oql.error.start}`);
     }
 
     render() {
@@ -189,6 +177,10 @@ export default class GeneSymbolValidator extends React.Component<
                         ? new Error('ERROR')
                         : this.genes.result
                 }
+                highlightError={() => {
+                    this.props.highlightError &&
+                        this.props.highlightError(this.oql);
+                }}
                 oql={this.oqlOrError}
                 validatingGenes={
                     this.props.skipGeneValidation ? false : this.genes.isPending

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import { observable, action, computed } from 'mobx';
-import {DownloadControls, DefaultTooltip}from 'cbioportal-frontend-commons';
+import { DownloadControls, DefaultTooltip } from 'cbioportal-frontend-commons';
 import autobind from 'autobind-decorator';
 import MultipleCategoryBarPlot from 'shared/components/plots/MultipleCategoryBarPlot';
 import ReactSelect from 'react-select';
@@ -10,7 +10,7 @@ import OQLTextArea, {
 } from 'shared/components/GeneSelectionBox/OQLTextArea';
 import _ from 'lodash';
 import { SingleGeneQuery } from 'shared/lib/oql/oql-parser';
-import { Gene } from 'shared/api/generated/CBioPortalAPI';
+import { Gene } from 'cbioportal-ts-api-client';
 import {
     getEnrichmentBarPlotData,
     getGeneListOptions,
@@ -37,8 +37,6 @@ export interface IGeneBarPlotProps {
     dataStore: EnrichmentsTableDataStore;
 }
 
-const SVG_ID = 'GroupComparisonGeneFrequencyPlot';
-
 const DEFAULT_GENES_COUNT = 10;
 
 const MAXIMUM_ALLOWED_GENES = 100;
@@ -57,6 +55,7 @@ export default class GeneBarPlot extends React.Component<
     @observable selectedGenes: SingleGeneQuery[] | undefined;
     @observable _label: GeneOptionLabel | undefined;
     @observable isGeneSelectionPopupVisible: boolean | undefined = false;
+    @observable private svgContainer: SVGElement | null;
 
     @computed get geneListOptions() {
         return getGeneListOptions(this.props.data, this.props.showCNAInTable);
@@ -139,11 +138,6 @@ export default class GeneBarPlot extends React.Component<
     }
 
     @autobind
-    private getSvg() {
-        return document.getElementById(SVG_ID) as SVGElement | null;
-    }
-
-    @autobind
     private getTooltip(datum: any) {
         let geneSymbol = datum.majorCategory as string;
         // get rid of a trailing *
@@ -184,10 +178,14 @@ export default class GeneBarPlot extends React.Component<
                     <tbody>{groupRows}</tbody>
                 </table>
                 <strong>p-Value</strong>:{' '}
-                {geneData.pValue ? toConditionalPrecision(geneData.pValue, 3, 0.01) : '-'}
+                {geneData.pValue
+                    ? toConditionalPrecision(geneData.pValue, 3, 0.01)
+                    : '-'}
                 <br />
                 <strong>q-Value</strong>:{' '}
-                {geneData.qValue ? toConditionalPrecision(geneData.qValue, 3, 0.01) : '-'}
+                {geneData.qValue
+                    ? toConditionalPrecision(geneData.qValue, 3, 0.01)
+                    : '-'}
             </div>
         );
     }
@@ -267,8 +265,8 @@ export default class GeneBarPlot extends React.Component<
                             </div>
                         </DefaultTooltip>
                         <DownloadControls
-                            getSvg={this.getSvg}
-                            filename={SVG_ID}
+                            getSvg={() => this.svgContainer}
+                            filename={'GroupComparisonGeneFrequencyPlot'}
                             dontFade={true}
                             type="button"
                         />
@@ -303,7 +301,6 @@ export default class GeneBarPlot extends React.Component<
                 {this.toolbar}
                 <div style={{ overflow: 'auto hidden', position: 'relative' }}>
                     <MultipleCategoryBarPlot
-                        svgId={SVG_ID}
                         barWidth={CHART_BAR_WIDTH}
                         domainPadding={CHART_BAR_WIDTH}
                         chartBase={300}
@@ -319,6 +316,7 @@ export default class GeneBarPlot extends React.Component<
                         countAxisLabel={`${this.yAxislabel} (%)`}
                         tooltip={this.getTooltip}
                         categoryToColor={this.props.categoryToColor}
+                        containerRef={ref => (this.svgContainer = ref)}
                     />
                 </div>
             </div>

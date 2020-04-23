@@ -7,6 +7,8 @@ const ServerConfigDefaults: Partial<IServerConfig> = {
     dat_method: 'none',
     disabled_tabs: '',
     genomenexus_url: 'https://v1.genomenexus.org',
+    genomenexus_url_grch38: 'https://grch38.genomenexus.org',
+    genomenexus_website_url: 'https://www.genomenexus.org',
     g2s_url: 'https://g2s.genomenexus.org',
     mycancergenome_show: false,
 
@@ -37,12 +39,15 @@ const ServerConfigDefaults: Partial<IServerConfig> = {
     show_hotspot: true,
     show_oncokb: true,
     show_civic: false,
+    show_pathway_mapper: true,
+    show_mutation_mapper_tool_grch38: true,
     skin_description:
         'The cBioPortal for Cancer Genomics provides visualization, analysis and download of large-scale cancer genomics data sets',
     show_genomenexus: true,
     skin_authorization_message:
         'Access to this portal is only available to authorized users.',
     skin_documentation_about: 'About-Us.md',
+    skin_documentation_software: 'Software-Acknowledgments.md',
     skin_documentation_baseurl:
         'https://raw.githubusercontent.com/cBioPortal/cbioportal/master/docs/',
     skin_documentation_markdown: true,
@@ -88,8 +93,8 @@ const ServerConfigDefaults: Partial<IServerConfig> = {
             cancer genomics studies.  The table below lists the number of available samples per data type and tumor.`,
 
     skin_example_study_queries: `tcga pancancer atlas\n
-                                     tcga provisional\n
-                                     tcga -provisional -pancancer\n
+                                     tcga legacy\n
+                                     tcga -legacy -pancancer\n
                                      tcga or icgc\n
                                      msk-impact\n
                                      -\"cell line\"\n
@@ -113,8 +118,12 @@ const ServerConfigDefaults: Partial<IServerConfig> = {
         priority: {
             CANCER_TYPE: 3000,
             CANCER_TYPE_DETAILED: 2000,
+            // TODO should have a more generic way to define survival plots priority
+            GENOMIC_PROFILES_SAMPLE_COUNT: 1000,
             OS_SURVIVAL: 400,
             DFS_SURVIVAL: 300,
+            DSS_SURVIVAL: 250,
+            PFS_SURVIVAL: 250,
             MUTATION_COUNT_CNA_FRACTION: 200,
             MUTATED_GENES_TABLE: 90,
             FUSION_GENES_TABLE: 85,
@@ -144,9 +153,17 @@ const ServerConfigDefaults: Partial<IServerConfig> = {
     ensembl_transcript_url:
         'http://grch37.ensembl.org/homo_sapiens/Transcript/Summary?t=<%= transcriptId %>',
 
+    ensembl_transcript_grch38_url:
+        'http://ensembl.org/homo_sapiens/Transcript/Summary?t=<%= transcriptId %>',
+
     query_product_limit: 1000000,
 
     skin_show_gsva: false,
+
+    generic_assay_display_text:
+        'TREATMENT_RESPONSE:Treatment Response,MUTATIONAL_SIGNATURE:Mutational Signature',
+
+    saml_logout_local: false,
 };
 
 export default ServerConfigDefaults;

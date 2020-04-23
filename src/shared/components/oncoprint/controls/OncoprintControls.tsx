@@ -1,38 +1,59 @@
 import * as React from 'react';
-import {observer, Observer} from 'mobx-react';
-import {Button, ButtonGroup, Modal} from 'react-bootstrap';
+import { observer, Observer } from 'mobx-react';
+import { Button, ButtonGroup, Modal } from 'react-bootstrap';
 import CustomDropdown from './CustomDropdown';
 import ConfirmNgchmModal from './ConfirmNgchmModal';
 import ReactSelect from 'react-select1';
-import {MobxPromise} from 'mobxpromise';
-import {action, computed, IObservableObject, observable, ObservableMap, reaction, toJS,} from 'mobx';
+import { MobxPromise } from 'mobxpromise';
+import {
+    action,
+    computed,
+    IObservableObject,
+    observable,
+    ObservableMap,
+    reaction,
+    toJS,
+} from 'mobx';
 import _ from 'lodash';
-import {SortMode} from '../ResultsViewOncoprint';
-import {Gene, MolecularProfile} from 'shared/api/generated/CBioPortalAPI';
+import { SortMode } from '../ResultsViewOncoprint';
+import {
+    Gene,
+    MolecularProfile,
+    GenericAssayMeta,
+} from 'cbioportal-ts-api-client';
 import LoadingIndicator from 'shared/components/loadingIndicator/LoadingIndicator';
 import {
     DefaultTooltip,
     EditableSpan,
-    CheckedSelect
+    CheckedSelect,
 } from 'cbioportal-frontend-commons';
 import Slider from 'react-rangeslider';
 import 'react-rangeslider/lib/index.css';
 import './styles.scss';
 import classNames from 'classnames';
-import {SpecialAttribute} from '../../../cache/ClinicalDataCache';
-import {AlterationTypeConstants, ResultsViewPageStore, GenericAssayTypeConstants,} from '../../../../pages/resultsView/ResultsViewPageStore';
-import {OncoprintAnalysisCaseType, ExtendedClinicalAttribute} from '../../../../pages/resultsView/ResultsViewPageStoreUtils';
-import OQLTextArea, {GeneBoxType} from '../../GeneSelectionBox/OQLTextArea';
+import { SpecialAttribute } from '../../../cache/ClinicalDataCache';
+import {
+    AlterationTypeConstants,
+    ResultsViewPageStore,
+    GenericAssayTypeConstants,
+} from '../../../../pages/resultsView/ResultsViewPageStore';
+import {
+    OncoprintAnalysisCaseType,
+    ExtendedClinicalAttribute,
+} from '../../../../pages/resultsView/ResultsViewPageStoreUtils';
+import OQLTextArea, { GeneBoxType } from '../../GeneSelectionBox/OQLTextArea';
 import autobind from 'autobind-decorator';
-import {SingleGeneQuery} from '../../../lib/oql/oql-parser';
+import { SingleGeneQuery } from '../../../lib/oql/oql-parser';
 import AddClinicalTracks from '../../../../pages/resultsView/oncoprint/AddClinicalTracks';
-import DriverAnnotationControls, {IDriverAnnotationControlsHandlers} from "../../../../pages/resultsView/settings/DriverAnnotationControls";
+import DriverAnnotationControls, {
+    IDriverAnnotationControlsHandlers,
+} from '../../../../pages/resultsView/settings/DriverAnnotationControls';
 import OncoprintDropdownCount from 'pages/resultsView/oncoprint/OncoprintDropdownCount';
 import TextIconArea, {
     ITextIconAreaItemProps,
 } from 'shared/components/textIconArea/TextIconArea';
-import { extractTreatmentSelections } from '../OncoprintUtils';
-import { Treatment } from 'shared/lib/GenericAssayUtils/TreatmentUtils';
+import { extractGenericAssaySelections } from '../OncoprintUtils';
+import { deriveDisplayTextFromGenericAssayType } from 'pages/resultsView/plots/PlotsTabUtils';
 
 export interface IOncoprintControlsHandlers {
     onSelectColumnType?: (type: 'sample' | 'patient') => void;
@@ -69,10 +90,9 @@ export interface IOncoprintControlsHandlers {
         attributeIds: (string | SpecialAttribute)[]
     ) => void;
     onClickAddGenesToHeatmap?: () => void;
-    onClickAddTreatmentsToHeatmap?: (treatments: string[]) => void;
+    onClickAddGenericAssaysToHeatmap?: (entityIds: string[]) => void;
     onSelectHeatmapProfile?: (molecularProfileId: string) => void;
     onChangeHeatmapGeneInputValue?: (value: string) => void;
-    onChangeHeatmapTreatmentInputValue?: (value: string) => void;
     onClickNGCHM: () => void;
     onSetHorzZoom: (z: number) => void;
     onClickZoomIn: () => void;
@@ -111,12 +131,14 @@ export interface IOncoprintControlsState {
     }>;
     selectedClinicalAttributeIds?: string[];
     heatmapProfilesPromise?: MobxPromise<MolecularProfile[]>;
-    treatmentsPromise?: MobxPromise<Treatment[]>;
-    selectedHeatmapProfile?: string;
-    selectedHeatmapProfileAlterationType?: string;
+    genericAssayEntitiesGroupByGenericAssayTypePromise?: MobxPromise<{
+        [genericAssayType: string]: GenericAssayMeta[];
+    }>;
+    selectedHeatmapProfileId?: string;
+    selectedHeatmapProfileAlterationType?: string | undefined;
+    selectedHeatmapProfileGenericAssayType?: string | undefined;
     heatmapIsDynamicallyQueried?: boolean;
     heatmapGeneInputValue?: string;
-    heatmapTreatmentInputValue?: string;
     hideHeatmapMenu?: boolean;
     ngchmButtonActive?: boolean;
 
@@ -126,7 +148,7 @@ export interface IOncoprintControlsState {
     selectedCustomDriverAnnotationTiers?: ObservableMap<boolean>;
     annotateCustomDriverBinary?: boolean;
 
-    columnMode?: OncoprintAnalysisCaseType
+    columnMode?: OncoprintAnalysisCaseType;
 
     horzZoom: number;
 }
@@ -136,8 +158,18 @@ export interface IOncoprintControlsProps {
     handlers: IOncoprintControlsHandlers;
     state: IOncoprintControlsState & IObservableObject;
     oncoprinterMode?: boolean;
-    treatmentSelectOptions?: ISelectOption[];
-    selectedTreatmentIds?: string[];
+    molecularProfileIdToMolecularProfile?: {
+        [molecularProfileId: string]: MolecularProfile;
+    };
+    genericAssayEntitiesSelectOptionsGroupByGenericAssayType?: {
+        [genericAssayType: string]: ISelectOption[];
+    };
+    genericAssayEntitiesSelectOptionsGroupByMolecularProfileId?: {
+        [molecularProfileId: string]: ISelectOption[];
+    };
+    selectedGenericAssayEntitiesGroupByGenericAssayTypeFromUrl?: {
+        [genericAssayType: string]: string[];
+    };
 }
 
 export interface ISelectOption {
@@ -180,7 +212,7 @@ const EVENT_KEY = {
     downloadTabular: '29',
     horzZoomSlider: '30',
     viewNGCHM: '31',
-    addTreatmentsToHeatmap: '32',
+    addGenericAssaysToHeatmap: '32',
 };
 
 @observer
@@ -190,10 +222,10 @@ export default class OncoprintControls extends React.Component<
 > {
     @observable horzZoomSliderState: number;
     @observable heatmapGenesReady = false;
-    @observable private _selectedTreatmentIds: string[] = [];
-    private textareaTreatmentText = '';
-    @observable treatmentFilter = '';
-    @observable showConfirmNgchmModal:boolean = false;
+    @observable private _selectedGenericAssayEntityIds: string[];
+    private textareaGenericAssayEntityText = '';
+    @observable genericAssayEntityFilter = '';
+    @observable showConfirmNgchmModal: boolean = false;
 
     constructor(props: IOncoprintControlsProps) {
         super(props);
@@ -220,15 +252,43 @@ export default class OncoprintControls extends React.Component<
         this.onHorzZoomSliderSet = this.onHorzZoomSliderSet.bind(this);
         this.onSetHorzZoomTextInput = this.onSetHorzZoomTextInput.bind(this);
 
-        if (props.selectedTreatmentIds) {
-            this._selectedTreatmentIds = props.selectedTreatmentIds;
-        }
-
         this.horzZoomSliderState = props.state.horzZoom;
+        // initialze selected generic assay entity Ids from props
+        this.initializeSelectedGenericAssayEntityIds();
         reaction(
             () => this.props.state.horzZoom,
             z => (this.horzZoomSliderState = z)
         ); // when horz zoom changes, set slider state
+    }
+
+    private initializeSelectedGenericAssayEntityIds() {
+        // set _selectedGenericAssayEntityIds by following logic
+        // find selected entities from url (set 1), and find entities in selected profiles (set 1)
+        // find intersection of two sets (set 1 and set 2)
+        this._selectedGenericAssayEntityIds =
+            this.props
+                .selectedGenericAssayEntitiesGroupByGenericAssayTypeFromUrl &&
+            this.props.state.selectedHeatmapProfileGenericAssayType &&
+            this.props
+                .selectedGenericAssayEntitiesGroupByGenericAssayTypeFromUrl[
+                this.props.state.selectedHeatmapProfileGenericAssayType
+            ] &&
+            !_.isEmpty(
+                this.genericAssayEntitiesSelectOptionsInSelectedHeatmapProfile
+            )
+                ? _.intersectionBy(
+                      this.props
+                          .selectedGenericAssayEntitiesGroupByGenericAssayTypeFromUrl[
+                          this.props.state
+                              .selectedHeatmapProfileGenericAssayType
+                      ],
+                      _.map(
+                          this
+                              .genericAssayEntitiesSelectOptionsInSelectedHeatmapProfile,
+                          option => option.id
+                      )
+                  )
+                : [];
     }
 
     private onZoomInClick() {
@@ -256,6 +316,61 @@ export default class OncoprintControls extends React.Component<
     private onHeatmapProfileSelect(option: { label: string; value: string }) {
         this.props.handlers.onSelectHeatmapProfile &&
             this.props.handlers.onSelectHeatmapProfile(option.value);
+        // find the genericAssayType from selected profile
+        const genericAssayType =
+            this.props.molecularProfileIdToMolecularProfile &&
+            this.props.molecularProfileIdToMolecularProfile[option.value]
+                ? this.props.molecularProfileIdToMolecularProfile[option.value]
+                      .genericAssayType
+                : undefined;
+
+        // set _selectedGenericAssayEntityIds by following logic
+        // find selected entities from url (set 1), and find entities in selected profiles (set 1)
+        // find intersection of two sets (set 1 and set 2)
+        if (
+            this.props
+                .selectedGenericAssayEntitiesGroupByGenericAssayTypeFromUrl &&
+            genericAssayType &&
+            this.props
+                .selectedGenericAssayEntitiesGroupByGenericAssayTypeFromUrl[
+                genericAssayType
+            ] &&
+            !_.isEmpty(
+                this.genericAssayEntitiesSelectOptionsInSelectedHeatmapProfile
+            )
+        ) {
+            this._selectedGenericAssayEntityIds = _.intersectionBy(
+                this.props
+                    .selectedGenericAssayEntitiesGroupByGenericAssayTypeFromUrl[
+                    genericAssayType
+                ],
+                _.map(
+                    this
+                        .genericAssayEntitiesSelectOptionsInSelectedHeatmapProfile,
+                    option => option.id
+                )
+            );
+        } else {
+            this._selectedGenericAssayEntityIds = [];
+        }
+    }
+
+    @computed get genericAssayEntitiesSelectOptionsInSelectedHeatmapProfile() {
+        if (
+            this.props.state.selectedHeatmapProfileId &&
+            this.props
+                .genericAssayEntitiesSelectOptionsGroupByMolecularProfileId &&
+            this.props
+                .genericAssayEntitiesSelectOptionsGroupByMolecularProfileId[
+                this.props.state.selectedHeatmapProfileId
+            ]
+        ) {
+            return this.props
+                .genericAssayEntitiesSelectOptionsGroupByMolecularProfileId[
+                this.props.state.selectedHeatmapProfileId
+            ];
+        }
+        return [];
     }
 
     private toggleShowMinimap() {
@@ -421,10 +536,10 @@ export default class OncoprintControls extends React.Component<
                 this.props.handlers.onClickAddGenesToHeatmap &&
                     this.props.handlers.onClickAddGenesToHeatmap();
                 break;
-            case EVENT_KEY.addTreatmentsToHeatmap:
-                this.props.handlers.onClickAddTreatmentsToHeatmap &&
-                    this.props.handlers.onClickAddTreatmentsToHeatmap(
-                        this._selectedTreatmentIds
+            case EVENT_KEY.addGenericAssaysToHeatmap:
+                this.props.handlers.onClickAddGenericAssaysToHeatmap &&
+                    this.props.handlers.onClickAddGenericAssaysToHeatmap(
+                        this._selectedGenericAssayEntityIds
                     );
                 break;
             case EVENT_KEY.downloadSVG:
@@ -448,9 +563,12 @@ export default class OncoprintControls extends React.Component<
                     this.props.handlers.onClickDownload('tabular');
                 break;
             case EVENT_KEY.viewNGCHM:
-            	if (this.props.state.ngchmButtonActive && this.props.handlers.onClickNGCHM) {
+                if (
+                    this.props.state.ngchmButtonActive &&
+                    this.props.handlers.onClickNGCHM
+                ) {
                     this.showConfirmNgchmModal = true;
-            	}
+                }
                 break;
         }
     }
@@ -489,22 +607,17 @@ export default class OncoprintControls extends React.Component<
     }
 
     @autobind
-    private onChangeTreatmentTextArea(text: string): string {
-        return extractTreatmentSelections(
+    private onChangeGenericAssayTextArea(text: string): string {
+        return extractGenericAssaySelections(
             text,
-            this._selectedTreatmentIds,
-            this.treatmentOptionsByValueMap
+            this._selectedGenericAssayEntityIds,
+            this.genericAssayEntitiesOptionsByValueMap
         );
     }
 
     @autobind
-    private onTreatmentRemoved(treatmentId: string) {
-        _.remove(this._selectedTreatmentIds, v => v === treatmentId);
-    }
-
-    private filterHeatmapProfilesByGenericAssayType(profiles: MolecularProfile[]) {
-        return _.filter(profiles, (profile) => profile.molecularAlterationType !== AlterationTypeConstants.GENERIC_ASSAY ||
-                                                                              profile.molecularAlterationType === AlterationTypeConstants.GENERIC_ASSAY && profile.genericAssayType === GenericAssayTypeConstants.TREATMENT_RESPONSE)
+    private onAddAllGenericAssayRemoved(entityId: string) {
+        _.remove(this._selectedGenericAssayEntityIds, v => v === entityId);
     }
 
     @computed get heatmapProfileOptions() {
@@ -512,11 +625,8 @@ export default class OncoprintControls extends React.Component<
             this.props.state.heatmapProfilesPromise &&
             this.props.state.heatmapProfilesPromise.result
         ) {
-            // only add GENERIC_ASSAY when generic_assay_type is TREATMENT_RESPONSE
-            // TODO: apply to all generic assay profiles when front-end implementation finish
-            const filteredHeatmapProfiles = this.filterHeatmapProfilesByGenericAssayType(this.props.state.heatmapProfilesPromise.result);
             return _.map(
-                filteredHeatmapProfiles,
+                this.props.state.heatmapProfilesPromise.result,
                 profile => ({
                     label: profile.name,
                     value: profile.molecularProfileId,
@@ -528,59 +638,88 @@ export default class OncoprintControls extends React.Component<
         }
     }
 
-    @computed get treatmentOptionsByValueMap(): {
+    @computed get genericAssayEntitiesOptionsByValueMap(): {
         [value: string]: ISelectOption;
     } {
-        return _.keyBy(this.props.treatmentSelectOptions, 'id');
+        if (
+            this.props.state.selectedHeatmapProfileGenericAssayType &&
+            this.props
+                .genericAssayEntitiesSelectOptionsGroupByGenericAssayType &&
+            this.props.genericAssayEntitiesSelectOptionsGroupByGenericAssayType[
+                this.props.state.selectedHeatmapProfileGenericAssayType
+            ]
+        ) {
+            return _.keyBy(
+                this.props
+                    .genericAssayEntitiesSelectOptionsGroupByGenericAssayType[
+                    this.props.state.selectedHeatmapProfileGenericAssayType!
+                ]!,
+                'id'
+            );
+        }
+        return {};
     }
 
     @autobind
     @action
-    private onSelectTreatments(selectedElements: ISelectOption[]) {
-        this._selectedTreatmentIds = selectedElements.map(o => o.id);
+    private onSelectGenericAssayEntities(selectedElements: ISelectOption[]) {
+        this._selectedGenericAssayEntityIds = selectedElements.map(o => o.id);
     }
 
-    @computed get selectedTreatments(): ISelectOption[] {
-        return this._selectedTreatmentIds.map(
-            o => this.treatmentOptionsByValueMap[o]
+    @computed get selectedGenericAssayEntities(): ISelectOption[] {
+        const filteredSelectedGenericAssayEntityIds = _.intersection(
+            this._selectedGenericAssayEntityIds,
+            _.keys(this.genericAssayEntitiesOptionsByValueMap)
+        );
+        return filteredSelectedGenericAssayEntityIds.map(
+            o => this.genericAssayEntitiesOptionsByValueMap[o]
         );
     }
 
-    @computed get selectedTreatmentsJS() {
-        return toJS(this.selectedTreatments);
+    @computed get selectedGenericAssaysJS() {
+        return toJS(this.selectedGenericAssayEntities);
     }
 
-    @computed get textareaTreatmentEntries(): ITextIconAreaItemProps[] {
-        return _.map(this.selectedTreatments, (d: ISelectOption) => ({
+    @computed get textareaGenericAssayEntries(): ITextIconAreaItemProps[] {
+        return _.map(this.selectedGenericAssayEntities, (d: ISelectOption) => ({
             value: d.id,
             label: d.id,
         }));
     }
 
-    @computed get filteredTreatmentOptions() {
-        if (this.treatmentFilter && this.props.treatmentSelectOptions) {
-            const regex = new RegExp(this.treatmentFilter, 'i');
-            return this.props.treatmentSelectOptions.filter(
+    @computed get filteredGenericAssayOptions() {
+        const allOptionsInSelectedProfile =
+            this.props.state.selectedHeatmapProfileId &&
+            this.props
+                .genericAssayEntitiesSelectOptionsGroupByMolecularProfileId
+                ? this.props
+                      .genericAssayEntitiesSelectOptionsGroupByMolecularProfileId[
+                      this.props.state.selectedHeatmapProfileId
+                  ]
+                : [];
+        if (this.genericAssayEntityFilter) {
+            const regex = new RegExp(this.genericAssayEntityFilter, 'i');
+            return allOptionsInSelectedProfile.filter(
                 option => regex.test(option.label) || regex.test(option.value)
             );
         }
-        return this.props.treatmentSelectOptions;
+        return allOptionsInSelectedProfile;
     }
 
     @autobind
     @action
     onInputChange(input: string) {
-        this.treatmentFilter = input;
+        this.genericAssayEntityFilter = input;
     }
 
-    @autobind onAddAllTreatments() {
-        if (this.filteredTreatmentOptions) {
+    @autobind onAddAllGenericAssays() {
+        if (this.filteredGenericAssayOptions) {
             // merge the current selected options with all the filtered ones and remove duplicates
-            this.onSelectTreatments(
+            this.onSelectGenericAssayEntities(
                 _.uniqBy(
                     [
-                        ...this.selectedTreatmentsJS,
-                        ...this.filteredTreatmentOptions,
+                        ...this.selectedGenericAssaysJS,
+                        ...this.filteredGenericAssayOptions,
                     ],
                     option => option.value
                 )
@@ -589,8 +728,8 @@ export default class OncoprintControls extends React.Component<
     }
 
     @computed get addAllLabel() {
-        if (this.filteredTreatmentOptions) {
-            return `Select all (${this.filteredTreatmentOptions.length})`;
+        if (this.filteredGenericAssayOptions) {
+            return `Select all (${this.filteredGenericAssayOptions.length})`;
         }
         return 'Select all';
     }
@@ -627,11 +766,10 @@ export default class OncoprintControls extends React.Component<
             showItemSelectionElements &&
             this.props.state.selectedHeatmapProfileAlterationType !==
                 AlterationTypeConstants.GENERIC_ASSAY;
-        const showTreatmentsTextArea =
+        const showGenericAssaysTextArea =
             showItemSelectionElements &&
             this.props.state.selectedHeatmapProfileAlterationType ===
                 AlterationTypeConstants.GENERIC_ASSAY;
-
         if (
             this.props.oncoprinterMode ||
             this.props.state.hideHeatmapMenu ||
@@ -654,7 +792,7 @@ export default class OncoprintControls extends React.Component<
                                     .isPending
                             }
                             onChange={this.onHeatmapProfileSelect}
-                            value={this.props.state.selectedHeatmapProfile}
+                            value={this.props.state.selectedHeatmapProfileId}
                             options={this.heatmapProfileOptions}
                         />
                         {showGenesTextArea && [
@@ -675,52 +813,85 @@ export default class OncoprintControls extends React.Component<
                                 Add Genes to Heatmap
                             </button>,
                         ]}
-                        {showTreatmentsTextArea &&
-                            this.props.state.treatmentsPromise!.isComplete && [
-                                <TextIconArea
-                                    elements={this.textareaTreatmentEntries}
-                                    text={this.textareaTreatmentText}
-                                    placeholder="Type space- or comma-separated treatments here, then click 'Add Treatments to Heatmap'"
-                                    onChangeTextArea={
-                                        this.onChangeTreatmentTextArea
-                                    }
-                                    onIconClicked={this.onTreatmentRemoved}
-                                    classNames={['treatment-textarea']}
-                                />,
-                                <div
-                                    className={classNames('treatment-selector')}
-                                >
-                                    <CheckedSelect
-                                        name="treatment-select"
-                                        placeholder="Search for Treatments..."
-                                        options={this.filteredTreatmentOptions}
-                                        onChange={this.onSelectTreatments}
-                                        value={this.selectedTreatmentsJS}
-                                        onInputChange={this.onInputChange}
-                                        addAllLabel={this.addAllLabel}
-                                        onAddAll={this.onAddAllTreatments}
-                                        inputValue={this.treatmentFilter}
-                                    />
-                                </div>,
+                        {showGenericAssaysTextArea && [
+                            <TextIconArea
+                                elements={this.textareaGenericAssayEntries}
+                                text={this.textareaGenericAssayEntityText}
+                                placeholder={`Type space- or comma-separated ${deriveDisplayTextFromGenericAssayType(
+                                    this.props.state
+                                        .selectedHeatmapProfileGenericAssayType!
+                                )} here, then click 'Add ${deriveDisplayTextFromGenericAssayType(
+                                    this.props.state
+                                        .selectedHeatmapProfileGenericAssayType!,
+                                    true
+                                )} to Heatmap'`}
+                                onChangeTextArea={
+                                    this.onChangeGenericAssayTextArea
+                                }
+                                onIconClicked={this.onAddAllGenericAssayRemoved}
+                                classNames={['generic-assay-textarea']}
+                            />,
+                            <div
+                                className={classNames('generic-assay-selector')}
+                            >
+                                <CheckedSelect
+                                    name="generic-assay-select"
+                                    placeholder={`Search for ${deriveDisplayTextFromGenericAssayType(
+                                        this.props.state
+                                            .selectedHeatmapProfileGenericAssayType!,
+                                        true
+                                    )}...`}
+                                    options={this.filteredGenericAssayOptions}
+                                    onChange={this.onSelectGenericAssayEntities}
+                                    value={this.selectedGenericAssaysJS}
+                                    onInputChange={this.onInputChange}
+                                    addAllLabel={this.addAllLabel}
+                                    onAddAll={this.onAddAllGenericAssays}
+                                    inputValue={this.genericAssayEntityFilter}
+                                />
+                            </div>,
+                            <button
+                                key="addGenericAssaysToHeatmapButton"
+                                className="btn btn-sm btn-default"
+                                name={EVENT_KEY.addGenericAssaysToHeatmap}
+                                onClick={this.onButtonClick}
+                            >
+                                {`Add ${deriveDisplayTextFromGenericAssayType(
+                                    this.props.state
+                                        .selectedHeatmapProfileGenericAssayType!,
+                                    true
+                                )} to Heatmap`}
+                            </button>,
+                        ]}
+
+                        {this.props.state.ngchmButtonActive && [
+                            <hr />,
+                            <DefaultTooltip
+                                overlay={
+                                    <span>
+                                        Open a new tab to visualize this study
+                                        as Next Generation Clustered Heatmaps
+                                        from MD Anderson Cancer Center.
+                                    </span>
+                                }
+                            >
                                 <button
-                                    key="addTreatmentsToHeatmapButton"
-                                    className="btn btn-sm btn-default"
-                                    name={EVENT_KEY.addTreatmentsToHeatmap}
+                                    className={classNames(
+                                        'btn',
+                                        'btn-sm',
+                                        'btn-default'
+                                    )}
+                                    name={EVENT_KEY.viewNGCHM}
                                     onClick={this.onButtonClick}
                                 >
-                                    Add Treatment Response to Heatmap
-                                </button>,
-                            ]}
-
-                        {this.props.state.ngchmButtonActive &&
-                            (<DefaultTooltip overlay={<span>Open a new tab for NG-CHM with this study from MD Anderson Cancer Center compendium.</span>}>
-                             <button
-                                 className={classNames("btn", "btn-sm", "btn-default")}
-                                 name={EVENT_KEY.viewNGCHM}
-                                 onClick={this.onButtonClick}
-                             >View Next-Generation Clustered Heat Map (NG-CHM)</button>
-                             </DefaultTooltip>)
-                        }
+                                    Whole Study Heatmap (NG-CHM){' '}
+                                    <i
+                                        className="fa fa-external-link"
+                                        aria-hidden="true"
+                                    ></i>
+                                </button>
+                            </DefaultTooltip>,
+                        ]}
                     </div>
                 );
             }
@@ -733,15 +904,18 @@ export default class OncoprintControls extends React.Component<
                 title="Add Heatmap Tracks"
                 id="heatmapDropdown"
                 className="heatmap"
-                titleElement={<OncoprintDropdownCount
-                    // only add GENERIC_ASSAY when generic_assay_type is TREATMENT_RESPONSE
-                    // TODO: apply to all generic assay profiles when front-end implementation finish
-                    count={
-                        this.props.state.heatmapProfilesPromise.isComplete && this.props.state.heatmapProfilesPromise!.result ?
-                            this.filterHeatmapProfilesByGenericAssayType(this.props.state.heatmapProfilesPromise!.result!).length :
-                            undefined
-                    }
-                />}
+                titleElement={
+                    <OncoprintDropdownCount
+                        count={
+                            this.props.state.heatmapProfilesPromise
+                                .isComplete &&
+                            this.props.state.heatmapProfilesPromise!.result
+                                ? this.props.state.heatmapProfilesPromise!
+                                      .result!.length
+                                : undefined
+                        }
+                    />
+                }
             >
                 {menu}
             </CustomDropdown>
@@ -915,9 +1089,13 @@ export default class OncoprintControls extends React.Component<
                     <div style={{ marginLeft: 10 }}>
                         <DriverAnnotationControls
                             state={this.props.state}
-                            handlers={Object.assign({
-                                onCustomDriverTierCheckboxClick: this.onCustomDriverTierCheckboxClick
-                            } as Partial<IDriverAnnotationControlsHandlers>, this.props.handlers)}
+                            handlers={Object.assign(
+                                {
+                                    onCustomDriverTierCheckboxClick: this
+                                        .onCustomDriverTierCheckboxClick,
+                                } as Partial<IDriverAnnotationControlsHandlers>,
+                                this.props.handlers
+                            )}
                         />
                     </div>
 
@@ -952,7 +1130,8 @@ export default class OncoprintControls extends React.Component<
                                     }
                                     onClick={this.onInputClick}
                                     disabled={
-                                        !this.props.state.distinguishGermlineMutations
+                                        !this.props.state
+                                            .distinguishGermlineMutations
                                     }
                                 />{' '}
                                 Hide germline mutations
@@ -966,25 +1145,34 @@ export default class OncoprintControls extends React.Component<
             return (
                 <>
                     <h5>Annotate and Filter</h5>
-                    <div style={{display:"flex", flexDirection:"row", alignItems:"center", marginLeft:10}}>
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginLeft: 10,
+                        }}
+                    >
                         Please see the
                         <button
                             style={{
-                                marginLeft:5,
-                                marginRight:5,
-                                marginBottom:0,
-                                width:"auto",
-                                padding:"1px 5px 1px 5px"
+                                marginLeft: 5,
+                                marginRight: 5,
+                                marginBottom: 0,
+                                width: 'auto',
+                                padding: '1px 5px 1px 5px',
                             }}
                             className="btn btn-primary"
-                            onClick={()=>{ store.resultsPageSettingsVisible = !store.resultsPageSettingsVisible }}
+                            onClick={() => {
+                                store.resultsPageSettingsVisible = !store.resultsPageSettingsVisible;
+                            }}
                         >
-                            <i className="fa fa-sliders"/>
+                            <i className="fa fa-sliders" />
                         </button>
                         menu.
                     </div>
                 </>
-            )
+            );
         }
     }
 
@@ -1104,7 +1292,8 @@ export default class OncoprintControls extends React.Component<
                             name="columnType"
                             value={EVENT_KEY.columnTypeSample}
                             checked={
-                                this.props.state.columnMode === OncoprintAnalysisCaseType.SAMPLE
+                                this.props.state.columnMode ===
+                                OncoprintAnalysisCaseType.SAMPLE
                             }
                             onClick={this.onInputClick}
                         />{' '}
@@ -1118,7 +1307,8 @@ export default class OncoprintControls extends React.Component<
                             name="columnType"
                             value={EVENT_KEY.columnTypePatient}
                             checked={
-                                this.props.state.columnMode === OncoprintAnalysisCaseType.PATIENT
+                                this.props.state.columnMode ===
+                                OncoprintAnalysisCaseType.PATIENT
                             }
                             onClick={this.onInputClick}
                         />{' '}
@@ -1183,7 +1373,8 @@ export default class OncoprintControls extends React.Component<
                             }
                         />{' '}
                         Only show clinical track legends for altered{' '}
-                        {this.props.state.columnMode === OncoprintAnalysisCaseType.PATIENT
+                        {this.props.state.columnMode ===
+                        OncoprintAnalysisCaseType.PATIENT
                             ? 'patients'
                             : 'samples'}
                         .
@@ -1263,9 +1454,7 @@ export default class OncoprintControls extends React.Component<
                     overlay={<span>Zoom out of oncoprint.</span>}
                     placement="top"
                 >
-                    <div
-                        onClick={this.onZoomOutClick}
-                    >
+                    <div onClick={this.onZoomOutClick}>
                         <i className="fa fa-search-minus"></i>
                     </div>
                 </DefaultTooltip>
@@ -1310,10 +1499,8 @@ export default class OncoprintControls extends React.Component<
                     overlay={<span>Zoom in to oncoprint.</span>}
                     placement="top"
                 >
-                    <div
-                        onClick={this.onZoomInClick}
-                    >
-                          <i className="fa fa-search-plus"></i>
+                    <div onClick={this.onZoomInClick}>
+                        <i className="fa fa-search-plus"></i>
                     </div>
                 </DefaultTooltip>
             </div>
@@ -1333,6 +1520,7 @@ export default class OncoprintControls extends React.Component<
                         onClick={this.toggleShowMinimap}
                     >
                         <img
+                            data-test="ShowMinimapButton"
                             src={require('./toggle-minimap.svg')}
                             alt="icon"
                             style={{ width: 15, height: 15 }}
@@ -1363,11 +1551,11 @@ export default class OncoprintControls extends React.Component<
                     <Observer>{this.getDownloadMenu}</Observer>
                     <Observer>{this.getHorzZoomControls}</Observer>
                     {this.minimapButton}
-                    <ConfirmNgchmModal 
+                    <ConfirmNgchmModal
                         show={this.showConfirmNgchmModal}
-                        onHide={()=>this.showConfirmNgchmModal=false}
+                        onHide={() => (this.showConfirmNgchmModal = false)}
                         openNgchmWindow={this.props.handlers.onClickNGCHM}
-                        />
+                    />
                 </ButtonGroup>
             </div>
         );

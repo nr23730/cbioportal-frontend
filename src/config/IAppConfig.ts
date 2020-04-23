@@ -38,6 +38,8 @@ export interface IServerConfig {
     oncoprint_oncokb_default: boolean;
     oncoprint_hotspots_default: boolean;
     genomenexus_url: string | null;
+    genomenexus_url_grch38: string | null;
+    genomenexus_website_url: string | null;
     mygene_info_url: string | null;
     g2s_url: string | null;
     google_analytics_profile_id: string | null;
@@ -56,7 +58,10 @@ export interface IServerConfig {
     show_oncokb: boolean;
     show_civic: boolean;
     show_genomenexus: boolean;
+    show_pathway_mapper: boolean;
+    show_mutation_mapper_tool_grch38: boolean;
     skin_documentation_about: string | null;
+    skin_documentation_software: string | null;
     skin_documentation_baseurl: string | null;
     skin_blurb: string | null;
     skin_custom_header_tabs: string | null;
@@ -102,6 +107,7 @@ export interface IServerConfig {
     study_view: StudyView;
     uniprot_id_url: string | null;
     ensembl_transcript_url: string | null;
+    ensembl_transcript_grch38_url: string | null;
     studiesWithGermlineConsentedSamples: string[] | undefined;
     mdacc_heatmap_study_meta_url: string | null;
     mdacc_heatmap_study_url: string | null;
@@ -117,10 +123,13 @@ export interface IServerConfig {
     query_product_limit: number;
     dat_uuid_revoke_other_tokens: boolean;
     dat_method: string;
-    skin_show_gsva:boolean;
+    skin_show_gsva: boolean;
+    oncoKbTokenDefined: boolean;
+    generic_assay_display_text: string; // this has a default
+    saml_logout_local: boolean;
 }
 
 export interface IFhirsparkConfig {
     host: string | null;
     port: string | null;
-} 
+}

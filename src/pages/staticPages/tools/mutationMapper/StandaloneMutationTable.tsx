@@ -1,29 +1,32 @@
-import * as React from "react";
-import {observer} from "mobx-react";
+import * as React from 'react';
+import { observer } from 'mobx-react';
 import {
-    IMutationTableProps, MutationTableColumnType, default as MutationTable
-} from "shared/components/mutationTable/MutationTable";
-import TumorAlleleFreqColumnFormatter from "shared/components/mutationTable/column/TumorAlleleFreqColumnFormatter";
-import CancerTypeColumnFormatter from "shared/components/mutationTable/column/CancerTypeColumnFormatter";
+    IMutationTableProps,
+    MutationTableColumnType,
+    default as MutationTable,
+} from 'shared/components/mutationTable/MutationTable';
+import TumorAlleleFreqColumnFormatter from 'shared/components/mutationTable/column/TumorAlleleFreqColumnFormatter';
+import CancerTypeColumnFormatter from 'shared/components/mutationTable/column/CancerTypeColumnFormatter';
 
 export interface IStandaloneMutationTableProps extends IMutationTableProps {
     // add standalone specific props here if needed
 }
 
 @observer
-export default class StandaloneMutationTable extends MutationTable<IStandaloneMutationTableProps> {
-
+export default class StandaloneMutationTable extends MutationTable<
+    IStandaloneMutationTableProps
+> {
     constructor(props: IStandaloneMutationTableProps) {
         super(props);
     }
 
-    public static defaultProps =
-    {
+    public static defaultProps = {
         ...MutationTable.defaultProps,
         columns: [
             MutationTableColumnType.SAMPLE_ID,
             MutationTableColumnType.CANCER_TYPE,
             MutationTableColumnType.ANNOTATION,
+            MutationTableColumnType.HGVSG,
             MutationTableColumnType.FUNCTIONAL_IMPACT,
             MutationTableColumnType.REF_READS_N,
             MutationTableColumnType.VAR_READS_N,
@@ -39,25 +42,36 @@ export default class StandaloneMutationTable extends MutationTable<IStandaloneMu
             MutationTableColumnType.CHROMOSOME,
             MutationTableColumnType.PROTEIN_CHANGE,
             MutationTableColumnType.MUTATION_TYPE,
+            MutationTableColumnType.VARIANT_TYPE,
             MutationTableColumnType.TUMOR_ALLELE_FREQ,
             MutationTableColumnType.NORMAL_ALLELE_FREQ,
             MutationTableColumnType.EXON,
             MutationTableColumnType.HGVSC,
             MutationTableColumnType.GNOMAD,
             MutationTableColumnType.CLINVAR,
-            MutationTableColumnType.DBSNP
-        ]
+            MutationTableColumnType.DBSNP,
+        ],
     };
 
     protected generateColumns() {
         super.generateColumns();
 
         // override default visibility for some columns
-        this._columns[MutationTableColumnType.TUMOR_ALLELE_FREQ].visible = TumorAlleleFreqColumnFormatter.isVisible(
-            this.props.dataStore ? this.props.dataStore.allData : this.props.data);
-        this._columns[MutationTableColumnType.CANCER_TYPE].visible = CancerTypeColumnFormatter.isVisible(
-            this.props.dataStore ? this.props.dataStore.allData : this.props.data,
-            this.props.uniqueSampleKeyToTumorType);
+        this._columns[
+            MutationTableColumnType.TUMOR_ALLELE_FREQ
+        ].visible = TumorAlleleFreqColumnFormatter.isVisible(
+            this.props.dataStore
+                ? this.props.dataStore.allData
+                : this.props.data
+        );
+        this._columns[
+            MutationTableColumnType.CANCER_TYPE
+        ].visible = CancerTypeColumnFormatter.isVisible(
+            this.props.dataStore
+                ? this.props.dataStore.allData
+                : this.props.data,
+            this.props.uniqueSampleKeyToTumorType
+        );
         this._columns[MutationTableColumnType.FUNCTIONAL_IMPACT].visible = true;
 
         // order columns
@@ -66,8 +80,10 @@ export default class StandaloneMutationTable extends MutationTable<IStandaloneMu
         this._columns[MutationTableColumnType.CANCER_TYPE].order = 15;
         this._columns[MutationTableColumnType.PROTEIN_CHANGE].order = 20;
         this._columns[MutationTableColumnType.ANNOTATION].order = 30;
+        this._columns[MutationTableColumnType.HGVSG].order = 35;
         this._columns[MutationTableColumnType.FUNCTIONAL_IMPACT].order = 38;
         this._columns[MutationTableColumnType.MUTATION_TYPE].order = 40;
+        this._columns[MutationTableColumnType.VARIANT_TYPE].order = 45;
         //this._columns[MutationTableColumnType.COPY_NUM].order = 50;
         //this._columns[MutationTableColumnType.COSMIC].order = 60;
         this._columns[MutationTableColumnType.MUTATION_STATUS].order = 70;

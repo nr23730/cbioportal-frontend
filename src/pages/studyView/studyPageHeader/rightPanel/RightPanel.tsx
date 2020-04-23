@@ -5,7 +5,7 @@ import { action, computed, observable } from 'mobx';
 import styles from '../styles.module.scss';
 import autobind from 'autobind-decorator';
 import { SingleGeneQuery } from 'shared/lib/oql/oql-parser';
-import { Gene } from 'shared/api/generated/CBioPortalAPI';
+import { Gene } from 'cbioportal-ts-api-client';
 import OQLTextArea, {
     GeneBoxType,
 } from 'shared/components/GeneSelectionBox/OQLTextArea';
@@ -57,13 +57,13 @@ export default class RightPanel extends React.Component<IRightPanelProps, {}> {
         return (
             <div className="studyViewSummaryHeader">
                 <div className={styles.rightPanel}>
-                    <div className={"small"}>
-                    <OQLTextArea
-                        inputGeneQuery={this.props.store.geneQueryStr}
-                        validateInputGeneQuery={false}
-                        callback={this.updateSelectedGenes}
-                        location={GeneBoxType.STUDY_VIEW_PAGE}
-                    />
+                    <div className={'small'}>
+                        <OQLTextArea
+                            inputGeneQuery={this.props.store.geneQueryStr}
+                            validateInputGeneQuery={false}
+                            callback={this.updateSelectedGenes}
+                            location={GeneBoxType.STUDY_VIEW_PAGE}
+                        />
                     </div>
                     <button
                         disabled={this.isQueryButtonDisabled}

@@ -1,12 +1,12 @@
 # cbioportal-frontend
-This is the frontend code for cBioPortal using React, MobX and TypeScript. Read more about the architecture of cBioPortal [here](https://docs.cbioportal.org/2.1-deployment/architecture-overview).
+This is the frontend code for cBioPortal which uses React, MobX and TypeScript. Read more about the architecture of cBioPortal [here](https://docs.cbioportal.org/2.1-deployment/architecture-overview).
 
 ## Branch Information
 | | main branch | upcoming release branch | later release candidate branch |
 | --- | --- | --- | --- |
 | Branch name | [`master`](https://github.com/cBioPortal/cbioportal-frontend/tree/master) |  release-3.3.0 |  [`rc`](https://github.com/cBioPortal/cbioportal-frontend/tree/rc) |
 | Description | All bug fixes and features not requiring database migrations go here. This code is either already in production or will be released this week | Next release that requires database migrations. Thorough manual product review often takes place for this branch before release | Later releases with features that require database migrations. This is useful to allow merging in new features without affecting the upcoming release. Could be seen as a development branch, but note that only high quality pull requests are merged. That is the feature should be pretty much ready for release after merge. |
-| Status | [![CircleCI](https://circleci.com/gh/cBioPortal/cbioportal-frontend/tree/master.svg?style=svg)](https://circleci.com/gh/cBioPortal/cbioportal-frontend/tree/master) | -- | [![CircleCI](https://circleci.com/gh/cBioPortal/cbioportal-frontend/tree/rc.svg?style=svg)](https://circleci.com/gh/cBioPortal/cbioportal-frontend/tree/rc) |
+| Test Status | [CircleCI master workflow](https://circleci.com/gh/cBioPortal/workflows/cbioportal-frontend/tree/master) | -- | [CircleCI rc workflow](https://circleci.com/gh/cBioPortal/workflows/cbioportal-frontend/tree/rc) |
 | Live instance frontend | https://frontend.cbioportal.org / https://master--cbioportalfrontend.netlify.com/ | -- | https://rc--cbioportalfrontend.netlify.com |
 | Live instance backend | https://www.cbioportal.org / https://master.cbioportal.org | -- | https://rc.cbioportal.org |
 
@@ -14,9 +14,14 @@ Note: you can always check the version of the live instance by checking the vari
 
 ## Run
 
-Make sure you have installed the node version specified in [package.json](https://github.com/cBioPortal/cbioportal-frontend/blob/master/package.json). You might want to use NVM to install the particular version.
+Make sure you have installed the node version and yarn version specified in
+[package.json](https://github.com/cBioPortal/cbioportal-frontend/blob/master/package.json).
 
-Remove old compiled `node_modules` if exists
+> **Tip:**  We recommend that you use [nvm:  Node Version Manager](https://github.com/nvm-sh/nvm) and [yvm:  Yarn Version Manager](https://yvm.js.org/docs/overview) to switch between versions more easily.
+
+> **Windows Tip:** If you are developing on Windows, we recommend that you use [Ubuntu / Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
+Remove old compiled `node_modules` if it exists
 
 ```
 rm -rf node_modules
@@ -32,7 +37,7 @@ To build DLLs in common-dist folder (must be done prior to start of dev server)
 yarn run buildDLL:dev
 ```
 
-To start dev server with hot reload enabled
+To start the dev server with hot reload enabled
 ```
 # set the environment variables you want based on what branch you're branching
 # from
@@ -45,10 +50,12 @@ Example pages:
  - http://localhost:3000/
  - http://localhost:3000/patient?studyId=lgg_ucsf_2014&caseId=P04
 
-To run unit/integration tests (need to have API URL defined in `.env`)
+To run unit/integration tests
 ```
 yarn run test
 ```
+
+> **Windows Tip:** There is a known solved hiccup running the tests on Ubuntu via Windows Subsystem for Linux (WSL): [#7096](https://github.com/cBioPortal/cbioportal/issues/7096)
 
 To run unit/integration tests in watch mode
 ```
@@ -60,20 +67,24 @@ To run unit/integration tests in watch mode (where specName is a fragment of the
 yarn run test:watch -- --grep=#specName#
 ```
 
-## Formatting Code with Prettier JS
-We are starting to format commits using Prettier JS. Right now this is optional, but you may run into formatting commits.  
-Things to remember:
-- Keep Prettier JS changes in a separate commit
-- Only run it on files you're changing or creating anyways
+## Formatting Code with PrettierJS
+When you make a git commit, PrettierJS will automatically run *in write mode* on all the files you changed, and make 
+formatting adjustments to those entire files as necessary, before passing them through to the commit (i.e. this is a 
+"pre-commit git hook"). No action from you is necessary for this. You may observe that your changes don't look exactly 
+the same as you wrote them due to formatting adjustments.
 
-To run Prettier JS: 
+When you make a pull request, CircleCI will run PrettierJS *in check mode* on all of the files that have changed between 
+your pull request and the base branch of your pull request. If all of the files are formatted correctly, then the
+CircleCI `prettier` job will pass and you'll see a green check on Github. But if, for whatever reason, this check *fails*, 
+you must run the following command in your cbioportal home directory:
 ```$bash
-yarn run prettier --write <files>
+yarn run prettierFixLocal
 ```
-
-To run Prettier JS on your last commit:
+This will make PrettierJS run through the same files that CircleCI checks (i.e. all files changed since the base branch)
+but *in write mode* and thus adjust those files to have correct formatting. When you make this update, the CircleCI 
+`prettier` job should pass. To check if it will pass, you can also run the same command that CircleCI will run:
 ```$bash
-yarn run prettierLastCommit
+yarn run prettierCheckCircleCI
 ```
 
 
@@ -93,7 +104,7 @@ yarn run test
 ```
 
 ## Check in cBioPortal context
-Go to http://cbioportal.org (`master` branch) or http://cbioportal.org/beta/ (`rc` branch)
+Go to https://cbioportal.org (`master` branch) or https://rc.cbioportal.org/ (`rc` branch)
 
 In your browser console set:
 ```
@@ -115,13 +126,13 @@ Change `x` to the number of your pull request.
 
 ## Run e2e-tests
 
-E2e-tests can be run against public cbioportal instances or against a local dockerized backend. These two e2e-tests types are referred to as `remote` and `local` types of e2e-tests.
+End-to-end tests can be run against public cbioportal instances or against a local dockerized backend. These two e2e-tests types are referred to as `remote` and `local` types of e2e-tests.
 
 ## Run of `remote e2e-tests`
 
-Install webdriver-manager, which manages standalone Selenium installation:
+First, install webdriver-manager, which manages standalone Selenium installation:
 ```
-yarn install -g webdriver-manager
+yarn global add webdriver-manager
 ```
 Run updater to get necessary binaries
 ```
@@ -129,29 +140,36 @@ webdriver-manager update
 ```
 Start the webdriver-manager
 ```
-webdriver-manager start # ...or `startSSL` (see below)
+webdriver-manager start
 ```
-In one terminal run frontend (this will get mounted inside whatever
-`CBIOPORTAL_URL` is pointing to)
+
+> **Tip:** To verify that your webdriver-manager is running, go to:  http://127.0.0.1:4444/wd/hub/static/resource/hub.html.
+
+> **Windows Tip:** If you are developing on Ubuntu under Windows Subsystem for Linux (WSL), we recommend that you install and run webdriver-manager via Powershell/Windows.  If you install and run webdriver-manager via Ubuntu, webdriver-manager has a hard time finding the Chrome browser, and this will cause all the end-to-end tests to fail.
+
+In a second terminal, run the frontend
 ```bash
-# set the environment variables you want based on what branch you're branching
-# from
+# set the environment variables for your branch
 export BRANCH_ENV=master # or rc if branching from rc
 # export any custom external API URLs by editing env/custom.sh
-yarn run start
+yarn run startSSL
 ```
-In another terminal run the e2e tests
+> **Tip:** Before going to the next step, verify that your front end code is running by going to: https://localhost:3000/.
+
+In a third terminal, run the e2e tests
 ```bash
-# set the environment variables you want based on what branch you're branching
-# from
 export SPEC_FILE_PATTERN=./remote/specs/**/*.spec.js
 export SCREENSHOT_DIRECTORY=./remote/screenshots
 export BRANCH_ENV=master # or rc if branching from rc
 # export any custom external API URLs in env/custom.sh
 cd end-to-end-test
 yarn install
-yarn run test-webdriver-manager # use `test-webdriver-manager-debug` for debugging of tests
+yarn run test-webdriver-manager
+# use `test-webdriver-manager-debug` for debugging of tests
 ```
+If all goes well, you will soon seen the end-to-end tests running via your Chrome browser.
+
+> **Tip:** If you want to run just one end-to-end test, you can modify `SPEC_FILE_PATTERN` accordingly.  For example, if you want to only run the `genomicEvolution.spec.js` test, you can use:  `export SPEC_FILE_PATTERN=./remote/specs/core/genomicEvolution.spec.js`.
 
 ### Mount of frontend onto HTTPS backend
 A custom frontend can be tested against any backend in the web browser using a local node server (command `yarn run start`) and the `localdev` flag passed to th e browser (see section 'Check in cBioPortal context'). For remote backends that communicate over a HTTP over SSL (https) connection (e.g., cbioportal.org or rc.cbioportal.org), the frontend has to be served over SSL as well. In this case run `yarn run startSSL` in stead of `yarn run start`.
@@ -302,7 +320,21 @@ import {something} from 'cbioportal-frontend-commons'
 
 Remember that the packages are used by other projects and compatibility needs to be carefully managed. 
 
-Whenever you need to update code under packages, you should also consider updating the version number in the corresponding `package.json` as well as the dependencies of other packages depending on the package you updated. For example if you update the `cbioportal-frontend-commons` version from `0.1.1` to `0.1.2`, corresponding `cbioportal-frontend-commons` dependency in the `package.json` for `react-mutation-mapper` and `cbioportal-frontend` should also be updated to the new version.
+When you update code under packages a new version of changed packages automatically published once the code is merged to master. However, in a rare case when you would like to set a custom package version, you can run
+ 
+```
+yarn run updatePackageVersion
+```
+
+Alternatively you can manually set a custom version. When updating manually you should update the version number in the corresponding `package.json` as well as the dependencies of other packages depending on the package you update. For example if you update the `cbioportal-frontend-commons` version from `0.1.1` to `0.1.2-beta.0`, corresponding `cbioportal-frontend-commons` dependency in the `package.json` for `react-mutation-mapper` and `cbioportal-frontend` should also be updated to the new version.
+
+Note that when setting a custom version if you want the next published package version to be, for example, `1.0.6`, then you should set the new version to `1.0.6-beta.1` or a similar prerelease version. If you set the custom version to `1.0.6`, the next published version will be `1.0.7` not `1.0.6`. This is because the auto publish script runs in any case to detect changes in all packages including custom versioned packages.
+
+#### Update API clients
+
+```
+yarn run updateAPI
+```
 
 ## Components
 
