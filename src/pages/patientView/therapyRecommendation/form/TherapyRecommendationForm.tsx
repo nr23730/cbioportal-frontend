@@ -4,7 +4,7 @@ import {Modal, Button} from "react-bootstrap";
 import { ITherapyRecommendation, EvidenceLevel } from "shared/model/TherapyRecommendation";
 import { TherapyRecommendationFormAlterationPositiveInput, 
     TherapyRecommendationFormAlterationNegativeInput } from "./TherapyRecommendationFormAlterationInput";
-import { Mutation, ClinicalData, DiscreteCopyNumberData } from "shared/api/generated/CBioPortalAPI";
+import { Mutation, ClinicalData, DiscreteCopyNumberData } from "cbioportal-ts-api-client";
 import TherapyRecommendationFormDrugInput from "./TherapyRecommendationFormDrugInput";
 import TherapyRecommendationFormClinicalInput from "./TherapyRecommendationFormClinicalInput";
 import Select from 'react-select';

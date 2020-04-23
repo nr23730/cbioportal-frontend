@@ -3,9 +3,10 @@ import * as _ from 'lodash';
 import {Modal, Button} from "react-bootstrap";
 import { ITherapyRecommendation, EvidenceLevel } from "shared/model/TherapyRecommendation";
 import Select from 'react-select';
-import { IndicatorQueryResp, Treatment, IndicatorQueryTreatment } from "cbioportal-frontend-commons/dist/api/generated/OncoKbAPI";
+import { IndicatorQueryResp } from "oncokb-ts-api-client";
 import { getNewTherapyRecommendation } from "../TherapyRecommendationTableUtils";
-import { IOncoKbDataWrapper } from "shared/model/OncoKB";
+import { RemoteData } from 'react-mutation-mapper';
+import { IOncoKbData } from "cbioportal-frontend-commons";
 import PubMedCache from "shared/cache/PubMedCache";
 import { ICache } from "cbioportal-frontend-commons";
 
@@ -13,8 +14,8 @@ import { ICache } from "cbioportal-frontend-commons";
 interface ITherapyRecommendationFormOncoKbProps {
     show: boolean;
     patientID: string;
-    oncoKbResult?: IOncoKbDataWrapper;
-    cnaOncoKbResult?: IOncoKbDataWrapper;
+    oncoKbResult?: RemoteData<IOncoKbData | Error | undefined>;
+    cnaOncoKbResult?: RemoteData<IOncoKbData | Error | undefined>;
     pubMedCache?: PubMedCache;
     title: string;
     userEmailAddress: string;
