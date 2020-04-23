@@ -2,7 +2,7 @@ import React from "react";
 import { ITherapyRecommendation, IClinicalData } from "shared/model/TherapyRecommendation";
 import CreatableSelect from 'react-select/creatable';
 import _ from "lodash";
-import { ClinicalData } from "shared/api/generated/CBioPortalAPI";
+import { ClinicalData } from "cbioportal-ts-api-client";
 
 interface TherapyRecommendationFormClinicalInputProps {
   data: ITherapyRecommendation;

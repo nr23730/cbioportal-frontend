@@ -1,6 +1,6 @@
 import React from "react";
 import { ITherapyRecommendation, IGeneticAlteration } from "shared/model/TherapyRecommendation";
-import { Mutation, DiscreteCopyNumberData } from "shared/api/generated/CBioPortalAPI";
+import { Mutation, DiscreteCopyNumberData } from "cbioportal-ts-api-client";
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import _ from "lodash";
