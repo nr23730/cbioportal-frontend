@@ -35,9 +35,9 @@ export class StudyList {
     addStudy(study: Study, keyword: String) {
         var nct_id = study.ProtocolSection.IdentificationModule.NCTId;
 
-        if (this.list.get(nct_id)) {
+        if (this.list.has(nct_id)) {
             //study is allready in list. Just add new keyword an increase numver
-            this.list.get(nct_id).addFound(keyword);
+            this.list.get(nct_id)!.addFound(keyword);
         } else {
             //study not yet in list, add it
             this.list.set(nct_id, new StudyListEntry(study, keyword));
