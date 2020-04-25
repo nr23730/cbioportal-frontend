@@ -1248,9 +1248,13 @@ export class PatientViewPageStore {
         let port = '3001';
         if (AppConfig.fhirspark && AppConfig.fhirspark.host && AppConfig.fhirspark.host !== 'undefined')
             host = AppConfig.fhirspark.host;
-        if (AppConfig.fhirspark && AppConfig.fhirspark.port && AppConfig.fhirspark.port !== 'undefined')
-        port = AppConfig.fhirspark.port;
-            return 'http://' + host + ':' + port + '/patients/';
+        if (
+            AppConfig.fhirspark &&
+            AppConfig.fhirspark.port &&
+            AppConfig.fhirspark.port !== 'undefined'
+        )
+            port = AppConfig.fhirspark.port;
+        return '//' + host + ':' + port + '/patients/';
     }
 
     private loadTherapyRecommendations() {
