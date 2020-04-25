@@ -1806,7 +1806,7 @@ export class PatientViewPageStore {
             AppConfig.fhirspark.port !== 'undefined'
         )
             port = AppConfig.fhirspark.port;
-        return 'http://' + host + ':' + port + '/patients/';
+        return '//' + host + ':' + port + '/patients/';
     }
 
     private loadTherapyRecommendations() {
