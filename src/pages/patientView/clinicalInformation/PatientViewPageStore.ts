@@ -1852,7 +1852,8 @@ export class PatientViewPageStore {
                             .IdentificationModule.OfficialTitle,
                         nct: std.getStudy().ProtocolSection.IdentificationModule
                             .NCTId,
-                        status: 'status',
+                        status: std.getStudy().ProtocolSection.StatusModule
+                            .OverallStatus,
                     };
                     result.push(newTrial);
                 }
