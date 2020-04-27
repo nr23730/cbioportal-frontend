@@ -12,6 +12,7 @@ import {
 } from '../../../shared/api/ClinicalTrialsGovStudyStrucutre';
 import { StudyList, StudyListEntry } from './utils/StudyList';
 import LazyMobXTable from '../../../shared/components/lazyMobXTable/LazyMobXTable';
+import ClinicalTrialMatchTableOptions from './ClinicalTrialMatchTableOptions';
 
 enum ColumnKey {
     NUM_FOUND = 'Appearences',
@@ -109,10 +110,15 @@ export class ClinicalTrialMatchTable extends React.Component<
     render() {
         return (
             <div>
-                <ClinicalTrialMatchTableComponent
-                    data={this.props.clinicalTrialMatches}
-                    columns={this._columns}
-                />
+                <div>
+                    <ClinicalTrialMatchTableOptions store={this.props.store} />
+                </div>
+                <div>
+                    <ClinicalTrialMatchTableComponent
+                        data={this.props.clinicalTrialMatches}
+                        columns={this._columns}
+                    />
+                </div>
             </div>
         );
     }
