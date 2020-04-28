@@ -21,6 +21,8 @@ enum ColumnKey {
     CONDITIONS = 'Conditions',
     NCT_NUMBER = 'NCT Number',
     STATUS = 'Status',
+    LOCATIONS = 'Locations',
+    INTERVENTIONS = 'Interventions',
 }
 
 interface IClinicalTrialMatchProps {
@@ -35,6 +37,8 @@ export interface IDetailedClinicalTrialMatch {
     title: String;
     nct: String;
     status: String;
+    locations: string[];
+    interventions: string[];
 }
 
 class ClinicalTrialMatchTableComponent extends LazyMobXTable<
@@ -48,9 +52,9 @@ export class ClinicalTrialMatchTable extends React.Component<
 > {
     private _columns = [
         {
-            name: ColumnKey.NUM_FOUND,
+            name: ColumnKey.STATUS,
             render: (trial: IDetailedClinicalTrialMatch) => (
-                <div>{trial.found}</div>
+                <div>{trial.status}</div>
             ),
             width: 300,
         },
@@ -62,21 +66,7 @@ export class ClinicalTrialMatchTable extends React.Component<
             width: 300,
         },
         {
-            name: ColumnKey.CONDITIONS,
-            render: (trial: IDetailedClinicalTrialMatch) => (
-                <div>{trial.conditions}</div>
-            ),
-            width: 300,
-        },
-        {
             name: ColumnKey.TITLE,
-            render: (trial: IDetailedClinicalTrialMatch) => (
-                <div>{trial.title}</div>
-            ),
-            width: 300,
-        },
-        {
-            name: ColumnKey.NCT_NUMBER,
             render: (trial: IDetailedClinicalTrialMatch) => (
                 <div>
                     <a
@@ -85,16 +75,34 @@ export class ClinicalTrialMatchTable extends React.Component<
                             'https://clinicaltrials.gov/ct2/show/' + trial.nct
                         }
                     >
-                        {trial.nct}
+                        {trial.title}
                     </a>
                 </div>
             ),
             width: 300,
         },
         {
-            name: ColumnKey.STATUS,
+            name: ColumnKey.CONDITIONS,
             render: (trial: IDetailedClinicalTrialMatch) => (
-                <div>{trial.status}</div>
+                <div>{trial.conditions}</div>
+            ),
+            width: 300,
+        },
+        {
+            name: ColumnKey.INTERVENTIONS,
+            render: (trial: IDetailedClinicalTrialMatch) => (
+                <div>
+                    <ul>{trial.interventions}</ul>
+                </div>
+            ),
+            width: 300,
+        },
+        {
+            name: ColumnKey.LOCATIONS,
+            render: (trial: IDetailedClinicalTrialMatch) => (
+                <div>
+                    <ul>{trial.locations}</ul>
+                </div>
             ),
             width: 300,
         },
