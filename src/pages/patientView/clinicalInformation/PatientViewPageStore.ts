@@ -1793,7 +1793,7 @@ export class PatientViewPageStore {
 
     private getJsonStoreUrl() {
         let host = window.location.hostname;
-        let port = '3001';
+        let port = '';
         if (
             AppConfig.fhirspark &&
             AppConfig.fhirspark.host &&
@@ -1805,8 +1805,8 @@ export class PatientViewPageStore {
             AppConfig.fhirspark.port &&
             AppConfig.fhirspark.port !== 'undefined'
         )
-            port = AppConfig.fhirspark.port;
-        return '//' + host + ':' + port + '/patients/';
+            port = ':' + AppConfig.fhirspark.port;
+        return '//' + host + port + '/therapyRecommendation/';
     }
 
     private loadTherapyRecommendations() {
