@@ -62,6 +62,8 @@ export type CancerGene = {
 
         'hugoSymbol': string
 
+        'isoform': string
+
         'mSKHeme': boolean
 
         'mSKImpact': boolean
@@ -71,6 +73,8 @@ export type CancerGene = {
         'oncogene': boolean
 
         'oncokbAnnotated': boolean
+
+        'refSeq': string
 
         'sangerCGC': boolean
 
@@ -88,13 +92,17 @@ export type MainType = {
 
 };
 export type OncoKBInfo = {
-    'dataVersion': Version
+    'apiVersion': string
+
+        'dataVersion': Version
 
         'levels': Array < InfoLevel >
 
         'ncitVersion': string
 
         'oncoTreeVersion': string
+
+        'publicInstance': boolean
 
 };
 export type Implication = {
