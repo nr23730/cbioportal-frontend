@@ -1,5 +1,5 @@
 export enum EvidenceLevel {
-    NA = "NA",
+    NA = 'NA',
     // I = "I",
     // II = "II",
     // III = "III",
@@ -13,15 +13,20 @@ export enum EvidenceLevel {
     IIIB = '3B',
     IV = '4',
     R1 = 'R1',
-    R2 = 'R2'
+    R2 = 'R2',
 }
 
 export enum Modified {
-    CREATED = "Created",
-    MODIFIED = "Modified",
-    DELETED = "Deleted"
+    CREATED = 'Created',
+    MODIFIED = 'Modified',
+    DELETED = 'Deleted',
 }
 
+export enum MtbState {
+    DRAFT = 'Draft',
+    COMPLETED = 'Completed',
+    ARCHIVED = 'Archived',
+}
 
 export interface IRecommender {
     credentials: string;
@@ -35,11 +40,14 @@ interface IModification {
     timestamp: string;
 }
 
-export interface IRecommendation {
+export interface IMtb {
+    id: string;
     therapyRecommendations: ITherapyRecommendation[];
-    geneticCounselingRecommendation: Boolean;
-    rebiopsyRecommendation: Boolean;
+    geneticCounselingRecommendation: boolean;
+    rebiopsyRecommendation: boolean;
     generalRecommendation: string;
+    date: string;
+    mtbState: MtbState;
 }
 
 export interface ITherapyRecommendation {
@@ -82,4 +90,4 @@ export interface IGeneticAlteration {
     entrezGeneId?: number;
     hugoSymbol: string;
     alteration?: string;
-};
+}

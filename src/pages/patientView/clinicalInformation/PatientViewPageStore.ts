@@ -126,7 +126,6 @@ import {
     IGeneticAlteration,
     EvidenceLevel,
     Modified,
-    IRecommendation,
 } from '../../../shared/model/TherapyRecommendation';
 import {
     flattenStringify,

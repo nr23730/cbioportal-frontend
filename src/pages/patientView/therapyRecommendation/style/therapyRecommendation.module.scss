@@ -1,145 +1,163 @@
 .armDiv {
-  margin: 0 0 3px 0;
+    margin: 0 0 3px 0;
 }
 .criteriaHr {
-  margin:3px 0 !important;
-  border-top-color: rgb(221, 221, 221) !important;
+    margin: 3px 0 !important;
+    border-top-color: rgb(221, 221, 221) !important;
 }
-.alterationUl{
-  margin-bottom: -20px !important;
-  list-style-type: none;
-  padding-left: 15px;
+.alterationUl {
+    margin-bottom: -20px !important;
+    list-style-type: none;
+    padding-left: 15px;
 }
 .genomicSpan {
-  margin-right:5px;
+    margin-right: 5px;
 }
 .tooltip {
-  maxHeight: 400px;
-  maxWidth: 600px;
-  overflow: auto;
+    maxheight: 400px;
+    maxwidth: 600px;
+    overflow: auto;
 }
 
 .icon {
-  .marginLeft {
-    margin-left:5px;
-  }
-  .marginRight {
-    margin-right:5px;
-  }
+    .marginLeft {
+        margin-left: 5px;
+    }
+    .marginRight {
+        margin-right: 5px;
+    }
 }
 
 .reasoningInfoContainer {
-  display: flex;
-  justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
 
-  .sampleIdsContainer {
-    flex: 0 0 auto;
-    width: 30px;
-  }
+    .sampleIdsContainer {
+        flex: 0 0 auto;
+        width: 30px;
+    }
 
-  .genomicInfoContainer {
-    flex: 1 1 auto;
-    margin: 0 5px 0 0;
-
-  }
+    .genomicInfoContainer {
+        flex: 1 1 auto;
+        margin: 0 5px 0 0;
+    }
 }
 
 .reasoningContainer {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-
-  .firstLeft{
-    display:flex;
-    flex: 0 0 auto;
-    width: 400px;
+    display: flex;
     justify-content: space-between;
+    margin-bottom: 10px;
 
-    .secondLeft {
-      flex: 0 0 auto;
-      width: 195px;
-      margin-right: 10px;
+    .firstLeft {
+        display: flex;
+        flex: 0 0 auto;
+        width: 400px;
+        justify-content: space-between;
+
+        .secondLeft {
+            flex: 0 0 auto;
+            width: auto; // 195px;
+            margin-right: 10px;
+        }
+        .secondRight {
+            flex: 1 1 auto;
+        }
     }
-    .secondRight{
-      flex: 1 1 auto;
+
+    .firstRight {
+        flex: 1 1 auto;
+        margin: 0 5px 0 0;
     }
-  }
-
-  .firstRight {
-    flex: 1 1 auto;
-    margin: 0 5px 0 0;
-  }
-
 }
 .powered {
-  padding-right: 9px;
-  text-align: right;
-  font-size: 13px;
+    padding-right: 9px;
+    text-align: right;
+    font-size: 13px;
 }
 .editContainer {
-  margin: 20% 0 20% 0;
+    margin: 20% 0 20% 0;
 
-  a:hover {
-    text-decoration: none;
-  }
+    a:hover {
+        text-decoration: none;
+    }
 }
 .edit {
-  font-size: 14px;
-  
+    font-size: 14px;
 
-  .editButton {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 90px;
-    margin-top: 10px;
-  }
+    .editButton {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 90px;
+        margin-top: 10px;
+    }
 
-  .deleteButton {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 10px;
-    width: 90px;
-    // background: red !important;
-    // color: white !important;
-    color: red !important;
-  }
+    .deleteButton {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        width: 90px;
+        // background: red !important;
+        // color: white !important;
+        color: red !important;
+    }
 
-  .addButton {
-    float: left;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 10px;
-    width: 90px;
-    color: white !important;
-    background: #73AD21 !important;
-  }
+    .addButton {
+        float: left;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        width: 90px;
+        color: white !important;
+        background: #73ad21 !important;
+    }
 
-  .addOncoKbButton {
-    float: left;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 10px;
-    width: 180px;
-    color: white !important;
-    background: #5bc0de !important;
-  }
+    .addMtbButton {
+        float: left;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        width: 120px;
+        color: white !important;
+        background: #73ad21 !important;
+    }
 
-  .testButton {
-    float: left;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 10px;
-    width: 180px;
-    color: white !important;
-    background: #333333 !important;
-  }
+    .addOncoKbButton {
+        float: left;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        width: 180px;
+        color: white !important;
+        background: #5bc0de !important;
+    }
 
+    .testButton {
+        float: left;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 10px;
+        width: 180px;
+        color: white !important;
+        background: #333333 !important;
+    }
 }
+
+// .mtb-table {
+//   ​table tr {
+//       border-bottom: 3px solid black !important;
+//   }​
+
+//   table tr:last-child {
+//       border-bottom: none;
+//   }
+// }
+
 // .statusBackground {
 //   display: block;
 //   padding: 10px;
