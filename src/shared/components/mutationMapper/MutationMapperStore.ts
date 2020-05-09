@@ -16,8 +16,8 @@ import {
     Mutation as SimpleMutation,
 } from 'cbioportal-utils';
 
-import genomeNexusClient from 'shared/api/genomeNexusClientInstance';
-import internalGenomeNexusClient from 'shared/api/genomeNexusInternalClientInstance';
+import defaultGenomeNexusClient from 'shared/api/genomeNexusClientInstance';
+import defaultInternalGenomeNexusClient from 'shared/api/genomeNexusInternalClientInstance';
 import oncoKBClient from 'shared/api/oncokbClientInstance';
 import { Gene, Mutation } from 'cbioportal-ts-api-client';
 import {
@@ -37,7 +37,7 @@ import {
     GenomeNexusAPI,
     GenomeNexusAPIInternal,
 } from 'genome-nexus-ts-api-client';
-import { CancerGene } from 'oncokb-ts-api-client';
+import { CancerGene, OncoKBInfo } from 'oncokb-ts-api-client';
 import { IPdbChain, PdbAlignmentIndex } from 'shared/model/Pdb';
 import {
     calcPdbIdNumericalValue,
@@ -58,6 +58,10 @@ import { IMutationMapperConfig } from './MutationMapperConfig';
 import autobind from 'autobind-decorator';
 import { normalizeMutation, normalizeMutations } from './MutationMapperUtils';
 import { getOncoKbApiUrl } from 'shared/api/urls';
+import {
+    ONCOKB_DEFAULT_INFO,
+    USE_DEFAULT_PUBLIC_INSTANCE_FOR_ONCOKB,
+} from 'react-mutation-mapper';
 
 export interface IMutationMapperStoreConfig {
     filterMutationsBySelectedTranscript?: boolean;
@@ -78,8 +82,8 @@ export default class MutationMapperStore extends DefaultMutationMapperStore {
         public uniqueSampleKeyToTumorType: {
             [uniqueSampleKey: string]: string;
         },
-        private genomenexus_client?: GenomeNexusAPI,
-        private genomenexus_internal_client?: GenomeNexusAPIInternal
+        protected genomenexusClient?: GenomeNexusAPI,
+        protected genomenexusInternalClient?: GenomeNexusAPIInternal
     ) {
         super(
             gene,
@@ -112,10 +116,24 @@ export default class MutationMapperStore extends DefaultMutationMapperStore {
                     this.mutationMapperConfig.genomenexus_url || undefined,
                 oncoKbUrl: getOncoKbApiUrl() || undefined,
             },
-            this.genomenexus_client || genomeNexusClient,
-            this.genomenexus_internal_client || internalGenomeNexusClient,
+            this.genomenexusClient || defaultGenomeNexusClient,
+            this.genomenexusInternalClient || defaultInternalGenomeNexusClient,
             oncoKBClient
         );
+    }
+
+    readonly oncoKbInfo: MobxPromise<OncoKBInfo> = remoteData(
+        {
+            invoke: () => this.dataFetcher.fetchOncoKbInfo(),
+            onError: () => ONCOKB_DEFAULT_INFO,
+        },
+        ONCOKB_DEFAULT_INFO
+    );
+
+    @computed get usingPublicOncoKbInstance() {
+        return this.oncoKbInfo.result
+            ? this.oncoKbInfo.result.publicInstance
+            : USE_DEFAULT_PUBLIC_INSTANCE_FOR_ONCOKB;
     }
 
     readonly mutationData = remoteData(

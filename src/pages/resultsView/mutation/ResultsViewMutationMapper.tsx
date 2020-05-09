@@ -128,6 +128,9 @@ export default class ResultsViewMutationMapper extends MutationMapper<
                 }
                 cosmicData={this.props.store.cosmicData.result}
                 oncoKbData={this.props.store.oncoKbData}
+                usingPublicOncoKbInstance={
+                    this.props.store.usingPublicOncoKbInstance
+                }
                 civicGenes={this.props.store.civicGenes}
                 civicVariants={this.props.store.civicVariants}
                 userEmailAddress={this.props.userEmailAddress}
@@ -137,6 +140,9 @@ export default class ResultsViewMutationMapper extends MutationMapper<
                 enableMyCancerGenome={this.props.enableMyCancerGenome}
                 enableCivic={this.props.enableCivic}
                 totalNumberOfExons={this.totalExonNumber}
+                generateGenomeNexusHgvsgUrl={
+                    this.props.store.generateGenomeNexusHgvsgUrl
+                }
             />
         );
     }
