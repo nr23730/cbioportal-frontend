@@ -22,7 +22,6 @@ import {
     truncate,
     getNewTherapyRecommendation,
     addModificationToTherapyRecommendation,
-    flattenStringify,
     isTherapyRecommendationEmpty,
     flattenObject,
     flattenArray,
@@ -36,13 +35,10 @@ import {
     DiscreteCopyNumberData,
 } from 'cbioportal-ts-api-client';
 import TherapyRecommendationForm from './form/TherapyRecommendationForm';
-import { SimpleCopyDownloadControls } from 'shared/components/copyDownloadControls/SimpleCopyDownloadControls';
 import { RemoteData } from 'react-mutation-mapper';
 import { IOncoKbData } from 'cbioportal-frontend-commons';
-import { CancerGene } from 'oncokb-ts-api-client';
 import TherapyRecommendationFormOncoKb from './form/TherapyRecommendationFormOncoKb';
 import PubMedCache from 'shared/cache/PubMedCache';
-import LabeledCheckbox from 'shared/components/labeledCheckbox/LabeledCheckbox';
 
 export type ITherapyRecommendationProps = {
     patientId: string;
@@ -61,7 +57,6 @@ export type ITherapyRecommendationProps = {
 
 export type ITherapyRecommendationState = {
     therapyRecommendations: ITherapyRecommendation[];
-    referenceMap: Map<number, string>;
 };
 
 enum ColumnKey {
@@ -95,7 +90,6 @@ export default class MtbTherapyRecommendationTable extends React.Component<
         super(props);
         this.state = {
             therapyRecommendations: props.therapyRecommendations,
-            referenceMap: new Map<number, string>(),
         };
     }
 
@@ -185,18 +179,6 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                                                 )}
                                         </div>
                                     </div>
-                                    {/* <div className={styles.secondRight}>
-                                        Negative for alterations:
-                                        <div>
-                                            {therapyRecommendation.reasoning
-                                                .geneticAlterationsMissing &&
-                                                this.getGeneticAlterationsNegative(
-                                                    therapyRecommendation
-                                                        .reasoning
-                                                        .geneticAlterationsMissing
-                                                )}
-                                        </div>
-                                    </div> */}
                                 </div>
 
                                 <div className={styles.firstRight}>
@@ -424,43 +406,6 @@ export default class MtbTherapyRecommendationTable extends React.Component<
         return this.getSampleIdIcons(fittingSampleIds);
     }
 
-    // public getSamplesForNegativeAlteration(
-    //     geneticAlteration: IGeneticAlteration
-    // ) {
-    //     if (!geneticAlteration || !geneticAlteration.hugoSymbol) return;
-    //     let allAlterationsOfPatient = this.getAllAlterationsOfPatient();
-    //     let groupedMutations = _.groupBy(
-    //         allAlterationsOfPatient,
-    //         (alteration: any) => alteration.sampleId
-    //     );
-    //     let fittingSampleIds: string[] = [];
-    //     for (let sampleId in groupedMutations) {
-    //         let allAlterationsOfSample = groupedMutations[sampleId];
-    //         if (
-    //             allAlterationsOfSample
-    //                 .map((alt: any) => alt.hugoGeneSymbol + alt.alteration)
-    //                 .includes(
-    //                     (geneticAlteration.hugoSymbol || '') +
-    //                         (geneticAlteration.alteration || '')
-    //                 )
-    //         ) {
-    //             fittingSampleIds.push(sampleId);
-    //         }
-    //     }
-    //     return (
-    //         <div>
-    //             <If condition={fittingSampleIds.length > 0}>
-    //                 <div>
-    //                     <p style={{ color: 'red' }}>
-    //                         Attention: Alteration in samples:
-    //                     </p>
-    //                     {this.getSampleIdIcons(fittingSampleIds)}
-    //                 </div>
-    //             </If>
-    //         </div>
-    //     );
-    // }
-
     public openDeleteForm(therapyRecommendation: ITherapyRecommendation) {
         if (this.props.onDelete(therapyRecommendation))
             this.updateTherapyRecommendationTable();
@@ -550,10 +495,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                     <div>
                         {geneticAlterations &&
                             geneticAlterations.map(
-                                (
-                                    geneticAlteration: IGeneticAlteration,
-                                    index: number
-                                ) => (
+                                (geneticAlteration: IGeneticAlteration) => (
                                     <div>
                                         {geneticAlteration &&
                                             this.getGeneticAlteration(
@@ -567,42 +509,6 @@ export default class MtbTherapyRecommendationTable extends React.Component<
             </React.Fragment>
         );
     }
-
-    // public getGeneticAlterationsNegative(
-    //     geneticAlterations: IGeneticAlteration[]
-    // ) {
-    //     return (
-    //         <React.Fragment>
-    //             <If
-    //                 condition={
-    //                     geneticAlterations && geneticAlterations.length > 0
-    //                 }
-    //             >
-    //                 <div>
-    //                     {geneticAlterations &&
-    //                         geneticAlterations.map(
-    //                             (
-    //                                 geneticAlteration: IGeneticAlteration,
-    //                                 index: number
-    //                             ) => (
-    //                                 <div>
-    //                                     {geneticAlteration &&
-    //                                         this.getGeneticAlteration(
-    //                                             geneticAlteration
-    //                                         )}
-    //                                     <div>
-    //                                         {this.getSamplesForNegativeAlteration(
-    //                                             geneticAlteration
-    //                                         )}
-    //                                     </div>
-    //                                 </div>
-    //                             )
-    //                         )}
-    //                 </div>
-    //             </If>
-    //         </React.Fragment>
-    //     );
-    // }
 
     public getGeneticAlteration(geneticAlteration: IGeneticAlteration) {
         return (
@@ -657,65 +563,9 @@ export default class MtbTherapyRecommendationTable extends React.Component<
         return text;
     }
 
-    private test() {
-        console.group('Test');
-        console.log(window.location);
-        // console.log(this.state.referenceMap);
-        // this.updateReferences();
-        console.groupEnd();
-    }
-
-    // @observable private flagTest = false;
-    // @observable private commentTest = "test123";
-
     render() {
         return (
             <div>
-                {/* <div style={{ marginBottom: '20px' }}>
-                    <h2 style={{ marginBottom: '5px' }}>Recommendations</h2>
-                    <div style={{ fontSize: 16, display: 'flex' }}>
-                        <LabeledCheckbox
-                            checked={this.props.geneticCounselingRecommended}
-                            onChange={() => {
-                                this.props.onEditGeneticCounselingRecommended(
-                                    !this.props.geneticCounselingRecommended
-                                );
-                            }}
-                            labelProps={{ style: { marginRight: 10 } }}
-                            // inputProps={{"data-test":"HeatmapCluster"}}
-                        >
-                            <span style={{ marginTop: '-2px' }}>
-                                Genetic Counseling
-                            </span>
-                        </LabeledCheckbox>
-                        <LabeledCheckbox
-                            checked={this.props.rebiopsyRecommended}
-                            onChange={() => {
-                                this.props.onEditRebiopsyRecommended(
-                                    !this.props.rebiopsyRecommended
-                                );
-                            }}
-                            labelProps={{ style: { marginRight: 10 } }}
-                            // inputProps={{"data-test":"HeatmapCluster"}}
-                        >
-                            <span style={{ marginTop: '-2px' }}>Rebiopsy</span>
-                        </LabeledCheckbox>
-                    </div>
-                    <h5 style={{ marginTop: '5px' }}>Comments</h5>
-                    <textarea
-                        title="Comments"
-                        rows={2}
-                        cols={80}
-                        value={this.props.commentRecommendation}
-                        onChange={event =>
-                            this.props.onEditCommentRecommendation(
-                                event.currentTarget.value
-                            )
-                        }
-                        // data-test='CustomCaseSetInput'
-                    />
-                </div> */}
-                {/* <h2 style={{ marginBottom: '0' }}>Therapy Recommendations</h2> */}
                 <p className={styles.edit}>
                     <Button
                         type="button"

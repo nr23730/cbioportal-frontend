@@ -20,7 +20,6 @@ import {
 import { SimpleCopyDownloadControls } from 'shared/components/copyDownloadControls/SimpleCopyDownloadControls';
 import { RemoteData } from 'react-mutation-mapper';
 import { IOncoKbData } from 'cbioportal-frontend-commons';
-import { CancerGene } from 'oncokb-ts-api-client';
 import PubMedCache from 'shared/cache/PubMedCache';
 import LabeledCheckbox from 'shared/components/labeledCheckbox/LabeledCheckbox';
 import WindowStore from 'shared/components/window/WindowStore';
@@ -33,22 +32,12 @@ export type IMtbProps = {
     clinicalData: ClinicalData[];
     sampleManager: SampleManager | null;
     mtbs: IMtb[];
-    therapyRecommendations: ITherapyRecommendation[];
-    geneticCounselingRecommended: boolean;
-    rebiopsyRecommended: boolean;
-    commentRecommendation: string;
     containerWidth: number;
     onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
     onAddOrEdit: (therapyRecommendation?: ITherapyRecommendation) => boolean;
-    onEditGeneticCounselingRecommended: (
-        geneticCounselingRecommended: boolean
-    ) => void;
-    onEditRebiopsyRecommended: (rebiopsyRecommended: boolean) => void;
-    onEditCommentRecommendation: (commentRecommendation: string) => void;
     onSaveData: (mtbs: IMtb[]) => void;
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     cnaOncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
-    oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>;
     pubMedCache?: PubMedCache;
 };
 

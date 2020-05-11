@@ -1711,22 +1711,6 @@ export default class PatientViewPage extends React.Component<
                                                     this.patientViewPageStore
                                                         .mtbs.result
                                                 }
-                                                therapyRecommendations={
-                                                    this.patientViewPageStore
-                                                        .therapyRecommendations
-                                                }
-                                                geneticCounselingRecommended={
-                                                    this.patientViewPageStore
-                                                        .geneticCounselingRecommended
-                                                }
-                                                rebiopsyRecommended={
-                                                    this.patientViewPageStore
-                                                        .rebiopsyRecommended
-                                                }
-                                                commentRecommendation={
-                                                    this.patientViewPageStore
-                                                        .commentRecommendation
-                                                }
                                                 containerWidth={
                                                     WindowStore.size.width - 20
                                                 }
@@ -1737,18 +1721,6 @@ export default class PatientViewPage extends React.Component<
                                                 onAddOrEdit={
                                                     this.patientViewPageStore
                                                         .therapyRecommendationOnAddOrEdit
-                                                }
-                                                onEditGeneticCounselingRecommended={
-                                                    this.patientViewPageStore
-                                                        .setGeneticCounselingRecommended
-                                                }
-                                                onEditRebiopsyRecommended={
-                                                    this.patientViewPageStore
-                                                        .setRebiopsyRecommended
-                                                }
-                                                onEditCommentRecommendation={
-                                                    this.patientViewPageStore
-                                                        .setCommentRecommendation
                                                 }
                                                 onSaveData={
                                                     this.patientViewPageStore
@@ -1761,10 +1733,6 @@ export default class PatientViewPage extends React.Component<
                                                 cnaOncoKbData={
                                                     this.patientViewPageStore
                                                         .cnaOncoKbData
-                                                }
-                                                oncoKbCancerGenes={
-                                                    this.patientViewPageStore
-                                                        .oncoKbCancerGenes
                                                 }
                                                 pubMedCache={
                                                     this.patientViewPageStore
