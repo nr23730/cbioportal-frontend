@@ -45,6 +45,7 @@ export type IMtbProps = {
     ) => void;
     onEditRebiopsyRecommended: (rebiopsyRecommended: boolean) => void;
     onEditCommentRecommendation: (commentRecommendation: string) => void;
+    onSaveData: (mtbs: IMtb[]) => void;
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     cnaOncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     oncoKbCancerGenes?: RemoteData<CancerGene[] | Error | undefined>;
@@ -248,6 +249,12 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
         this.setState({ mtbs: newMtbs });
     }
 
+    private test() {
+        console.group('Test save mtbs');
+        this.props.onSaveData(this.state.mtbs);
+        console.groupEnd();
+    }
+
     render() {
         return (
             <div>
@@ -264,7 +271,13 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         ></i>{' '}
                         Add MTB
                     </Button>
-                    {/* <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button> */}
+                    <Button
+                        type="button"
+                        className={'btn btn-default ' + styles.testButton}
+                        onClick={() => this.test()}
+                    >
+                        Test (Update)
+                    </Button>
                 </p>
                 <MtbTableComponent
                     data={this.state.mtbs}

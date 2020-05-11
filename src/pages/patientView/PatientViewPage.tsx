@@ -322,6 +322,12 @@ export default class PatientViewPage extends React.Component<
     private shouldShowTherapyRecommendation(
         patientViewPageStore: PatientViewPageStore
     ): boolean {
+        return false;
+    }
+
+    private shouldShowMtbTab(
+        patientViewPageStore: PatientViewPageStore
+    ): boolean {
         return true;
     }
 
@@ -1647,7 +1653,7 @@ export default class PatientViewPage extends React.Component<
                                         </MSKTab>
                                     )}
 
-                                {this.shouldShowTherapyRecommendation(
+                                {this.shouldShowMtbTab(
                                     this.patientViewPageStore
                                 ) &&
                                     this.patientViewPageStore.mutationData
@@ -1658,7 +1664,10 @@ export default class PatientViewPage extends React.Component<
                                         .isComplete &&
                                     this.patientViewPageStore.oncoKbData
                                         .isComplete &&
-                                    // this.patientViewPageStore.therapyRecommendation.isComplete &&
+                                    (this.patientViewPageStore.mtbs
+                                        .isComplete ||
+                                        this.patientViewPageStore.mtbs
+                                            .isError) &&
                                     this.patientViewPageStore.cnaOncoKbData
                                         .isComplete && (
                                         <MSKTab
@@ -1685,19 +1694,23 @@ export default class PatientViewPage extends React.Component<
                                                         .result
                                                 )}
                                                 sampleManager={sampleManager}
-                                                mtbs={[
-                                                    {
-                                                        id: 'test123',
-                                                        generalRecommendation:
-                                                            'test',
-                                                        geneticCounselingRecommendation: true,
-                                                        rebiopsyRecommendation: false,
-                                                        date: '2020-05-05',
-                                                        mtbState:
-                                                            MtbState.DRAFT,
-                                                        therapyRecommendations: [],
-                                                    },
-                                                ]}
+                                                // mtbs={[
+                                                //     {
+                                                //         id: 'test123',
+                                                //         generalRecommendation:
+                                                //             'test',
+                                                //         geneticCounselingRecommendation: true,
+                                                //         rebiopsyRecommendation: false,
+                                                //         date: '2020-05-05',
+                                                //         mtbState:
+                                                //             MtbState.DRAFT,
+                                                //         therapyRecommendations: [],
+                                                //     },
+                                                // ]}
+                                                mtbs={
+                                                    this.patientViewPageStore
+                                                        .mtbs.result
+                                                }
                                                 therapyRecommendations={
                                                     this.patientViewPageStore
                                                         .therapyRecommendations
@@ -1736,6 +1749,10 @@ export default class PatientViewPage extends React.Component<
                                                 onEditCommentRecommendation={
                                                     this.patientViewPageStore
                                                         .setCommentRecommendation
+                                                }
+                                                onSaveData={
+                                                    this.patientViewPageStore
+                                                        .updateMtbs
                                                 }
                                                 oncoKbData={
                                                     this.patientViewPageStore

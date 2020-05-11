@@ -126,6 +126,7 @@ import {
     IGeneticAlteration,
     EvidenceLevel,
     Modified,
+    IMtb,
 } from '../../../shared/model/TherapyRecommendation';
 import {
     flattenStringify,
@@ -142,6 +143,10 @@ import {
 } from 'shared/api/ClinicalTrialsGovStudyStrucutre';
 import { IDetailedClinicalTrialMatch } from '../clinicalTrialMatch/ClinicalTrialMatchTable';
 import { searchStudiesForKeywordAsString } from 'shared/api/ClinicalTrialMatchAPI';
+import {
+    fetchMtbsUsingGET,
+    updateMtbUsingPUT,
+} from 'shared/api/TherapyRecommendationAPI';
 
 type PageMode = 'patient' | 'sample';
 
@@ -1652,6 +1657,25 @@ export class PatientViewPageStore {
     //     }
     // })
 
+    readonly mtbs = remoteData<IMtb[]>(
+        {
+            invoke: () => {
+                return fetchMtbsUsingGET(
+                    this.getMtbJsonStoreUrl(this.getSafePatientId())
+                );
+            },
+        },
+        []
+    );
+
+    updateMtbs = (mtbs: IMtb[]) => {
+        updateMtbUsingPUT(
+            this.getSafePatientId(),
+            this.getMtbJsonStoreUrl(this.getSafePatientId()),
+            mtbs
+        );
+    };
+
     @observable private _therapyRecommendations: ITherapyRecommendation[] = [];
     @observable public geneticCounselingRecommended: boolean = false;
     @observable public rebiopsyRecommended: boolean = false;
@@ -1806,6 +1830,24 @@ export class PatientViewPageStore {
         )
             port = ':' + AppConfig.fhirspark.port;
         return '//' + host + port + '/therapyRecommendation/';
+    }
+
+    private getMtbJsonStoreUrl(id: string) {
+        let host = window.location.hostname;
+        let port = '';
+        if (
+            AppConfig.fhirspark &&
+            AppConfig.fhirspark.host &&
+            AppConfig.fhirspark.host !== 'undefined'
+        )
+            host = AppConfig.fhirspark.host;
+        if (
+            AppConfig.fhirspark &&
+            AppConfig.fhirspark.port &&
+            AppConfig.fhirspark.port !== 'undefined'
+        )
+            port = ':' + AppConfig.fhirspark.port;
+        return '//' + host + port + '/mtb/' + id;
     }
 
     private loadTherapyRecommendations() {
