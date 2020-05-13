@@ -1,90 +1,93 @@
-import { IRecommendation } from "shared/model/TherapyRecommendation";
+import { IMtb } from 'shared/model/TherapyRecommendation';
 import * as request from 'superagent';
 
-
-
-function getJsonStoreUrl() {
-    return 'http://' + window.location.hostname + ':3001/patients/';
-}
-
-function flattenArray(x: Array<any>) : string {
-    let y : any = {};
+export function flattenArray(x: Array<any>): Array<any> {
+    let y: any[] = [];
     x.forEach(function(elem, index) {
-        let elemY : any = {};
-        for(var i in elem) {
-            if(!elem.hasOwnProperty(i)) {
+        let elemY: any = {};
+        for (var i in elem) {
+            if (!elem.hasOwnProperty(i)) {
                 elem[i] = elem[i];
             }
             elemY[i] = elem[i];
         }
-        y[index] = elemY;   
+        y[index] = elemY;
     });
     return y;
 }
 
+export async function fetchMtbsUsingGET(url: string) {
+    console.log('### MTB ### Calling GET: ' + url);
+    return request
+        .get(url)
+        .then(res => {
+            if (res.ok) {
+                console.group('### MTB ### Success GETting ' + url);
+                console.log(JSON.parse(res.text));
+                console.groupEnd();
+                const response = JSON.parse(res.text);
+                return response.mtbs.map(
+                    (mtb: any) =>
+                        ({
+                            id: mtb.id,
+                            therapyRecommendations: mtb.therapyRecommendations,
+                            geneticCounselingRecommendation:
+                                mtb.geneticCounselingRecommendation,
+                            rebiopsyRecommendation: mtb.rebiopsyRecommendation,
+                            generalRecommendation: mtb.generalRecommendation,
+                            date: mtb.date,
+                            mtbState: mtb.mtbState,
+                            samples: mtb.samples,
+                        } as IMtb)
+                );
+            } else {
+                console.group('### MTB ### ERROR res not ok GETting ' + url);
+                console.log(JSON.parse(res.text));
+                console.groupEnd();
 
-
-export async function fetchTherapyRecommendationUsingGET(id: string) : Promise<IRecommendation> {
-    return request.get(getJsonStoreUrl() + encodeURIComponent(id))
-    .then((res)=>{
-        // if (!err && res.ok) {
-            console.group("Success GETting " + this.patientId);
-            console.log(JSON.parse(res.text));
+                return [] as IMtb[];
+            }
+        })
+        .catch(err => {
+            console.group('### MTB ### ERROR catched GETting ' + url);
+            console.log(JSON.parse(err));
             console.groupEnd();
-            let patient = JSON.parse(res.text);
-            let geneticCounselingRecommended = patient.geneticCounselingRecommendation;
-            let rebiopsyRecommended = patient.rebiopsyRecommendation;
-            let commentRecommendation = patient.generalRecommendation;
-            var therapyRecommendations = Object.keys(patient.therapyRecommendations).map(function(index){
-                return patient.therapyRecommendations[index];
-            });
-            return {
-                geneticCounselingRecommendation: geneticCounselingRecommended,
-                rebiopsyRecommendation: rebiopsyRecommended,
-                generalRecommendation: commentRecommendation,
-                therapyRecommendations: therapyRecommendations
-            } as IRecommendation;
-            
-        // } else {
-        //     return null;// {} as IRecommendation;
-        // }
-    });
+
+            return [] as IMtb[];
+        });
 }
 
-
-export async function writeTherapyRecommendation(id:string, recommendation: IRecommendation) {
-    request.put(getJsonStoreUrl() + encodeURIComponent(id))
-    .set('Content-Type', 'application/json')
-    .send(JSON.stringify(
-        ({
-            id: encodeURIComponent(id), 
-            geneticCounselingRecommendation: recommendation.geneticCounselingRecommendation,
-            rebiopsyRecommendation: recommendation.rebiopsyRecommendation,
-            generalRecommendation: recommendation.generalRecommendation,
-            therapyRecommendations: recommendation.therapyRecommendations
-        })))
-    .end((err, res)=>{
-        if (!err && res.ok) {
-            console.log("Success PUTting " + id);
-        } else {
-            console.log("Error PUTting " + id + "... trying POST");
-            request.post(getJsonStoreUrl())
-            .set('Content-Type', 'application/json')
-            .send(JSON.stringify(
-                ({
-                    id: encodeURIComponent(id), 
-                    geneticCounselingRecommendation: recommendation.geneticCounselingRecommendation,
-                    rebiopsyRecommendation: recommendation.rebiopsyRecommendation,
-                    generalRecommendation: recommendation.generalRecommendation,
-                    therapyRecommendations: recommendation.therapyRecommendations
-                })))
-            .end((err, res)=>{
-                if (!err && res.ok) {
-                    console.log("Success POSTing " + id);
-                } else {
-                    console.log("Error POSTing " + id);
-                }
-            });
-        }
-    });
+export async function updateMtbUsingPUT(id: string, url: string, mtbs: IMtb[]) {
+    mtbs.forEach(
+        mtb =>
+            (mtb.therapyRecommendations = flattenArray(
+                mtb.therapyRecommendations
+            ))
+    );
+    console.log('### MTB ### Calling PUT: ' + url);
+    return request
+        .put(url)
+        .set('Content-Type', 'application/json')
+        .send(
+            JSON.stringify({
+                id: id,
+                mtbs: flattenArray(mtbs),
+            })
+        )
+        .then(res => {
+            if (res.ok) {
+                console.group('### MTB ### Success PUTting ' + url);
+                console.log(JSON.parse(res.text));
+                console.groupEnd();
+            } else {
+                console.group('### MTB ### ERROR res not ok PUTting ' + url);
+                console.log(JSON.parse(res.text));
+                console.groupEnd();
+            }
+        })
+        .catch(err => {
+            console.group('### MTB ### ERROR catched PUTting ' + url);
+            console.log(JSON.parse(err));
+            console.groupEnd();
+        });
 }

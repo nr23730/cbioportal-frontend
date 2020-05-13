@@ -79,6 +79,8 @@ import ResourcesTab, { RESOURCES_TAB_NAME } from './resources/ResourcesTab';
 import { MakeMobxView } from '../../shared/components/MobxView';
 import ResourceTab from '../../shared/components/resources/ResourceTab';
 import { ClinicalTrialMatchTable } from './clinicalTrialMatch/ClinicalTrialMatchTable';
+import MtbTable from './therapyRecommendation/MtbTable';
+import { MtbState } from 'shared/model/TherapyRecommendation';
 
 export interface IPatientViewPageProps {
     params: any; // react route
@@ -318,6 +320,12 @@ export default class PatientViewPage extends React.Component<
     }
 
     private shouldShowTherapyRecommendation(
+        patientViewPageStore: PatientViewPageStore
+    ): boolean {
+        return false;
+    }
+
+    private shouldShowMtbTab(
         patientViewPageStore: PatientViewPageStore
     ): boolean {
         return true;
@@ -1655,7 +1663,86 @@ export default class PatientViewPage extends React.Component<
                                         </MSKTab>
                                     )}
 
-                                <MSKTab
+                                {this.shouldShowMtbTab(
+                                    this.patientViewPageStore
+                                ) &&
+                                    this.patientViewPageStore.mutationData
+                                        .isComplete &&
+                                    this.patientViewPageStore.discreteCNAData
+                                        .isComplete &&
+                                    this.patientViewPageStore.oncoKbData
+                                        .isComplete &&
+                                    (this.patientViewPageStore.mtbs
+                                        .isComplete ||
+                                        this.patientViewPageStore.mtbs
+                                            .isError) &&
+                                    this.patientViewPageStore.cnaOncoKbData
+                                        .isComplete && (
+                                        <MSKTab
+                                            key={42}
+                                            id={PatientViewPageTabs.Mtb}
+                                            linkText="MTB"
+                                        >
+                                            <MtbTable
+                                                patientId={
+                                                    this.patientViewPageStore
+                                                        .patientId
+                                                }
+                                                mutations={
+                                                    this.patientViewPageStore
+                                                        .mutationData.result
+                                                }
+                                                cna={
+                                                    this.patientViewPageStore
+                                                        .discreteCNAData.result
+                                                }
+                                                clinicalData={this.patientViewPageStore.clinicalDataPatient.result.concat(
+                                                    this.patientViewPageStore
+                                                        .clinicalDataForSamples
+                                                        .result
+                                                )}
+                                                sampleManager={sampleManager}
+                                                // mtbs={[
+                                                //     {
+                                                //         id: 'test123',
+                                                //         generalRecommendation:
+                                                //             'test',
+                                                //         geneticCounselingRecommendation: true,
+                                                //         rebiopsyRecommendation: false,
+                                                //         date: '2020-05-05',
+                                                //         mtbState:
+                                                //             MtbState.DRAFT,
+                                                //         therapyRecommendations: [],
+                                                //     },
+                                                // ]}
+                                                mtbs={
+                                                    this.patientViewPageStore
+                                                        .mtbs.result
+                                                }
+                                                containerWidth={
+                                                    WindowStore.size.width - 20
+                                                }
+                                                onSaveData={
+                                                    this.patientViewPageStore
+                                                        .updateMtbs
+                                                }
+                                                oncoKbData={
+                                                    this.patientViewPageStore
+                                                        .oncoKbData
+                                                }
+                                                cnaOncoKbData={
+                                                    this.patientViewPageStore
+                                                        .cnaOncoKbData
+                                                }
+                                                pubMedCache={
+                                                    this.patientViewPageStore
+                                                        .pubMedCache
+                                                }
+                                            />
+                                        </MSKTab>
+                                    )}
+
+                                {/* <MSKTab
                                     key={8}
                                     id={PatientViewPageTabs.ClinicalTrialsGov}
                                     linkText="ClinicalTrialsGov"
@@ -1667,7 +1754,7 @@ export default class PatientViewPage extends React.Component<
                                                 .clinicalTrialMatches.result
                                         }
                                     />
-                                </MSKTab>
+                                </MSKTab> */}
 
                                 {/*<MSKTab key={5} id={{PatientViewPageTabs.MutationalSignatures}} linkText="Mutational Signature Data" hide={true}>*/}
                                 {/*<div className="clearfix">*/}
