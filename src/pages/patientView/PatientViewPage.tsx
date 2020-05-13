@@ -1660,8 +1660,6 @@ export default class PatientViewPage extends React.Component<
                                         .isComplete &&
                                     this.patientViewPageStore.discreteCNAData
                                         .isComplete &&
-                                    this.patientViewPageStore.oncoKbCancerGenes
-                                        .isComplete &&
                                     this.patientViewPageStore.oncoKbData
                                         .isComplete &&
                                     (this.patientViewPageStore.mtbs
@@ -1673,7 +1671,7 @@ export default class PatientViewPage extends React.Component<
                                         <MSKTab
                                             key={42}
                                             id={PatientViewPageTabs.Mtb}
-                                            linkText="MTB Test"
+                                            linkText="MTB"
                                         >
                                             <MtbTable
                                                 patientId={
@@ -1713,14 +1711,6 @@ export default class PatientViewPage extends React.Component<
                                                 }
                                                 containerWidth={
                                                     WindowStore.size.width - 20
-                                                }
-                                                onDelete={
-                                                    this.patientViewPageStore
-                                                        .therapyRecommendationOnDelete
-                                                }
-                                                onAddOrEdit={
-                                                    this.patientViewPageStore
-                                                        .therapyRecommendationOnAddOrEdit
                                                 }
                                                 onSaveData={
                                                     this.patientViewPageStore

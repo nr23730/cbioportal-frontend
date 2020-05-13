@@ -37,6 +37,7 @@ export async function fetchMtbsUsingGET(url: string) {
                             generalRecommendation: mtb.generalRecommendation,
                             date: mtb.date,
                             mtbState: mtb.mtbState,
+                            samples: mtb.samples,
                         } as IMtb)
                 );
             } else {

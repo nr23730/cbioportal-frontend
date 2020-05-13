@@ -24,6 +24,7 @@ import PubMedCache from 'shared/cache/PubMedCache';
 import LabeledCheckbox from 'shared/components/labeledCheckbox/LabeledCheckbox';
 import WindowStore from 'shared/components/window/WindowStore';
 import MtbTherapyRecommendationTable from './MtbTherapyRecommendationTable';
+import Select from 'react-select';
 
 export type IMtbProps = {
     patientId: string;
@@ -33,8 +34,6 @@ export type IMtbProps = {
     sampleManager: SampleManager | null;
     mtbs: IMtb[];
     containerWidth: number;
-    onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
-    onAddOrEdit: (therapyRecommendation?: ITherapyRecommendation) => boolean;
     onSaveData: (mtbs: IMtb[]) => void;
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     cnaOncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
@@ -165,6 +164,58 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                             this.setState({ mtbs: newMtbs });
                         }}
                     />
+                    <Select
+                        options={this.props
+                            .sampleManager!.getSampleIdsInOrder()
+                            .map(sampleId => ({
+                                label: sampleId,
+                                value: sampleId,
+                            }))}
+                        isMulti
+                        defaultValue={mtb.samples.map(sampleId => ({
+                            label: sampleId,
+                            value: sampleId,
+                        }))}
+                        name="samplesConsidered"
+                        className="basic-multi-select"
+                        classNamePrefix="select"
+                        onChange={(selectedOption: Array<any>) => {
+                            const newSamples = [];
+                            if (selectedOption !== null) {
+                                const sampleIds = selectedOption.map(
+                                    sampleId => sampleId.value
+                                );
+                                newSamples.push(...sampleIds);
+                            }
+                            const newMtbs = this.state.mtbs.slice();
+                            newMtbs.find(
+                                x => x.id === mtb.id
+                            )!.samples = newSamples;
+                            this.setState({ mtbs: newMtbs });
+                            // if (Array.isArray(selectedOption)) {
+                            // this.props.onChange(selectedOption.map(option => option.value));
+                            // } else if (selectedOption === null) {
+                            // this.props.onChange([] as IGeneticAlteration[])
+                            // }
+                        }}
+                    />
+                    <span className={styles.edit}>
+                        <Button
+                            type="button"
+                            className={'btn btn-default ' + styles.deleteButton}
+                            onClick={() =>
+                                window.confirm(
+                                    'Are you sure you wish to delete this MTB session?'
+                                ) && this.deleteMtb(mtb)
+                            }
+                        >
+                            <i
+                                className={`fa fa-trash ${styles.marginLeft}`}
+                                aria-hidden="true"
+                            ></i>{' '}
+                            Delete
+                        </Button>
+                    </span>
                 </div>
             ),
             width: this.columnWidths[ColumnKey.INFO],
@@ -233,8 +284,16 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
             therapyRecommendations: [],
             date: now.toISOString().split('T')[0],
             mtbState: MtbState.DRAFT,
+            samples: [],
         } as IMtb;
         newMtbs.push(newMtb);
+        this.setState({ mtbs: newMtbs });
+    }
+
+    private deleteMtb(mtbToDelete: IMtb) {
+        const newMtbs = this.state.mtbs
+            .slice()
+            .filter((mtb: IMtb) => mtbToDelete.id !== mtb.id);
         this.setState({ mtbs: newMtbs });
     }
 
@@ -265,7 +324,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         className={'btn btn-default ' + styles.testButton}
                         onClick={() => this.test()}
                     >
-                        Test (Update)
+                        Save Data
                     </Button>
                 </p>
                 <MtbTableComponent

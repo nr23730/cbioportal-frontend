@@ -48,6 +48,7 @@ export interface IMtb {
     generalRecommendation: string;
     date: string;
     mtbState: MtbState;
+    samples: string[];
 }
 
 export interface ITherapyRecommendation {

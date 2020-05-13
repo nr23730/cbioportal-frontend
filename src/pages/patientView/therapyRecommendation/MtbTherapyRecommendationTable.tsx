@@ -156,48 +156,65 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                     <div className={styles.reasoningInfoContainer}>
                         <div className={styles.genomicInfoContainer}>
                             <div className={styles.reasoningContainer}>
-                                <div className={styles.firstLeft}>
-                                    <div className={styles.secondLeft}>
-                                        Positve for alterations:
-                                        <div>
-                                            {therapyRecommendation.reasoning
-                                                .geneticAlterations &&
-                                                this.getGeneticAlterations(
-                                                    therapyRecommendation
-                                                        .reasoning
-                                                        .geneticAlterations
-                                                )}
-                                        </div>
-                                        In samples:
-                                        <div>
-                                            {therapyRecommendation.reasoning
-                                                .geneticAlterations &&
-                                                this.getSamplesForPostiveAlterations(
-                                                    therapyRecommendation
-                                                        .reasoning
-                                                        .geneticAlterations
-                                                )}
+                                <If
+                                    condition={
+                                        therapyRecommendation.reasoning
+                                            .geneticAlterations &&
+                                        therapyRecommendation.reasoning
+                                            .geneticAlterations.length > 0
+                                    }
+                                >
+                                    <div className={styles.firstLeft}>
+                                        <div className={styles.secondLeft}>
+                                            Positve for alterations:
+                                            <div>
+                                                {therapyRecommendation.reasoning
+                                                    .geneticAlterations &&
+                                                    this.getGeneticAlterations(
+                                                        therapyRecommendation
+                                                            .reasoning
+                                                            .geneticAlterations
+                                                    )}
+                                            </div>
+                                            In samples:
+                                            <div>
+                                                {therapyRecommendation.reasoning
+                                                    .geneticAlterations &&
+                                                    this.getSamplesForPostiveAlterations(
+                                                        therapyRecommendation
+                                                            .reasoning
+                                                            .geneticAlterations
+                                                    )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div className={styles.firstRight}>
-                                    Clinical data:
-                                    {therapyRecommendation.reasoning
-                                        .clinicalData &&
-                                        therapyRecommendation.reasoning.clinicalData.map(
-                                            (
-                                                clinicalDataItem: IClinicalData
-                                            ) => (
-                                                <div>
-                                                    {/* {clinicalDataItem.attribute + ": " + clinicalDataItem.value} */}
-                                                    {this.getTextForClinicalDataItem(
-                                                        clinicalDataItem
-                                                    )}
-                                                </div>
-                                            )
-                                        )}
-                                </div>
+                                </If>
+                                <If
+                                    condition={
+                                        therapyRecommendation.reasoning
+                                            .clinicalData &&
+                                        therapyRecommendation.reasoning
+                                            .clinicalData.length > 0
+                                    }
+                                >
+                                    <div className={styles.firstRight}>
+                                        Clinical data:
+                                        {therapyRecommendation.reasoning
+                                            .clinicalData &&
+                                            therapyRecommendation.reasoning.clinicalData.map(
+                                                (
+                                                    clinicalDataItem: IClinicalData
+                                                ) => (
+                                                    <div>
+                                                        {/* {clinicalDataItem.attribute + ": " + clinicalDataItem.value} */}
+                                                        {this.getTextForClinicalDataItem(
+                                                            clinicalDataItem
+                                                        )}
+                                                    </div>
+                                                )
+                                            )}
+                                    </div>
+                                </If>
                             </div>
                         </div>
                     </div>
