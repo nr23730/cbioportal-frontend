@@ -107,9 +107,9 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                             this.setState({ mtbs: newMtbs });
                         }}
                     >
-                        {Object.keys(MtbState).map(key => (
+                        {Object.entries(MtbState).map(([key, value]) => (
                             <option key={key} value={key}>
-                                {MtbState[key as any]}
+                                {value}
                             </option>
                         ))}
                     </select>
