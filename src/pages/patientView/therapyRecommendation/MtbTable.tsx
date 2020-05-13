@@ -32,6 +32,7 @@ export type IMtbProps = {
     cna: DiscreteCopyNumberData[];
     clinicalData: ClinicalData[];
     sampleManager: SampleManager | null;
+    oncoKbAvailable: boolean;
     mtbs: IMtb[];
     containerWidth: number;
     onSaveData: (mtbs: IMtb[]) => void;
@@ -229,6 +230,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                     cna={this.props.cna}
                     clinicalData={this.props.clinicalData}
                     sampleManager={this.props.sampleManager}
+                    oncoKbAvailable={this.props.oncoKbAvailable}
                     therapyRecommendations={mtb.therapyRecommendations}
                     containerWidth={WindowStore.size.width - 20}
                     onDelete={this.therapyRecommendationOnDelete(mtb.id)}

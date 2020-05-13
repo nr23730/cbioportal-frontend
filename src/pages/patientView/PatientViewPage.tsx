@@ -1660,14 +1660,18 @@ export default class PatientViewPage extends React.Component<
                                         .isComplete &&
                                     this.patientViewPageStore.discreteCNAData
                                         .isComplete &&
-                                    this.patientViewPageStore.oncoKbData
-                                        .isComplete &&
+                                    (this.patientViewPageStore.oncoKbData
+                                        .isComplete ||
+                                        this.patientViewPageStore.oncoKbData
+                                            .isError) &&
                                     (this.patientViewPageStore.mtbs
                                         .isComplete ||
                                         this.patientViewPageStore.mtbs
                                             .isError) &&
-                                    this.patientViewPageStore.cnaOncoKbData
-                                        .isComplete && (
+                                    (this.patientViewPageStore.cnaOncoKbData
+                                        .isComplete ||
+                                        this.patientViewPageStore.cnaOncoKbData
+                                            .isError) && (
                                         <MSKTab
                                             key={42}
                                             id={PatientViewPageTabs.Mtb}
@@ -1692,6 +1696,15 @@ export default class PatientViewPage extends React.Component<
                                                         .result
                                                 )}
                                                 sampleManager={sampleManager}
+                                                oncoKbAvailable={
+                                                    AppConfig.serverConfig
+                                                        .show_oncokb ||
+                                                    this.patientViewPageStore
+                                                        .cnaOncoKbData
+                                                        .isError ||
+                                                    this.patientViewPageStore
+                                                        .oncoKbData.isError
+                                                }
                                                 // mtbs={[
                                                 //     {
                                                 //         id: 'test123',

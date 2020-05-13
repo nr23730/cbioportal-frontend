@@ -46,6 +46,7 @@ export type ITherapyRecommendationProps = {
     cna: DiscreteCopyNumberData[];
     clinicalData: ClinicalData[];
     sampleManager: SampleManager | null;
+    oncoKbAvailable: boolean;
     therapyRecommendations: ITherapyRecommendation[];
     containerWidth: number;
     onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
@@ -595,17 +596,21 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         ></i>{' '}
                         Add
                     </Button>
-                    <Button
-                        type="button"
-                        className={'btn btn-default ' + styles.addOncoKbButton}
-                        onClick={() => this.openAddOncoKbForm()}
-                    >
-                        <i
-                            className={`fa fa-plus ${styles.marginLeft}`}
-                            aria-hidden="true"
-                        ></i>{' '}
-                        Add from OncoKB
-                    </Button>
+                    {this.props.oncoKbAvailable && (
+                        <Button
+                            type="button"
+                            className={
+                                'btn btn-default ' + styles.addOncoKbButton
+                            }
+                            onClick={() => this.openAddOncoKbForm()}
+                        >
+                            <i
+                                className={`fa fa-plus ${styles.marginLeft}`}
+                                aria-hidden="true"
+                            ></i>{' '}
+                            Add from OncoKB
+                        </Button>
+                    )}
                     {/* <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button> */}
                 </p>
                 {this.selectedTherapyRecommendation && (
