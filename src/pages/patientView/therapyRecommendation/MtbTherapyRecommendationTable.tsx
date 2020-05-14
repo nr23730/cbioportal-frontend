@@ -596,21 +596,38 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         ></i>{' '}
                         Add
                     </Button>
-                    {this.props.oncoKbAvailable && (
-                        <Button
-                            type="button"
-                            className={
-                                'btn btn-default ' + styles.addOncoKbButton
-                            }
-                            onClick={() => this.openAddOncoKbForm()}
-                        >
-                            <i
-                                className={`fa fa-plus ${styles.marginLeft}`}
-                                aria-hidden="true"
-                            ></i>{' '}
-                            Add from OncoKB
-                        </Button>
-                    )}
+                    <If condition={this.props.oncoKbAvailable}>
+                        <Then>
+                            <Button
+                                type="button"
+                                className={
+                                    'btn btn-default ' + styles.addOncoKbButton
+                                }
+                                onClick={() => this.openAddOncoKbForm()}
+                            >
+                                <i
+                                    className={`fa fa-plus ${styles.marginLeft}`}
+                                    aria-hidden="true"
+                                ></i>{' '}
+                                Add from OncoKB
+                            </Button>
+                        </Then>
+                        <Else>
+                            <Button
+                                type="button"
+                                className={
+                                    'btn btn-default ' + styles.addOncoKbButton
+                                }
+                                disabled={true}
+                            >
+                                <i
+                                    className={`fa fa-exclamation-triangle ${styles.marginLeft}`}
+                                    aria-hidden="true"
+                                ></i>{' '}
+                                OncoKB unavailable
+                            </Button>
+                        </Else>
+                    </If>
                     {/* <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button> */}
                 </p>
                 {this.selectedTherapyRecommendation && (

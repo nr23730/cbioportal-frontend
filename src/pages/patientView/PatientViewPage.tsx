@@ -1698,11 +1698,11 @@ export default class PatientViewPage extends React.Component<
                                                 sampleManager={sampleManager}
                                                 oncoKbAvailable={
                                                     AppConfig.serverConfig
-                                                        .show_oncokb ||
-                                                    this.patientViewPageStore
+                                                        .show_oncokb &&
+                                                    !this.patientViewPageStore
                                                         .cnaOncoKbData
-                                                        .isError ||
-                                                    this.patientViewPageStore
+                                                        .isError &&
+                                                    !this.patientViewPageStore
                                                         .oncoKbData.isError
                                                 }
                                                 // mtbs={[

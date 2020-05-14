@@ -299,9 +299,15 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
         this.setState({ mtbs: newMtbs });
     }
 
-    private test() {
-        console.group('Test save mtbs');
+    private saveMtbs() {
+        console.group('Save mtbs');
         this.props.onSaveData(this.state.mtbs);
+        console.groupEnd();
+    }
+
+    private test() {
+        console.group('Test');
+        console.log(this.props);
         console.groupEnd();
     }
 
@@ -324,10 +330,11 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                     <Button
                         type="button"
                         className={'btn btn-default ' + styles.testButton}
-                        onClick={() => this.test()}
+                        onClick={() => this.saveMtbs()}
                     >
                         Save Data
                     </Button>
+                    {/* <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test</Button> */}
                 </p>
                 <MtbTableComponent
                     data={this.state.mtbs}
