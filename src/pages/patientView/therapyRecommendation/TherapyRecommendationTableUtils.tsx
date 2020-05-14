@@ -184,63 +184,70 @@ export function flattenObject(x: any): any {
     return y;
 }
 
-export function getOncoKbLevelDesc() {
+export function getEvidenceLevelDesc() {
     const levelMap: { [level: string]: JSX.Element } = {
-        '1': (
+        m1A: (
             <span>
-                <b>FDA-recognized</b> biomarker predictive of response to an{' '}
-                <b>FDA-approved</b> drug <b>in this indication</b>
+                In der <b>gleichen Tumorentit&auml;t </b>wurde der
+                pr&auml;diktive Wert des Biomarkers oder die klinische
+                Wirksamkeit in einer <b>Biomarker-stratifizierten Kohorte </b>
+                einer ad&auml;quat gepowerten <b>prospektiven Studie </b>oder{' '}
+                <b>Metaanalyse </b>gezeigt.
             </span>
         ),
-        '2': (
+        m1B: (
             <span>
-                <b>Standard care</b> biomarker recommended by the NCCN or other
-                expert panels predictive of response to an{' '}
-                <b>FDA-approved drug</b> in this indication
+                In der <b>gleichen Tumorentit&auml;t </b>wurde der
+                pr&auml;diktive Wert des Biomarkers oder die klinische
+                Wirksamkeit in einer <b>retrospektiven Kohorte </b>oder{' '}
+                <b>Fall-KontrollStudie </b>gezeigt.
             </span>
         ),
-        '2A': (
+        m1C: (
             <span>
-                <b>Standard care</b> biomarker predictive of response to an{' '}
-                <b>FDA-approved</b> drug <b>in this indication</b>
+                Ein oder mehrere <b>Fallberichte</b> in der{' '}
+                <b>gleichen Tumorentit&auml;t</b>.
             </span>
         ),
-        '2B': (
+        m2A: (
             <span>
-                <b>Standard care</b> biomarker predictive of response to an{' '}
-                <b>FDA-approved</b> drug <b>in another indication</b>, but not
-                standard care for this indication
+                In einer <b>anderen Tumorentit&auml;t </b>wurde der
+                pr&auml;diktive Wert des Biomarkers oder die klinische
+                Wirksamkeit in einer <b>Biomarker-stratifizierten Kohorte </b>
+                einer ad&auml;quat gepowerten <b>prospektiven Studie </b>oder{' '}
+                <b>Metaanalyse </b>gezeigt.
             </span>
         ),
-        '3A': (
+        m2B: (
             <span>
-                <b>Compelling clinical evidence</b> supports the biomarker as
-                being predictive of response to a drug <b>in this indication</b>
+                In einer <b>anderen Tumorentit&auml;t </b>wurde der
+                pr&auml;diktive Wert des Biomarkers oder die Klinische
+                Wirksamkeit in einer <b>retrospektiven Kohorte </b>oder{' '}
+                <b>Fall-KontrollStudie </b>gezeigt.
             </span>
         ),
-        '3B': (
+        m2C: (
             <span>
-                <b>Compelling clinical evidence</b> supports the biomarker as
-                being predictive of response to a drug{' '}
-                <b>in another indication</b>
+                Unabh&auml;ngig von der Tumorentit&auml;t wurde beim Vorliegen
+                des Biomarkers eine <b>klinische Wirksamkeit </b>in einem oder
+                mehreren <b>Fallberichten </b>gezeigt.
             </span>
         ),
-        '4': (
+        m3: (
             <span>
-                <b>Compelling biological evidence</b> supports the biomarker as
-                being predictive of response to a drug
+                <b>Pr&auml;klinische Daten </b>(<em>in-vitro</em>-/
+                <em>in-vivo</em>-Modelle, funktionelle Untersuchungen) zeigen
+                eine Assoziation des Biomarkers mit der Wirksamkeit der
+                Medikation, welche durch eine wissenschaftliche Rationale
+                gest&uuml;tzt wird.
             </span>
         ),
-        R1: (
+        m4: (
             <span>
-                <b>Standard care</b> biomarker predictive of <b>resistance</b>{' '}
-                to an <b>FDA-approved</b> drug <b>in this indication</b>
-            </span>
-        ),
-        R2: (
-            <span>
-                <b>Compelling clinical evidence</b> supports the biomarker as
-                being predictive of <b>resistance</b> to a drug
+                Eine <b>wissenschaftliche, biologische Rationale </b>legt eine
+                Assoziation des Biomarkers mit der Wirksamkeit der Medikation
+                nahe, welche bisher{' '}
+                <b>nicht durch (pr&auml;)klinische Daten </b>gest&uuml;tzt wird.
             </span>
         ),
     };

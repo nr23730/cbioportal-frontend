@@ -1974,7 +1974,7 @@ export class PatientViewPageStore {
                     },
                 ],
             },
-            evidenceLevel: EvidenceLevel.III,
+            evidenceLevel: EvidenceLevel.NA,
             modifications: [
                 {
                     modified: Modified.CREATED,

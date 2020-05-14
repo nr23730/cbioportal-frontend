@@ -27,6 +27,7 @@ import {
     flattenObject,
     flattenArray,
     getOncoKbLevelDesc,
+    getEvidenceLevelDesc,
 } from './TherapyRecommendationTableUtils';
 import AppConfig from 'appConfig';
 import { Button } from 'react-bootstrap';
@@ -239,18 +240,12 @@ export default class TherapyRecommendationTable extends React.Component<
                     <span style={{ marginRight: 5 }}>
                         Level <b>{therapyRecommendation.evidenceLevel}</b>
                     </span>
-                    <If
-                        condition={
-                            therapyRecommendation.evidenceLevel &&
-                            therapyRecommendation.evidenceLevel !==
-                                EvidenceLevel.NA
-                        }
-                    >
+                    <If condition={therapyRecommendation.evidenceLevel}>
                         <DefaultTooltip
                             placement="bottomLeft"
                             trigger={['hover', 'focus']}
                             overlay={this.tooltipEvidenceContent(
-                                therapyRecommendation.evidenceLevel
+                                therapyRecommendation.evidenceLevel.toString()
                             )}
                             destroyTooltipOnHide={false}
                             onPopupAlign={placeArrowBottomLeft}
@@ -657,7 +652,7 @@ export default class TherapyRecommendationTable extends React.Component<
     private tooltipEvidenceContent(evidenceLevel: string) {
         return (
             <div className={styles.tooltip} style={{ maxWidth: '200px' }}>
-                {getOncoKbLevelDesc()[evidenceLevel]}
+                {getEvidenceLevelDesc()[evidenceLevel]}
             </div>
         );
     }

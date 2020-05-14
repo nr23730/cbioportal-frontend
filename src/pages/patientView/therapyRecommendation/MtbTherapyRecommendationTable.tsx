@@ -25,7 +25,7 @@ import {
     isTherapyRecommendationEmpty,
     flattenObject,
     flattenArray,
-    getOncoKbLevelDesc,
+    getEvidenceLevelDesc,
 } from './TherapyRecommendationTableUtils';
 import AppConfig from 'appConfig';
 import { Button } from 'react-bootstrap';
@@ -230,13 +230,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                     <span style={{ marginRight: 5 }}>
                         Level <b>{therapyRecommendation.evidenceLevel}</b>
                     </span>
-                    <If
-                        condition={
-                            therapyRecommendation.evidenceLevel &&
-                            therapyRecommendation.evidenceLevel !==
-                                EvidenceLevel.NA
-                        }
-                    >
+                    <If condition={therapyRecommendation.evidenceLevel}>
                         <DefaultTooltip
                             placement="bottomLeft"
                             trigger={['hover', 'focus']}
@@ -565,10 +559,10 @@ export default class MtbTherapyRecommendationTable extends React.Component<
         );
     }
 
-    private tooltipEvidenceContent(evidenceLevel: string) {
+    private tooltipEvidenceContent(evidenceLevel: any) {
         return (
-            <div className={styles.tooltip} style={{ maxWidth: '200px' }}>
-                {getOncoKbLevelDesc()[evidenceLevel]}
+            <div className={styles.tooltip} style={{ width: '300px' }}>
+                {getEvidenceLevelDesc()[evidenceLevel]}
             </div>
         );
     }

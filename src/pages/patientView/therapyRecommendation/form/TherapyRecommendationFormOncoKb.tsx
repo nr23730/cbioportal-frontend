@@ -32,31 +32,6 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
     ITherapyRecommendationFormOncoKbProps,
     {}
 > {
-    private getEvidenceLevel(level: string) {
-        switch (level.split('_')[1]) {
-            case '1':
-                return EvidenceLevel.I;
-            case '2':
-                return EvidenceLevel.II;
-            case '2A':
-                return EvidenceLevel.IIA;
-            case '2B':
-                return EvidenceLevel.IIB;
-            case '3A':
-                return EvidenceLevel.IIIA;
-            case '3B':
-                return EvidenceLevel.IIIB;
-            case '4':
-                return EvidenceLevel.IV;
-            case 'R1':
-                return EvidenceLevel.R1;
-            case 'R2':
-                return EvidenceLevel.R2;
-            default:
-                return EvidenceLevel.NA;
-        }
-    }
-
     private indicationSort(a: string, b: string): number {
         // Increase ascii code of parentheses to put these entries after text in the sort order
         a = a.trim().replace('(', '{');
@@ -113,7 +88,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
             this.props.patientID
         );
         let treatment = result.treatments[treatmentIndex];
-        let evidenceLevel = this.getEvidenceLevel(treatment.level);
+        let evidenceLevel = treatment.level;
 
         // Treatments
         treatment.drugs.map(drug => {
@@ -131,12 +106,11 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
         therapyRecommendation.comment.push(
             ...treatment.approvedIndications.sort(this.indicationSort)
         );
-        if (
-            evidenceLevel === EvidenceLevel.R1 ||
-            evidenceLevel === EvidenceLevel.R2
-        ) {
+        if (evidenceLevel.includes('R')) {
             therapyRecommendation.comment.push(
-                'ATTENTION: Evidence level R1/2 represents resistance to the selected drug.'
+                'ATTENTION: Evidence level' +
+                    evidenceLevel +
+                    'represents resistance to the selected drug.'
             );
         }
 
@@ -150,7 +124,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
         ];
 
         // Evidence Level
-        therapyRecommendation.evidenceLevel = evidenceLevel;
+        therapyRecommendation.evidenceLevel = EvidenceLevel.NA;
 
         // References
         treatment.pmids.map(reference => {
