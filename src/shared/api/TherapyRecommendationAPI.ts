@@ -50,7 +50,7 @@ export async function fetchMtbsUsingGET(url: string) {
         })
         .catch(err => {
             console.group('### MTB ### ERROR catched GETting ' + url);
-            console.log(JSON.parse(err));
+            console.log(err);
             console.groupEnd();
 
             return [] as IMtb[];
@@ -87,7 +87,7 @@ export async function updateMtbUsingPUT(id: string, url: string, mtbs: IMtb[]) {
         })
         .catch(err => {
             console.group('### MTB ### ERROR catched PUTting ' + url);
-            console.log(JSON.parse(err));
+            console.log(err);
             console.groupEnd();
         });
 }
