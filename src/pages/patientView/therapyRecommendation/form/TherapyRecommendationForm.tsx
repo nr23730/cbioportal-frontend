@@ -112,7 +112,7 @@ export default class TherapyRecommendationForm extends React.Component<
                             <h5>Evidence Level:</h5>
                             <Select
                                 options={Object.entries(EvidenceLevel).map(
-                                    (key, value) => ({
+                                    ([key, value]) => ({
                                         label: key,
                                         value: value,
                                     })
