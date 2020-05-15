@@ -75,7 +75,6 @@ export interface IClinicalData {
 
 export interface IReasoning {
     geneticAlterations?: IGeneticAlteration[];
-    geneticAlterationsMissing?: IGeneticAlteration[];
     clinicalData?: IClinicalData[];
     tmb?: number;
     other?: string;

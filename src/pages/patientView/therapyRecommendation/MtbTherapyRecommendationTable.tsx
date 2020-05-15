@@ -167,7 +167,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                                 >
                                     <div className={styles.firstLeft}>
                                         <div className={styles.secondLeft}>
-                                            Positve for alterations:
+                                            Genomic alterations:
                                             <div>
                                                 {therapyRecommendation.reasoning
                                                     .geneticAlterations &&
@@ -181,7 +181,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                                             <div>
                                                 {therapyRecommendation.reasoning
                                                     .geneticAlterations &&
-                                                    this.getSamplesForPostiveAlterations(
+                                                    this.getSamplesForGeneticAlterations(
                                                         therapyRecommendation
                                                             .reasoning
                                                             .geneticAlterations
@@ -388,7 +388,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
         return allMutations;
     }
 
-    public getSamplesForPostiveAlterations(
+    public getSamplesForGeneticAlterations(
         geneticAlterations: IGeneticAlteration[]
     ) {
         if (!geneticAlterations || geneticAlterations.length == 0) return;
