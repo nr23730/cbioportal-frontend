@@ -26,6 +26,7 @@ import {
     flattenObject,
     flattenArray,
     getEvidenceLevelDesc,
+    getTooltipEvidenceContent,
 } from './TherapyRecommendationTableUtils';
 import AppConfig from 'appConfig';
 import { Button } from 'react-bootstrap';
@@ -234,7 +235,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         <DefaultTooltip
                             placement="bottomLeft"
                             trigger={['hover', 'focus']}
-                            overlay={this.tooltipEvidenceContent(
+                            overlay={getTooltipEvidenceContent(
                                 therapyRecommendation.evidenceLevel
                             )}
                             destroyTooltipOnHide={false}
@@ -555,14 +556,6 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                     {geneticAlteration.entrezGeneId}){' '}
                     {geneticAlteration.alteration || 'any'}
                 </div>
-            </div>
-        );
-    }
-
-    private tooltipEvidenceContent(evidenceLevel: any) {
-        return (
-            <div className={styles.tooltip} style={{ width: '300px' }}>
-                {getEvidenceLevelDesc()[evidenceLevel]}
             </div>
         );
     }

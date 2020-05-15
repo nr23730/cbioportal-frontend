@@ -16,6 +16,7 @@ import TherapyRecommendationFormClinicalInput from './TherapyRecommendationFormC
 import Select from 'react-select';
 import TherapyRecommendationFormReferenceInput from './TherapyRecommendationFormReferenceInput';
 import TherapyRecommendationFormCommentInput from './TherapyRecommendationFormCommentInput';
+import TherapyRecommendationFormEvidenceLevelInput from './TherapyRecommendationFormEvidenceLevelInput';
 
 interface ITherapyRecommendationFormProps {
     show: boolean;
@@ -92,35 +93,11 @@ export default class TherapyRecommendationForm extends React.Component<
 
                         <div className="form-group">
                             <h5>Evidence Level:</h5>
-                            <Select
-                                options={Object.entries(EvidenceLevel)
-                                    .filter(
-                                        ([key, value]) =>
-                                            typeof value === 'string'
-                                    )
-                                    .map(([key, value]) => ({
-                                        label: value,
-                                        value: key,
-                                    }))}
-                                defaultValue={{
-                                    label: therapyRecommendation.evidenceLevel,
-                                    value:
-                                        EvidenceLevel[
-                                            therapyRecommendation.evidenceLevel
-                                        ],
-                                }}
-                                name="evidenceLevel"
-                                className="basic-select"
-                                classNamePrefix="select"
-                                onChange={(selectedOption: {
-                                    label: string;
-                                    value: string;
-                                }) => {
-                                    therapyRecommendation.evidenceLevel =
-                                        EvidenceLevel[
-                                            selectedOption.value as keyof typeof EvidenceLevel
-                                        ];
-                                }}
+                            <TherapyRecommendationFormEvidenceLevelInput
+                                data={therapyRecommendation}
+                                onChange={evidenceLevel =>
+                                    (therapyRecommendation.evidenceLevel = evidenceLevel)
+                                }
                             />
                         </div>
 

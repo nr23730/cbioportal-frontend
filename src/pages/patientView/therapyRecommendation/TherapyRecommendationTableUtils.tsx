@@ -9,6 +9,7 @@ import AppConfig from 'appConfig';
 import _ from 'lodash';
 import request from 'superagent';
 import * as React from 'react';
+import styles from './style/therapyRecommendation.module.scss';
 
 export function truncate(
     s: string | undefined,
@@ -184,15 +185,25 @@ export function flattenObject(x: any): any {
     return y;
 }
 
+export function getTooltipEvidenceContent(evidenceLevel: any) {
+    return (
+        <div className={styles.tooltip} style={{ width: '300px' }}>
+            {getEvidenceLevelDesc()[evidenceLevel]}
+        </div>
+    );
+}
+
 export function getEvidenceLevelDesc() {
     const levelMap: { [level: string]: JSX.Element } = {
+        NA: <span>N/A</span>,
         m1A: (
             <span>
                 In der <b>gleichen Tumorentit&auml;t </b>wurde der
                 pr&auml;diktive Wert des Biomarkers oder die klinische
                 Wirksamkeit in einer <b>Biomarker-stratifizierten Kohorte </b>
-                einer ad&auml;quat gepowerten <b>prospektiven Studie </b>oder{' '}
-                <b>Metaanalyse </b>gezeigt.
+                einer ad&auml;quat gepowerten <b>
+                    prospektiven Studie{' '}
+                </b>oder <b>Metaanalyse </b>gezeigt.
             </span>
         ),
         m1B: (
@@ -214,8 +225,9 @@ export function getEvidenceLevelDesc() {
                 In einer <b>anderen Tumorentit&auml;t </b>wurde der
                 pr&auml;diktive Wert des Biomarkers oder die klinische
                 Wirksamkeit in einer <b>Biomarker-stratifizierten Kohorte </b>
-                einer ad&auml;quat gepowerten <b>prospektiven Studie </b>oder{' '}
-                <b>Metaanalyse </b>gezeigt.
+                einer ad&auml;quat gepowerten <b>
+                    prospektiven Studie{' '}
+                </b>oder <b>Metaanalyse </b>gezeigt.
             </span>
         ),
         m2B: (
