@@ -2,7 +2,7 @@ import {
     ITherapyRecommendation,
     EvidenceLevel,
     Modified,
-    IRecommender,
+    IModification,
     IReference,
 } from 'shared/model/TherapyRecommendation';
 import AppConfig from 'appConfig';
@@ -65,14 +65,20 @@ export function getSampleTherapyRecommendation(
 export function addModificationToTherapyRecommendation(
     therapyRecommendation: ITherapyRecommendation
 ): ITherapyRecommendation {
-    therapyRecommendation.modifications.push({
-        modified: Modified.MODIFIED,
+    therapyRecommendation.modifications.push(
+        getModification(Modified.MODIFIED)
+    );
+    return therapyRecommendation;
+}
+
+export function getModification(modifier: Modified): IModification {
+    return {
+        modified: modifier,
         recommender: {
             credentials: AppConfig.serverConfig.user_email_address,
         },
         timestamp: new Date().toISOString(),
-    });
-    return therapyRecommendation;
+    };
 }
 
 export function isTherapyRecommendationEmpty(

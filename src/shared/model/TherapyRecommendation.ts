@@ -28,7 +28,7 @@ export interface IRecommender {
     email?: string;
 }
 
-interface IModification {
+export interface IModification {
     recommender: IRecommender;
     modified: Modified;
     timestamp: string;
@@ -43,6 +43,7 @@ export interface IMtb {
     date: string;
     mtbState: MtbState;
     samples: string[];
+    modifications: IModification[];
 }
 
 export interface ITherapyRecommendation {

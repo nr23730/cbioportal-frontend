@@ -5,12 +5,16 @@ import {
     ITherapyRecommendation,
     IMtb,
     MtbState,
+    Modified,
 } from '../../../shared/model/TherapyRecommendation';
 import { computed, observable } from 'mobx';
 import LazyMobXTable from '../../../shared/components/lazyMobXTable/LazyMobXTable';
 import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from '../SampleManager';
-import { flattenStringify } from './TherapyRecommendationTableUtils';
+import {
+    flattenStringify,
+    getModification,
+} from './TherapyRecommendationTableUtils';
 import { Button } from 'react-bootstrap';
 import {
     Mutation,
@@ -85,7 +89,6 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
             name: ColumnKey.INFO,
             render: (mtb: IMtb) => (
                 <div>
-                    <p>ID: {mtb.id}</p>
                     <input
                         type="date"
                         value={mtb.date}
@@ -193,11 +196,6 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                                 x => x.id === mtb.id
                             )!.samples = newSamples;
                             this.setState({ mtbs: newMtbs });
-                            // if (Array.isArray(selectedOption)) {
-                            // this.props.onChange(selectedOption.map(option => option.value));
-                            // } else if (selectedOption === null) {
-                            // this.props.onChange([] as IGeneticAlteration[])
-                            // }
                         }}
                     />
                     <span className={styles.edit}>
@@ -287,6 +285,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
             date: now.toISOString().split('T')[0],
             mtbState: MtbState.DRAFT,
             samples: [],
+            modifications: [getModification(Modified.CREATED)],
         } as IMtb;
         newMtbs.push(newMtb);
         this.setState({ mtbs: newMtbs });

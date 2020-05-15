@@ -38,6 +38,7 @@ export async function fetchMtbsUsingGET(url: string) {
                             date: mtb.date,
                             mtbState: mtb.mtbState,
                             samples: mtb.samples,
+                            modifications: mtb.modifications,
                         } as IMtb)
                 );
             } else {
