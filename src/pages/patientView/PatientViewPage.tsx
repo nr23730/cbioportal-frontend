@@ -67,7 +67,6 @@ import { PagePath } from 'shared/enums/PagePaths';
 import { GeneFilterOption } from './mutation/GeneFilterMenu';
 import { checkNonProfiledGenesExist } from './PatientViewPageUtils';
 import PatientViewMutationsTab from './mutation/PatientViewMutationsTab';
-import TherapyRecommendationTable from './therapyRecommendation/TherapyRecommendationTable';
 import PatientViewGenePanelModal from './PatientViewGenePanelModal/PatientViewGenePanelModal';
 import {
     extractResourceIdFromTabId,
@@ -80,7 +79,6 @@ import { MakeMobxView } from '../../shared/components/MobxView';
 import ResourceTab from '../../shared/components/resources/ResourceTab';
 import { ClinicalTrialMatchTable } from './clinicalTrialMatch/ClinicalTrialMatchTable';
 import MtbTable from './therapyRecommendation/MtbTable';
-import { MtbState } from 'shared/model/TherapyRecommendation';
 
 export interface IPatientViewPageProps {
     params: any; // react route
@@ -1554,105 +1552,6 @@ export default class PatientViewPage extends React.Component<
                                     </MSKTab>
                                 )}
 
-                                {this.shouldShowTherapyRecommendation(
-                                    this.patientViewPageStore
-                                ) &&
-                                    this.patientViewPageStore.mutationData
-                                        .isComplete &&
-                                    this.patientViewPageStore.discreteCNAData
-                                        .isComplete &&
-                                    this.patientViewPageStore.oncoKbCancerGenes
-                                        .isComplete &&
-                                    this.patientViewPageStore.oncoKbData
-                                        .isComplete &&
-                                    // this.patientViewPageStore.therapyRecommendation.isComplete &&
-                                    this.patientViewPageStore.cnaOncoKbData
-                                        .isComplete && (
-                                        <MSKTab
-                                            key={8}
-                                            id={
-                                                PatientViewPageTabs.TherapyRecommendation
-                                            }
-                                            linkText="Therapy Recommendation"
-                                        >
-                                            <TherapyRecommendationTable
-                                                patientId={
-                                                    this.patientViewPageStore
-                                                        .patientId
-                                                }
-                                                mutations={
-                                                    this.patientViewPageStore
-                                                        .mutationData.result
-                                                }
-                                                cna={
-                                                    this.patientViewPageStore
-                                                        .discreteCNAData.result
-                                                }
-                                                clinicalData={this.patientViewPageStore.clinicalDataPatient.result.concat(
-                                                    this.patientViewPageStore
-                                                        .clinicalDataForSamples
-                                                        .result
-                                                )}
-                                                sampleManager={sampleManager}
-                                                therapyRecommendations={
-                                                    this.patientViewPageStore
-                                                        .therapyRecommendations
-                                                }
-                                                geneticCounselingRecommended={
-                                                    this.patientViewPageStore
-                                                        .geneticCounselingRecommended
-                                                }
-                                                rebiopsyRecommended={
-                                                    this.patientViewPageStore
-                                                        .rebiopsyRecommended
-                                                }
-                                                commentRecommendation={
-                                                    this.patientViewPageStore
-                                                        .commentRecommendation
-                                                }
-                                                containerWidth={
-                                                    WindowStore.size.width - 20
-                                                }
-                                                onDelete={
-                                                    this.patientViewPageStore
-                                                        .therapyRecommendationOnDelete
-                                                }
-                                                onAddOrEdit={
-                                                    this.patientViewPageStore
-                                                        .therapyRecommendationOnAddOrEdit
-                                                }
-                                                onEditGeneticCounselingRecommended={
-                                                    this.patientViewPageStore
-                                                        .setGeneticCounselingRecommended
-                                                }
-                                                onEditRebiopsyRecommended={
-                                                    this.patientViewPageStore
-                                                        .setRebiopsyRecommended
-                                                }
-                                                onEditCommentRecommendation={
-                                                    this.patientViewPageStore
-                                                        .setCommentRecommendation
-                                                }
-                                                oncoKbData={
-                                                    this.patientViewPageStore
-                                                        .oncoKbData
-                                                }
-                                                cnaOncoKbData={
-                                                    this.patientViewPageStore
-                                                        .cnaOncoKbData
-                                                }
-                                                oncoKbCancerGenes={
-                                                    this.patientViewPageStore
-                                                        .oncoKbCancerGenes
-                                                }
-                                                pubMedCache={
-                                                    this.patientViewPageStore
-                                                        .pubMedCache
-                                                }
-                                            />
-                                        </MSKTab>
-                                    )}
-
                                 {this.shouldShowMtbTab(
                                     this.patientViewPageStore
                                 ) &&
@@ -1705,19 +1604,6 @@ export default class PatientViewPage extends React.Component<
                                                     !this.patientViewPageStore
                                                         .oncoKbData.isError
                                                 }
-                                                // mtbs={[
-                                                //     {
-                                                //         id: 'test123',
-                                                //         generalRecommendation:
-                                                //             'test',
-                                                //         geneticCounselingRecommendation: true,
-                                                //         rebiopsyRecommendation: false,
-                                                //         date: '2020-05-05',
-                                                //         mtbState:
-                                                //             MtbState.DRAFT,
-                                                //         therapyRecommendations: [],
-                                                //     },
-                                                // ]}
                                                 mtbs={
                                                     this.patientViewPageStore
                                                         .mtbs.result

@@ -70,12 +70,6 @@ export default class TherapyRecommendationForm extends React.Component<
                                     (therapyRecommendation.comment = comments)
                                 }
                             />
-                            {/* <input
-                            type="text"
-                            defaultValue={therapyRecommendation.comment}
-                            onChange={(e) => therapyRecommendation.comment = e.target.value}
-                            className="form-control"
-                            /> */}
                         </div>
 
                         <div className="form-group">
@@ -138,7 +132,6 @@ export default class TherapyRecommendationForm extends React.Component<
                                         EvidenceLevel[
                                             selectedOption.value as keyof typeof EvidenceLevel
                                         ];
-                                    console.log(selectedOption);
                                 }}
                             />
                         </div>
