@@ -14,8 +14,8 @@
     margin-right: 5px;
 }
 .tooltip {
-    maxheight: 400px;
-    maxwidth: 600px;
+    max-height: 400px;
+    max-width: 600px;
     overflow: auto;
 }
 
@@ -56,7 +56,7 @@
 
         .secondLeft {
             flex: 0 0 auto;
-            width: auto; // 195px;
+            width: auto; /*195px;*/
             margin-right: 10px;
         }
         .secondRight {
@@ -98,8 +98,8 @@
         margin-right: auto;
         margin-top: 10px;
         width: 90px;
-        // background: red !important;
-        // color: white !important;
+        /*background: red !important;
+        color: white !important;*/
         color: red !important;
     }
 
@@ -148,22 +148,24 @@
     }
 }
 
-// .mtb-table {
-//   ​table tr {
-//       border-bottom: 3px solid black !important;
-//   }​
+/*
+.mtb-table {
+  ​table tr {
+      border-bottom: 3px solid black !important;
+  }​
 
-//   table tr:last-child {
-//       border-bottom: none;
-//   }
-// }
+  table tr:last-child {
+      border-bottom: none;
+  }
+}
 
-// .statusBackground {
-//   display: block;
-//   padding: 10px;
-//   width: 130px;
-//   border-radius: 10px;
-//   background: #73AD21;
-//   text-align: center;
-//   color: #ffffff;
-// }
+.statusBackground {
+  display: block;
+  padding: 10px;
+  width: 130px;
+  border-radius: 10px;
+  background: #73AD21;
+  text-align: center;
+  color: #ffffff;
+}
+*/
