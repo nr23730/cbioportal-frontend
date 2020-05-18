@@ -1,19 +1,13 @@
 export enum EvidenceLevel {
-    NA = 'NA',
-    // I = "I",
-    // II = "II",
-    // III = "III",
-    // IV = "IV",
-    I = '1',
-    II = '2',
-    IIA = '2A',
-    IIB = '2B',
-    III = '3',
-    IIIA = '3A',
-    IIIB = '3B',
-    IV = '4',
-    R1 = 'R1',
-    R2 = 'R2',
+    NA,
+    m1A,
+    m1B,
+    m1C,
+    m2A,
+    m2B,
+    m2C,
+    m3,
+    m4,
 }
 
 export enum Modified {
@@ -34,7 +28,7 @@ export interface IRecommender {
     email?: string;
 }
 
-interface IModification {
+export interface IModification {
     recommender: IRecommender;
     modified: Modified;
     timestamp: string;
@@ -49,6 +43,7 @@ export interface IMtb {
     date: string;
     mtbState: MtbState;
     samples: string[];
+    modifications: IModification[];
 }
 
 export interface ITherapyRecommendation {
@@ -81,7 +76,6 @@ export interface IClinicalData {
 
 export interface IReasoning {
     geneticAlterations?: IGeneticAlteration[];
-    geneticAlterationsMissing?: IGeneticAlteration[];
     clinicalData?: IClinicalData[];
     tmb?: number;
     other?: string;

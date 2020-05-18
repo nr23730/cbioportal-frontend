@@ -25,7 +25,8 @@ import {
     isTherapyRecommendationEmpty,
     flattenObject,
     flattenArray,
-    getOncoKbLevelDesc,
+    getEvidenceLevelDesc,
+    getTooltipEvidenceContent,
 } from './TherapyRecommendationTableUtils';
 import AppConfig from 'appConfig';
 import { Button } from 'react-bootstrap';
@@ -46,6 +47,7 @@ export type ITherapyRecommendationProps = {
     cna: DiscreteCopyNumberData[];
     clinicalData: ClinicalData[];
     sampleManager: SampleManager | null;
+    oncoKbAvailable: boolean;
     therapyRecommendations: ITherapyRecommendation[];
     containerWidth: number;
     onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
@@ -166,7 +168,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                                 >
                                     <div className={styles.firstLeft}>
                                         <div className={styles.secondLeft}>
-                                            Positve for alterations:
+                                            Genomic alterations:
                                             <div>
                                                 {therapyRecommendation.reasoning
                                                     .geneticAlterations &&
@@ -180,7 +182,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                                             <div>
                                                 {therapyRecommendation.reasoning
                                                     .geneticAlterations &&
-                                                    this.getSamplesForPostiveAlterations(
+                                                    this.getSamplesForGeneticAlterations(
                                                         therapyRecommendation
                                                             .reasoning
                                                             .geneticAlterations
@@ -229,17 +231,11 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                     <span style={{ marginRight: 5 }}>
                         Level <b>{therapyRecommendation.evidenceLevel}</b>
                     </span>
-                    <If
-                        condition={
-                            therapyRecommendation.evidenceLevel &&
-                            therapyRecommendation.evidenceLevel !==
-                                EvidenceLevel.NA
-                        }
-                    >
+                    <If condition={therapyRecommendation.evidenceLevel}>
                         <DefaultTooltip
                             placement="bottomLeft"
                             trigger={['hover', 'focus']}
-                            overlay={this.tooltipEvidenceContent(
+                            overlay={getTooltipEvidenceContent(
                                 therapyRecommendation.evidenceLevel
                             )}
                             destroyTooltipOnHide={false}
@@ -393,7 +389,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
         return allMutations;
     }
 
-    public getSamplesForPostiveAlterations(
+    public getSamplesForGeneticAlterations(
         geneticAlterations: IGeneticAlteration[]
     ) {
         if (!geneticAlterations || geneticAlterations.length == 0) return;
@@ -564,14 +560,6 @@ export default class MtbTherapyRecommendationTable extends React.Component<
         );
     }
 
-    private tooltipEvidenceContent(evidenceLevel: string) {
-        return (
-            <div className={styles.tooltip} style={{ maxWidth: '200px' }}>
-                {getOncoKbLevelDesc()[evidenceLevel]}
-            </div>
-        );
-    }
-
     private getTextForClinicalDataItem(item: IClinicalData): string {
         let text = '';
         if (item.attributeName) text += item.attributeName;
@@ -595,17 +583,38 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         ></i>{' '}
                         Add
                     </Button>
-                    <Button
-                        type="button"
-                        className={'btn btn-default ' + styles.addOncoKbButton}
-                        onClick={() => this.openAddOncoKbForm()}
-                    >
-                        <i
-                            className={`fa fa-plus ${styles.marginLeft}`}
-                            aria-hidden="true"
-                        ></i>{' '}
-                        Add from OncoKB
-                    </Button>
+                    <If condition={this.props.oncoKbAvailable}>
+                        <Then>
+                            <Button
+                                type="button"
+                                className={
+                                    'btn btn-default ' + styles.addOncoKbButton
+                                }
+                                onClick={() => this.openAddOncoKbForm()}
+                            >
+                                <i
+                                    className={`fa fa-plus ${styles.marginLeft}`}
+                                    aria-hidden="true"
+                                ></i>{' '}
+                                Add from OncoKB
+                            </Button>
+                        </Then>
+                        <Else>
+                            <Button
+                                type="button"
+                                className={
+                                    'btn btn-default ' + styles.addOncoKbButton
+                                }
+                                disabled={true}
+                            >
+                                <i
+                                    className={`fa fa-exclamation-triangle ${styles.marginLeft}`}
+                                    aria-hidden="true"
+                                ></i>{' '}
+                                OncoKB unavailable
+                            </Button>
+                        </Else>
+                    </If>
                     {/* <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button> */}
                 </p>
                 {this.selectedTherapyRecommendation && (

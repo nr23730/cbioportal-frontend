@@ -5,10 +5,7 @@ import {
     ITherapyRecommendation,
     EvidenceLevel,
 } from 'shared/model/TherapyRecommendation';
-import {
-    TherapyRecommendationFormAlterationPositiveInput,
-    TherapyRecommendationFormAlterationNegativeInput,
-} from './TherapyRecommendationFormAlterationInput';
+import { TherapyRecommendationFormAlterationPositiveInput } from './TherapyRecommendationFormAlterationInput';
 import {
     Mutation,
     ClinicalData,
@@ -19,6 +16,7 @@ import TherapyRecommendationFormClinicalInput from './TherapyRecommendationFormC
 import Select from 'react-select';
 import TherapyRecommendationFormReferenceInput from './TherapyRecommendationFormReferenceInput';
 import TherapyRecommendationFormCommentInput from './TherapyRecommendationFormCommentInput';
+import TherapyRecommendationFormEvidenceLevelInput from './TherapyRecommendationFormEvidenceLevelInput';
 
 interface ITherapyRecommendationFormProps {
     show: boolean;
@@ -70,32 +68,17 @@ export default class TherapyRecommendationForm extends React.Component<
                                     (therapyRecommendation.comment = comments)
                                 }
                             />
-                            {/* <input
-                            type="text"
-                            defaultValue={therapyRecommendation.comment}
-                            onChange={(e) => therapyRecommendation.comment = e.target.value}
-                            className="form-control"
-                            /> */}
                         </div>
 
                         <div className="form-group">
                             <h5>Reasoning:</h5>
-                            <h6>Positive for alterations:</h6>
+                            <h6>Genomic alterations:</h6>
                             <TherapyRecommendationFormAlterationPositiveInput
                                 data={therapyRecommendation}
                                 mutations={this.props.mutations}
                                 cna={this.props.cna}
                                 onChange={alterations =>
                                     (therapyRecommendation.reasoning.geneticAlterations = alterations)
-                                }
-                            />
-                            <h6>Negative for alterations:</h6>
-                            <TherapyRecommendationFormAlterationNegativeInput
-                                data={therapyRecommendation}
-                                mutations={this.props.mutations}
-                                cna={this.props.cna}
-                                onChange={alterations =>
-                                    (therapyRecommendation.reasoning.geneticAlterationsMissing = alterations)
                                 }
                             />
                             <h6>Clinical data:</h6>
@@ -110,29 +93,11 @@ export default class TherapyRecommendationForm extends React.Component<
 
                         <div className="form-group">
                             <h5>Evidence Level:</h5>
-                            <Select
-                                options={Object.entries(EvidenceLevel).map(
-                                    ([key, value]) => ({
-                                        label: key,
-                                        value: value,
-                                    })
-                                )}
-                                defaultValue={{
-                                    label: therapyRecommendation.evidenceLevel,
-                                    value: therapyRecommendation.evidenceLevel,
-                                }}
-                                name="evidenceLevel"
-                                className="basic-select"
-                                classNamePrefix="select"
-                                onChange={(selectedOption: {
-                                    label: string;
-                                    value: EvidenceLevel;
-                                }) => {
-                                    therapyRecommendation.evidenceLevel =
-                                        EvidenceLevel[
-                                            selectedOption.label as keyof typeof EvidenceLevel
-                                        ];
-                                }}
+                            <TherapyRecommendationFormEvidenceLevelInput
+                                data={therapyRecommendation}
+                                onChange={evidenceLevel =>
+                                    (therapyRecommendation.evidenceLevel = evidenceLevel)
+                                }
                             />
                         </div>
 
