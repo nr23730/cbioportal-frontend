@@ -1641,19 +1641,23 @@ export default class PatientViewPage extends React.Component<
                                         </MSKTab>
                                     )}
 
-                                {/* <MSKTab
-                                    key={8}
-                                    id={PatientViewPageTabs.ClinicalTrialsGov}
-                                    linkText="ClinicalTrialsGov"
-                                >
-                                    <ClinicalTrialMatchTable
-                                        store={this.patientViewPageStore}
-                                        clinicalTrialMatches={
-                                            this.patientViewPageStore
-                                                .clinicalTrialMatches.result
+                                {
+                                    <MSKTab
+                                        key={8}
+                                        id={
+                                            PatientViewPageTabs.ClinicalTrialsGov
                                         }
-                                    />
-                                </MSKTab> */}
+                                        linkText="ClinicalTrialsGov"
+                                    >
+                                        <ClinicalTrialMatchTable
+                                            store={this.patientViewPageStore}
+                                            clinicalTrialMatches={
+                                                this.patientViewPageStore
+                                                    .clinicalTrialMatches.result
+                                            }
+                                        />
+                                    </MSKTab>
+                                }
 
                                 {/*<MSKTab key={5} id={{PatientViewPageTabs.MutationalSignatures}} linkText="Mutational Signature Data" hide={true}>*/}
                                 {/*<div className="clearfix">*/}
