@@ -8,8 +8,17 @@ interface IClinicalTrialOptionsMatchProps {
     store: PatientViewPageStore;
 }
 
+interface IClinicalTrialOptionsMatchState {
+    checkedItems: Map<string, boolean>;
+    queryBoxValue: string;
+    countryString: string;
+    checkedRecruitingItems: Map<string, boolean>;
+    value?: string;
+}
+
 class ClinicalTrialMatchTableOptions extends React.Component<
-    IClinicalTrialOptionsMatchProps
+    IClinicalTrialOptionsMatchProps,
+    IClinicalTrialOptionsMatchState
 > {
     //query_field:ClinicalTrialMatchTextfield = new ClinicalTrialMatchTextfield("");
     recruiting_values: RecruitingStatus[] = [];
@@ -52,7 +61,7 @@ class ClinicalTrialMatchTableOptions extends React.Component<
         return RecruitingStatus.Invalid;
     }
 
-    handleChange(e) {
+    handleChange(e: React.ChangeEvent<HTMLInputElement>) {
         const item = e.target.name;
         const isChecked = e.target.checked;
         this.setState(prevState => ({
@@ -64,7 +73,7 @@ class ClinicalTrialMatchTableOptions extends React.Component<
         console.log(this.state);
     }
 
-    handleTextChange(e) {
+    handleTextChange(e: React.ChangeEvent<HTMLInputElement>) {
         const newValue = e.target.value;
         this.setState(prevState => ({
             checkedItems: prevState.checkedItems,
@@ -75,7 +84,7 @@ class ClinicalTrialMatchTableOptions extends React.Component<
         console.log(this.state);
     }
 
-    handleCountryChange(e) {
+    handleCountryChange(e: React.ChangeEvent<HTMLInputElement>) {
         const newValue = e.target.value;
         this.setState(prevState => ({
             checkedItems: prevState.checkedItems,
@@ -86,7 +95,7 @@ class ClinicalTrialMatchTableOptions extends React.Component<
         console.log(this.state);
     }
 
-    handleRecChange(e) {
+    handleRecChange(e: React.ChangeEvent<HTMLInputElement>) {
         const item = e.target.name;
         const isChecked = e.target.checked;
         this.setState(prevState => ({
