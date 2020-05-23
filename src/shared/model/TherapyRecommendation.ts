@@ -10,12 +10,6 @@ export enum EvidenceLevel {
     m4,
 }
 
-export enum Modified {
-    CREATED = 'Created',
-    MODIFIED = 'Modified',
-    DELETED = 'Deleted',
-}
-
 export enum MtbState {
     DRAFT = 'Draft',
     COMPLETED = 'Completed',
@@ -28,12 +22,6 @@ export interface IRecommender {
     email?: string;
 }
 
-export interface IModification {
-    recommender: IRecommender;
-    modified: Modified;
-    timestamp: string;
-}
-
 export interface IMtb {
     id: string;
     therapyRecommendations: ITherapyRecommendation[];
@@ -43,7 +31,7 @@ export interface IMtb {
     date: string;
     mtbState: MtbState;
     samples: string[];
-    modifications: IModification[];
+    author: string;
 }
 
 export interface ITherapyRecommendation {
@@ -51,7 +39,7 @@ export interface ITherapyRecommendation {
     comment: string[];
     reasoning: IReasoning;
     evidenceLevel: EvidenceLevel;
-    modifications: IModification[];
+    author: string;
     treatments: ITreatment[];
     references: IReference[];
 }

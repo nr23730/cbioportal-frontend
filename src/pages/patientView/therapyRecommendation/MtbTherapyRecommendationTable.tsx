@@ -21,11 +21,10 @@ import {
 import {
     truncate,
     getNewTherapyRecommendation,
-    addModificationToTherapyRecommendation,
+    setAuthorInTherapyRecommendation,
     isTherapyRecommendationEmpty,
     flattenObject,
     flattenArray,
-    getEvidenceLevelDesc,
     getTooltipEvidenceContent,
 } from './TherapyRecommendationTableUtils';
 import AppConfig from 'appConfig';
@@ -479,7 +478,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                 this.backupTherapyRecommendation = undefined;
             }
         } else {
-            newTherapyRecommendation = addModificationToTherapyRecommendation(
+            newTherapyRecommendation = setAuthorInTherapyRecommendation(
                 newTherapyRecommendation
             );
             this.props.onAddOrEdit(newTherapyRecommendation);

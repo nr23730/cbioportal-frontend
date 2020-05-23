@@ -5,16 +5,12 @@ import {
     ITherapyRecommendation,
     IMtb,
     MtbState,
-    Modified,
 } from '../../../shared/model/TherapyRecommendation';
 import { computed, observable } from 'mobx';
 import LazyMobXTable from '../../../shared/components/lazyMobXTable/LazyMobXTable';
 import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from '../SampleManager';
-import {
-    flattenStringify,
-    getModification,
-} from './TherapyRecommendationTableUtils';
+import { flattenStringify, getAuthor } from './TherapyRecommendationTableUtils';
 import { Button } from 'react-bootstrap';
 import {
     Mutation,
@@ -285,7 +281,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
             date: now.toISOString().split('T')[0],
             mtbState: MtbState.DRAFT,
             samples: [],
-            modifications: [getModification(Modified.CREATED)],
+            author: getAuthor(),
         } as IMtb;
         newMtbs.push(newMtb);
         this.setState({ mtbs: newMtbs });

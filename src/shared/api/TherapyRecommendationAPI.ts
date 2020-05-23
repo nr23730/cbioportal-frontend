@@ -37,7 +37,7 @@ export async function fetchMtbsUsingGET(url: string) {
                             date: mtb.date,
                             mtbState: mtb.mtbState,
                             samples: mtb.samples,
-                            modifications: mtb.modifications,
+                            author: mtb.author,
                         } as IMtb)
                 );
             } else {
@@ -68,11 +68,7 @@ export async function updateMtbUsingPUT(id: string, url: string, mtbs: IMtb[]) {
     return request
         .put(url)
         .set('Content-Type', 'application/json')
-        .send(
-            JSON.stringify(
-                flattenArray(mtbs),
-            )
-        )
+        .send(JSON.stringify(flattenArray(mtbs)))
         .then(res => {
             if (res.ok) {
                 console.group('### MTB ### Success PUTting ' + url);

@@ -1,8 +1,6 @@
 import {
     ITherapyRecommendation,
     EvidenceLevel,
-    Modified,
-    IModification,
     IReference,
 } from 'shared/model/TherapyRecommendation';
 import AppConfig from 'appConfig';
@@ -39,15 +37,7 @@ export function getNewTherapyRecommendation(
         comment: [],
         reasoning: {},
         evidenceLevel: EvidenceLevel.NA,
-        modifications: [
-            {
-                modified: Modified.CREATED,
-                recommender: {
-                    credentials: AppConfig.serverConfig.user_email_address,
-                },
-                timestamp: timeString,
-            },
-        ],
+        author: getAuthor(),
         references: [],
         treatments: [],
     };
@@ -58,27 +48,19 @@ export function getSampleTherapyRecommendation(
     patientId: string
 ): ITherapyRecommendation {
     let sample = getNewTherapyRecommendation(patientId);
-    sample.comment = ['Created: ' + sample.modifications[0].timestamp];
+    sample.comment = ['Created: ' + new Date().toISOString()];
     return sample;
 }
 
-export function addModificationToTherapyRecommendation(
+export function setAuthorInTherapyRecommendation(
     therapyRecommendation: ITherapyRecommendation
 ): ITherapyRecommendation {
-    therapyRecommendation.modifications.push(
-        getModification(Modified.MODIFIED)
-    );
+    therapyRecommendation.author = getAuthor();
     return therapyRecommendation;
 }
 
-export function getModification(modifier: Modified): IModification {
-    return {
-        modified: modifier,
-        recommender: {
-            credentials: AppConfig.serverConfig.user_email_address,
-        },
-        timestamp: new Date().toISOString(),
-    };
+export function getAuthor(): string {
+    return AppConfig.serverConfig.user_email_address;
 }
 
 export function isTherapyRecommendationEmpty(
