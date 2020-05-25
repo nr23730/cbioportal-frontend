@@ -26,9 +26,10 @@ export async function fetchMtbsUsingGET(url: string) {
                 console.log(JSON.parse(res.text));
                 console.groupEnd();
                 const response = JSON.parse(res.text);
-                return response.map(
+                return response.mtbs.map(
                     (mtb: any) =>
                         ({
+                            id: mtb.id,
                             therapyRecommendations: mtb.therapyRecommendations,
                             geneticCounselingRecommendation:
                                 mtb.geneticCounselingRecommendation,
@@ -68,7 +69,12 @@ export async function updateMtbUsingPUT(id: string, url: string, mtbs: IMtb[]) {
     return request
         .put(url)
         .set('Content-Type', 'application/json')
-        .send(JSON.stringify(flattenArray(mtbs)))
+        .send(
+            JSON.stringify({
+                id: id,
+                mtbs: flattenArray(mtbs),
+            })
+        )
         .then(res => {
             if (res.ok) {
                 console.group('### MTB ### Success PUTting ' + url);
