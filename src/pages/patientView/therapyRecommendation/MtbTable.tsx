@@ -108,7 +108,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         }}
                     >
                         {Object.entries(MtbState).map(([key, value]) => (
-                            <option key={key} value={value}>
+                            <option key={key} value={key}>
                                 {value}
                             </option>
                         ))}
