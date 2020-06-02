@@ -54,6 +54,7 @@ export type ITherapyRecommendationProps = {
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     cnaOncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     pubMedCache?: PubMedCache;
+    isDisabled: boolean;
 };
 
 export type ITherapyRecommendationState = {
@@ -309,6 +310,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         <Button
                             type="button"
                             className={'btn btn-default ' + styles.editButton}
+                            disabled={this.props.isDisabled}
                             onClick={() =>
                                 this.openEditForm(therapyRecommendation)
                             }
@@ -324,6 +326,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         <Button
                             type="button"
                             className={'btn btn-default ' + styles.deleteButton}
+                            disabled={this.props.isDisabled}
                             onClick={() =>
                                 window.confirm(
                                     'Are you sure you wish to delete this item?'
@@ -574,6 +577,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                     <Button
                         type="button"
                         className={'btn btn-default ' + styles.addButton}
+                        disabled={this.props.isDisabled}
                         onClick={() => this.openAddForm()}
                     >
                         <i
@@ -589,6 +593,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                                 className={
                                     'btn btn-default ' + styles.addOncoKbButton
                                 }
+                                disabled={this.props.isDisabled}
                                 onClick={() => this.openAddOncoKbForm()}
                             >
                                 <i

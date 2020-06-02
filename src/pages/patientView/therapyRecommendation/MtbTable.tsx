@@ -89,6 +89,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         type="date"
                         value={mtb.date}
                         style={{ display: 'block' }}
+                        disabled={this.isDisabled(mtb)}
                         onChange={(e: React.FormEvent<HTMLInputElement>) => {
                             const newDate = e.currentTarget.value;
                             const newMtbs = this.state.mtbs.slice();
@@ -108,13 +109,14 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         }}
                     >
                         {Object.entries(MtbState).map(([key, value]) => (
-                            <option key={key} value={value}>
+                            <option key={key} value={key}>
                                 {value}
                             </option>
                         ))}
                     </select>
                     <LabeledCheckbox
                         checked={mtb.geneticCounselingRecommendation}
+                        disabled={this.isDisabled(mtb)}
                         onChange={() => {
                             const newGcr = !mtb.geneticCounselingRecommendation;
                             const newMtbs = this.state.mtbs.slice();
@@ -136,6 +138,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                     </LabeledCheckbox>
                     <LabeledCheckbox
                         checked={mtb.rebiopsyRecommendation}
+                        disabled={this.isDisabled(mtb)}
                         onChange={() => {
                             const newRr = !mtb.rebiopsyRecommendation;
                             const newMtbs = this.state.mtbs.slice();
@@ -153,6 +156,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         rows={4}
                         cols={30}
                         value={mtb.generalRecommendation}
+                        disabled={this.isDisabled(mtb)}
                         onChange={(
                             e: React.ChangeEvent<HTMLTextAreaElement>
                         ) => {
@@ -179,6 +183,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         name="samplesConsidered"
                         className="basic-multi-select"
                         classNamePrefix="select"
+                        isDisabled={this.isDisabled(mtb)}
                         onChange={(selectedOption: Array<any>) => {
                             const newSamples = [];
                             if (selectedOption !== null) {
@@ -198,6 +203,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         <Button
                             type="button"
                             className={'btn btn-default ' + styles.deleteButton}
+                            disabled={this.isDisabled(mtb)}
                             onClick={() =>
                                 window.confirm(
                                     'Are you sure you wish to delete this MTB session?'
@@ -232,6 +238,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                     oncoKbData={this.props.oncoKbData}
                     cnaOncoKbData={this.props.cnaOncoKbData}
                     pubMedCache={this.props.pubMedCache}
+                    isDisabled={this.isDisabled(mtb)}
                 />
             ),
             width: this.columnWidths[ColumnKey.THERAPYRECOMMENDATIONS],
@@ -298,6 +305,10 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
         console.group('Save mtbs');
         this.props.onSaveData(this.state.mtbs);
         console.groupEnd();
+    }
+
+    private isDisabled(mtb: IMtb) {
+        return mtb.mtbState === MtbState.ARCHIVED;
     }
 
     private test() {
