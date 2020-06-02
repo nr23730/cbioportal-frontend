@@ -1641,7 +1641,7 @@ export default class PatientViewPage extends React.Component<
                                         </MSKTab>
                                     )}
 
-                                {/* <MSKTab
+                                <MSKTab
                                     key={8}
                                     id={PatientViewPageTabs.ClinicalTrialsGov}
                                     linkText="ClinicalTrialsGov"
@@ -1653,7 +1653,7 @@ export default class PatientViewPage extends React.Component<
                                                 .clinicalTrialMatches.result
                                         }
                                     />
-                                </MSKTab> */}
+                                </MSKTab>
 
                                 {/*<MSKTab key={5} id={{PatientViewPageTabs.MutationalSignatures}} linkText="Mutational Signature Data" hide={true}>*/}
                                 {/*<div className="clearfix">*/}
