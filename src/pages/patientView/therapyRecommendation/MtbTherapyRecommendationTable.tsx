@@ -111,46 +111,6 @@ export default class MtbTherapyRecommendationTable extends React.Component<
 
     private _columns = [
         {
-            name: ColumnKey.THERAPY,
-            render: (therapyRecommendation: ITherapyRecommendation) => (
-                <If
-                    condition={
-                        therapyRecommendation.treatments &&
-                        therapyRecommendation.treatments.length > 0
-                    }
-                >
-                    <div>
-                        <span>
-                            {therapyRecommendation.treatments.map(
-                                (treatment: ITreatment) => (
-                                    <div>
-                                        <img
-                                            src={require('../../../globalStyles/images/drug.png')}
-                                            style={{ width: 18, marginTop: -5 }}
-                                            alt="drug icon"
-                                        />
-                                        <b>{treatment.name}</b>
-                                    </div>
-                                )
-                            )}
-                        </span>
-                    </div>
-                </If>
-            ),
-            // width: this.columnWidths[ColumnKey.THERAPY]
-        },
-        {
-            name: ColumnKey.COMMENT,
-            render: (therapyRecommendation: ITherapyRecommendation) => (
-                <div>
-                    {therapyRecommendation.comment.map((comment: string) => (
-                        <p>{comment}</p>
-                    ))}
-                </div>
-            ),
-            width: this.columnWidths[ColumnKey.COMMENT],
-        },
-        {
             name: ColumnKey.REASONING,
             render: (therapyRecommendation: ITherapyRecommendation) => (
                 <div>
@@ -222,6 +182,46 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                 </div>
             ),
             // width: this.columnWidths[ColumnKey.REASONING]
+        },
+        {
+            name: ColumnKey.THERAPY,
+            render: (therapyRecommendation: ITherapyRecommendation) => (
+                <If
+                    condition={
+                        therapyRecommendation.treatments &&
+                        therapyRecommendation.treatments.length > 0
+                    }
+                >
+                    <div>
+                        <span>
+                            {therapyRecommendation.treatments.map(
+                                (treatment: ITreatment) => (
+                                    <div>
+                                        <img
+                                            src={require('../../../globalStyles/images/drug.png')}
+                                            style={{ width: 18, marginTop: -5 }}
+                                            alt="drug icon"
+                                        />
+                                        <b>{treatment.name}</b>
+                                    </div>
+                                )
+                            )}
+                        </span>
+                    </div>
+                </If>
+            ),
+            // width: this.columnWidths[ColumnKey.THERAPY]
+        },
+        {
+            name: ColumnKey.COMMENT,
+            render: (therapyRecommendation: ITherapyRecommendation) => (
+                <div>
+                    {therapyRecommendation.comment.map((comment: string) => (
+                        <p>{comment}</p>
+                    ))}
+                </div>
+            ),
+            width: this.columnWidths[ColumnKey.COMMENT],
         },
         {
             name: ColumnKey.EVIDENCE,

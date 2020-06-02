@@ -51,26 +51,6 @@ export default class TherapyRecommendationForm extends React.Component<
                 <Modal.Body>
                     <form className="form">
                         <div className="form-group">
-                            <h5>Drug(s):</h5>
-                            <TherapyRecommendationFormDrugInput
-                                data={therapyRecommendation}
-                                onChange={drugs =>
-                                    (therapyRecommendation.treatments = drugs)
-                                }
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <h5>Comment:</h5>
-                            <TherapyRecommendationFormCommentInput
-                                data={therapyRecommendation}
-                                onChange={comments =>
-                                    (therapyRecommendation.comment = comments)
-                                }
-                            />
-                        </div>
-
-                        <div className="form-group">
                             <h5>Reasoning:</h5>
                             <h6>Genomic alterations:</h6>
                             <TherapyRecommendationFormAlterationPositiveInput
@@ -87,6 +67,26 @@ export default class TherapyRecommendationForm extends React.Component<
                                 clinicalData={this.props.clinicalData}
                                 onChange={clinicalDataItems =>
                                     (therapyRecommendation.reasoning.clinicalData = clinicalDataItems)
+                                }
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <h5>Drug(s):</h5>
+                            <TherapyRecommendationFormDrugInput
+                                data={therapyRecommendation}
+                                onChange={drugs =>
+                                    (therapyRecommendation.treatments = drugs)
+                                }
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <h5>Comment:</h5>
+                            <TherapyRecommendationFormCommentInput
+                                data={therapyRecommendation}
+                                onChange={comments =>
+                                    (therapyRecommendation.comment = comments)
                                 }
                             />
                         </div>
