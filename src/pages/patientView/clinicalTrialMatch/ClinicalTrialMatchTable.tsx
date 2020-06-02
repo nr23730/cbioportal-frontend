@@ -46,7 +46,7 @@ class CollapseList extends React.PureComponent {
     NUM_LIST_ELEMENTS = 3;
 
     getDiplayStyle(str: String[]) {
-        if (str.length < this.NUM_LIST_ELEMENTS) {
+        if (str.length <= this.NUM_LIST_ELEMENTS) {
             return (
                 <div>
                     <ul>{this.asFirstListElement(str)}</ul>
@@ -79,7 +79,7 @@ class CollapseList extends React.PureComponent {
 
     asFirstListElement(str: String[]) {
         var res: String[] = [];
-        if (str.length < this.NUM_LIST_ELEMENTS) {
+        if (str.length <= this.NUM_LIST_ELEMENTS) {
             for (var i = 0; i < str.length; i++) {
                 res.push(str[i]);
             }
@@ -93,7 +93,7 @@ class CollapseList extends React.PureComponent {
 
     asHiddenListElement(str: String[]) {
         var res: String[] = [];
-        if (str.length >= this.NUM_LIST_ELEMENTS) {
+        if (str.length > this.NUM_LIST_ELEMENTS) {
             for (var i = this.NUM_LIST_ELEMENTS; i < str.length; i++) {
                 res.push(str[i]);
             }
