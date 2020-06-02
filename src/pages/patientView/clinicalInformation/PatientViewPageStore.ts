@@ -1837,9 +1837,8 @@ export class PatientViewPageStore {
                     var newTrial = {
                         found: std.getNumberFound(),
                         keywords: std.getKeywords().toString(),
-                        conditions: std
-                            .getStudy()
-                            .ProtocolSection.ConditionsModule.ConditionList.Condition.toString(),
+                        conditions: std.getStudy().ProtocolSection
+                            .ConditionsModule.ConditionList.Condition,
                         title: std.getStudy().ProtocolSection
                             .IdentificationModule.OfficialTitle,
                         nct: std.getStudy().ProtocolSection.IdentificationModule
