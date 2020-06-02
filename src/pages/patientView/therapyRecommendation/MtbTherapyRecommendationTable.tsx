@@ -54,6 +54,7 @@ export type ITherapyRecommendationProps = {
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     cnaOncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     pubMedCache?: PubMedCache;
+    isDisabled: boolean;
 };
 
 export type ITherapyRecommendationState = {
@@ -110,46 +111,6 @@ export default class MtbTherapyRecommendationTable extends React.Component<
     @observable showOncoKBForm: boolean;
 
     private _columns = [
-        {
-            name: ColumnKey.THERAPY,
-            render: (therapyRecommendation: ITherapyRecommendation) => (
-                <If
-                    condition={
-                        therapyRecommendation.treatments &&
-                        therapyRecommendation.treatments.length > 0
-                    }
-                >
-                    <div>
-                        <span>
-                            {therapyRecommendation.treatments.map(
-                                (treatment: ITreatment) => (
-                                    <div>
-                                        <img
-                                            src={require('../../../globalStyles/images/drug.png')}
-                                            style={{ width: 18, marginTop: -5 }}
-                                            alt="drug icon"
-                                        />
-                                        <b>{treatment.name}</b>
-                                    </div>
-                                )
-                            )}
-                        </span>
-                    </div>
-                </If>
-            ),
-            // width: this.columnWidths[ColumnKey.THERAPY]
-        },
-        {
-            name: ColumnKey.COMMENT,
-            render: (therapyRecommendation: ITherapyRecommendation) => (
-                <div>
-                    {therapyRecommendation.comment.map((comment: string) => (
-                        <p>{comment}</p>
-                    ))}
-                </div>
-            ),
-            width: this.columnWidths[ColumnKey.COMMENT],
-        },
         {
             name: ColumnKey.REASONING,
             render: (therapyRecommendation: ITherapyRecommendation) => (
@@ -222,6 +183,46 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                 </div>
             ),
             // width: this.columnWidths[ColumnKey.REASONING]
+        },
+        {
+            name: ColumnKey.THERAPY,
+            render: (therapyRecommendation: ITherapyRecommendation) => (
+                <If
+                    condition={
+                        therapyRecommendation.treatments &&
+                        therapyRecommendation.treatments.length > 0
+                    }
+                >
+                    <div>
+                        <span>
+                            {therapyRecommendation.treatments.map(
+                                (treatment: ITreatment) => (
+                                    <div>
+                                        <img
+                                            src={require('../../../globalStyles/images/drug.png')}
+                                            style={{ width: 18, marginTop: -5 }}
+                                            alt="drug icon"
+                                        />
+                                        <b>{treatment.name}</b>
+                                    </div>
+                                )
+                            )}
+                        </span>
+                    </div>
+                </If>
+            ),
+            // width: this.columnWidths[ColumnKey.THERAPY]
+        },
+        {
+            name: ColumnKey.COMMENT,
+            render: (therapyRecommendation: ITherapyRecommendation) => (
+                <div>
+                    {therapyRecommendation.comment.map((comment: string) => (
+                        <p>{comment}</p>
+                    ))}
+                </div>
+            ),
+            width: this.columnWidths[ColumnKey.COMMENT],
         },
         {
             name: ColumnKey.EVIDENCE,
@@ -309,6 +310,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         <Button
                             type="button"
                             className={'btn btn-default ' + styles.editButton}
+                            disabled={this.props.isDisabled}
                             onClick={() =>
                                 this.openEditForm(therapyRecommendation)
                             }
@@ -324,6 +326,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         <Button
                             type="button"
                             className={'btn btn-default ' + styles.deleteButton}
+                            disabled={this.props.isDisabled}
                             onClick={() =>
                                 window.confirm(
                                     'Are you sure you wish to delete this item?'
@@ -574,6 +577,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                     <Button
                         type="button"
                         className={'btn btn-default ' + styles.addButton}
+                        disabled={this.props.isDisabled}
                         onClick={() => this.openAddForm()}
                     >
                         <i
@@ -589,6 +593,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                                 className={
                                     'btn btn-default ' + styles.addOncoKbButton
                                 }
+                                disabled={this.props.isDisabled}
                                 onClick={() => this.openAddOncoKbForm()}
                             >
                                 <i
