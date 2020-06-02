@@ -78,14 +78,9 @@ export class ClinicalTrialMatchTable extends React.Component<
             name: ColumnKey.NCT_NUMBER,
             render: (trial: IDetailedClinicalTrialMatch) => (
                 <div>
-                    <a
-                        target="_blank"
-                        href={
-                            'https://clinicaltrials.gov/ct2/show/' + trial.nct
-                        }
-                    >
-                        {trial.nct}
-                    </a>
+                    <ul>
+                        <li>{trial.interventions}</li>
+                    </ul>
                 </div>
             ),
             width: 300,

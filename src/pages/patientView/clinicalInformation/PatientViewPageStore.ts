@@ -1736,9 +1736,21 @@ export class PatientViewPageStore {
                 var sortedList;
                 var mutations: Mutation[][] = this.mergedMutationData;
 
-                mutations.forEach(function(value: Mutation[]) {
-                    gene_symbols.push(value[0].gene.hugoGeneSymbol);
-                });
+                if (
+                    search_symbols.length == 0 &&
+                    clinicalTrialQuery.additionalClinicalTrialsQueries.length ==
+                        0
+                ) {
+                    gene_symbols = [];
+                } else {
+                    gene_symbols = search_symbols;
+                }
+
+                clinicalTrialQuery.additionalClinicalTrialsQueries.forEach(
+                    function(value: string) {
+                        gene_symbols.push(value);
+                    }
+                );
 
                 for (const symbol of gene_symbols) {
                     var result: Study[] = await this.getAllStudiesForKeyword(
@@ -1774,6 +1786,54 @@ export class PatientViewPageStore {
             invoke: async () => {
                 var result: IDetailedClinicalTrialMatch[] = [];
                 for (const std of this.getStudiesFromClinicalTrialsGov.result) {
+                    var loc: string[] = [];
+                    var inv: string[] = [];
+
+                    var locationModule: Location[] = [];
+                    var interventionModule: Intervention[] = [];
+
+                    try {
+                        locationModule = std.getStudy().ProtocolSection
+                            .ContactsLocationsModule.LocationList.Location;
+                    } catch (e) {
+                        //no location module in study
+                        locationModule = [];
+                    }
+
+                    try {
+                        interventionModule = std.getStudy().ProtocolSection
+                            .ArmsInterventionsModule.InterventionList
+                            .Intervention;
+                    } catch (e) {
+                        //no intervention module in study
+                        interventionModule = [];
+                    }
+
+                    for (let i = 0; i < locationModule.length; i++) {
+                        let location: Location = locationModule[i];
+                        console.log(
+                            location.LocationCity +
+                                ': ' +
+                                location.LocationFacility +
+                                ': ' +
+                                location.LocationStatus
+                        );
+
+                        loc.push(
+                            location.LocationCity +
+                                ': ' +
+                                location.LocationFacility +
+                                ': ' +
+                                location.LocationStatus
+                        );
+                    }
+
+                    for (let i = 0; i < interventionModule.length; i++) {
+                        let intervention: Intervention = interventionModule[i];
+                        console.log(intervention.InterventionName);
+                        inv.push(intervention.InterventionName);
+                    }
+
                     var newTrial = {
                         found: std.getNumberFound(),
                         keywords: std.getKeywords().toString(),
