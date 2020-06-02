@@ -139,6 +139,10 @@ import {
 import {
     Study,
     ClinicalTrialsGovStudies,
+    Location,
+    LocationList,
+    Intervention,
+    InterventionList,
 } from 'shared/api/ClinicalTrialsGovStudyStrucutre';
 import { IDetailedClinicalTrialMatch } from '../clinicalTrialMatch/ClinicalTrialMatchTable';
 import { searchStudiesForKeywordAsString } from 'shared/api/ClinicalTrialMatchAPI';
@@ -146,6 +150,7 @@ import {
     fetchMtbsUsingGET,
     updateMtbUsingPUT,
 } from 'shared/api/TherapyRecommendationAPI';
+import { RecruitingStatus } from 'shared/enums/ClinicalTrialsGovRecruitingStatus';
 
 type PageMode = 'patient' | 'sample';
 
@@ -239,6 +244,25 @@ function transformClinicalInformationToStoreShape(
     return rv;
 }
 
+class ClinicalTrialsSearchParams {
+    additionalClinicalTrialsQueries: string[] = [];
+    clinicalTrialsCountires: string[] = [];
+    clinicalTrialsRecruitingStatus: RecruitingStatus[] = [];
+    symbolsToSearch: string[] = [];
+
+    constructor(
+        additionalClinicalTrialsQueries: string[],
+        clinicalTrialsCountires: string[],
+        clinicalTrialsRecruitingStatus: RecruitingStatus[],
+        symbolsToSearch: string[] = []
+    ) {
+        this.additionalClinicalTrialsQueries = additionalClinicalTrialsQueries;
+        this.clinicalTrialsRecruitingStatus = clinicalTrialsRecruitingStatus;
+        this.clinicalTrialsCountires = clinicalTrialsCountires;
+        this.symbolsToSearch = symbolsToSearch;
+    }
+}
+
 export class PatientViewPageStore {
     constructor(private appStore: AppStore) {
         labelMobxPromises(this);
@@ -246,6 +270,14 @@ export class PatientViewPageStore {
     }
 
     public internalClient: CBioPortalAPIInternal;
+
+    @observable
+    private clinicalTrialSerchParams: ClinicalTrialsSearchParams = new ClinicalTrialsSearchParams(
+        [],
+        [],
+        [],
+        []
+    );
 
     @observable public activeTabId = '';
 
@@ -1402,6 +1434,23 @@ export class PatientViewPageStore {
         return mergeMutations(this.mutationData);
     }
 
+    @computed get mutationHugoGeneSymbols(): string[] {
+        var gene_symbols: string[] = [];
+        this.mergedMutationData.forEach(function(value: Mutation[]) {
+            gene_symbols.push(value[0].gene.hugoGeneSymbol);
+        });
+
+        this.mergedDiscreteCNADataFilteredByGene.forEach(function(
+            value: DiscreteCopyNumberData[]
+        ) {
+            gene_symbols.push(value[0].gene.hugoGeneSymbol);
+        });
+
+        var unique_gene_symbols = [...new Set(gene_symbols)];
+
+        return unique_gene_symbols;
+    }
+
     @computed get mergedMutationDataIncludingUncalled(): Mutation[][] {
         return mergeMutationsIncludingUncalled(
             this.mutationData,
@@ -1732,9 +1781,13 @@ export class PatientViewPageStore {
             await: () => [],
             invoke: async () => {
                 var study_list = new StudyList();
-                var gene_symbols: String[] = [];
                 var sortedList;
-                var mutations: Mutation[][] = this.mergedMutationData;
+                var all_gene_symbols: string[] = this.mutationHugoGeneSymbols;
+                var clinicalTrialQuery = this.clinicalTrialSerchParams;
+                var locations = clinicalTrialQuery.clinicalTrialsCountires;
+                var status = clinicalTrialQuery.clinicalTrialsRecruitingStatus;
+                var search_symbols = clinicalTrialQuery.symbolsToSearch;
+                var gene_symbols: string[] = [];
 
                 if (
                     search_symbols.length == 0 &&
@@ -1773,6 +1826,13 @@ export class PatientViewPageStore {
                 );
 
                 console.log(sorted_arr);
+                var res = '["';
+                for (const a of sorted_arr) {
+                    res += a.getStudy().ProtocolSection.IdentificationModule
+                        .NCTId;
+                    res += '","';
+                }
+                console.log(res);
 
                 return sorted_arr;
             },
@@ -1816,7 +1876,7 @@ export class PatientViewPageStore {
                                 ': ' +
                                 location.LocationFacility +
                                 ': ' +
-                                location.LocationStatus
+                                location.LocationState
                         );
                     }
 
@@ -1834,12 +1894,14 @@ export class PatientViewPageStore {
                             .IdentificationModule.OfficialTitle,
                         nct: std.getStudy().ProtocolSection.IdentificationModule
                             .NCTId,
-                        status: 'status',
+                        status: std.getStudy().ProtocolSection.StatusModule
+                            .OverallStatus,
+                        locations: loc,
+                        interventions: inv,
                     };
                     result.push(newTrial);
                 }
 
-                //let newfTrial = {found: 12, keywords: "keywords", conditions: "conditions", title: "title", nct: "nct", status: "status"}
                 return result;
             },
         },
@@ -1852,7 +1914,9 @@ export class PatientViewPageStore {
         var result: ClinicalTrialsGovStudies = await searchStudiesForKeywordAsString(
             keyword,
             1,
-            1
+            1,
+            this.clinicalTrialSerchParams.clinicalTrialsCountires,
+            this.clinicalTrialSerchParams.clinicalTrialsRecruitingStatus
         ); //find amount of available studies.
         var num_studies_found = result.FullStudiesResponse.NStudiesFound;
         var current_max = STEPSIZE; //ClinicalTrials.gov API Allows to oly fetch 100 studies at a time
@@ -1867,7 +1931,9 @@ export class PatientViewPageStore {
         result = await searchStudiesForKeywordAsString(
             keyword,
             current_min,
-            current_max
+            current_max,
+            this.clinicalTrialSerchParams.clinicalTrialsCountires,
+            this.clinicalTrialSerchParams.clinicalTrialsRecruitingStatus
         );
 
         result.FullStudiesResponse.FullStudies.forEach(function(value) {
@@ -1882,7 +1948,9 @@ export class PatientViewPageStore {
             result = await searchStudiesForKeywordAsString(
                 keyword,
                 current_min,
-                current_max
+                current_max,
+                this.clinicalTrialSerchParams.clinicalTrialsCountires,
+                this.clinicalTrialSerchParams.clinicalTrialsRecruitingStatus
             );
             result.FullStudiesResponse.FullStudies.forEach(function(value) {
                 all_studies.push(value.Study);
@@ -1890,6 +1958,35 @@ export class PatientViewPageStore {
         }
 
         return all_studies;
+    }
+
+    public setClinicalTrialSearchParams(
+        additionalQuery: string,
+        country: string,
+        status: RecruitingStatus[],
+        symbols: string[]
+    ) {
+        var queries: string[] = [];
+        var cntr: string[] = [];
+
+        if (additionalQuery == '') {
+            queries = [];
+        } else {
+            queries = [additionalQuery];
+        }
+
+        if (country == '') {
+            cntr = [];
+        } else {
+            cntr = [country];
+        }
+
+        this.clinicalTrialSerchParams = new ClinicalTrialsSearchParams(
+            queries,
+            cntr,
+            status,
+            symbols
+        );
     }
 
     @computed get referenceGenomeBuild() {

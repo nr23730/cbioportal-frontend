@@ -2,7 +2,7 @@ import * as React from 'react';
 import { action, computed, observable } from 'mobx';
 import { PatientViewPageStore } from '../clinicalInformation/PatientViewPageStore';
 import { observer } from 'mobx-react';
-import { Mutation } from '../../../shared/api/generated/CBioPortalAPI';
+
 import { Collapse } from 'react-collapse';
 import {
     searchStudiesForKeyword,
@@ -14,6 +14,7 @@ import {
 } from '../../../shared/api/ClinicalTrialsGovStudyStrucutre';
 import { StudyList, StudyListEntry } from './utils/StudyList';
 import LazyMobXTable from '../../../shared/components/lazyMobXTable/LazyMobXTable';
+import ClinicalTrialMatchTableOptions from './ClinicalTrialMatchTableOptions';
 
 enum ColumnKey {
     NUM_FOUND = 'Appearences',
@@ -22,6 +23,8 @@ enum ColumnKey {
     CONDITIONS = 'Conditions',
     NCT_NUMBER = 'NCT Number',
     STATUS = 'Status',
+    LOCATIONS = 'Locations',
+    INTERVENTIONS = 'Interventions',
 }
 
 interface IClinicalTrialMatchProps {
@@ -29,20 +32,33 @@ interface IClinicalTrialMatchProps {
     clinicalTrialMatches: IDetailedClinicalTrialMatch[];
 }
 
+interface ICollapseListState {
+    isOpened: boolean;
+}
+
+interface ICollapseListProps {
+    elements: string[];
+}
+
 export interface IDetailedClinicalTrialMatch {
     found: number;
     keywords: String;
-    conditions: String[];
+    conditions: string[];
     title: String;
     nct: String;
     status: String;
+    locations: string[];
+    interventions: string[];
 }
 
 class ClinicalTrialMatchTableComponent extends LazyMobXTable<
     IDetailedClinicalTrialMatch
 > {}
 
-class CollapseList extends React.PureComponent {
+class CollapseList extends React.PureComponent<
+    ICollapseListProps,
+    ICollapseListState
+> {
     NUM_LIST_ELEMENTS = 3;
 
     getDiplayStyle(str: String[]) {
@@ -103,7 +119,7 @@ class CollapseList extends React.PureComponent {
         }
     }
 
-    constructor(props) {
+    constructor(props: ICollapseListProps) {
         super(props);
         this.state = { isOpened: false };
     }
@@ -143,9 +159,9 @@ export class ClinicalTrialMatchTable extends React.Component<
     private readonly ENTRIES_PER_PAGE = 10;
     private _columns = [
         {
-            name: ColumnKey.NUM_FOUND,
+            name: ColumnKey.STATUS,
             render: (trial: IDetailedClinicalTrialMatch) => (
-                <div>{trial.found}</div>
+                <div>{trial.status}</div>
             ),
             width: 300,
         },
@@ -157,14 +173,23 @@ export class ClinicalTrialMatchTable extends React.Component<
             width: 300,
         },
         {
-            name: ColumnKey.CONDITIONS,
+            name: ColumnKey.TITLE,
             render: (trial: IDetailedClinicalTrialMatch) => (
-                <div>{trial.conditions}</div>
+                <div>
+                    <a
+                        target="_blank"
+                        href={
+                            'https://clinicaltrials.gov/ct2/show/' + trial.nct
+                        }
+                    >
+                        {trial.title}
+                    </a>
+                </div>
             ),
             width: 300,
         },
         {
-            name: ColumnKey.TITLE,
+            name: ColumnKey.CONDITIONS,
             render: (trial: IDetailedClinicalTrialMatch) => (
                 <div>
                     <CollapseList elements={trial.conditions}></CollapseList>
@@ -173,7 +198,7 @@ export class ClinicalTrialMatchTable extends React.Component<
             width: 300,
         },
         {
-            name: ColumnKey.NCT_NUMBER,
+            name: ColumnKey.INTERVENTIONS,
             render: (trial: IDetailedClinicalTrialMatch) => (
                 <div>
                     <CollapseList elements={trial.interventions}></CollapseList>
@@ -182,7 +207,7 @@ export class ClinicalTrialMatchTable extends React.Component<
             width: 300,
         },
         {
-            name: ColumnKey.STATUS,
+            name: ColumnKey.LOCATIONS,
             render: (trial: IDetailedClinicalTrialMatch) => (
                 <div>
                     <CollapseList elements={trial.locations}></CollapseList>
