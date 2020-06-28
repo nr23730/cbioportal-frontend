@@ -73,4 +73,5 @@ export interface IGeneticAlteration {
     entrezGeneId?: number;
     hugoSymbol: string;
     alteration?: string;
+    chromosome?: string;
 }

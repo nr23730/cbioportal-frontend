@@ -27,6 +27,7 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
                 hugoSymbol: mutation.gene.hugoGeneSymbol,
                 alteration: mutation.proteinChange,
                 entrezGeneId: mutation.entrezGeneId,
+                chromosome: mutation.chr,
             } as IGeneticAlteration;
         });
 
