@@ -88,7 +88,11 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                     <input
                         type="date"
                         value={mtb.date}
-                        style={{ display: 'block' }}
+                        style={{
+                            display: 'block',
+                            marginTop: '2px',
+                            marginBottom: '2px',
+                        }}
                         disabled={this.isDisabled(mtb)}
                         onChange={(e: React.FormEvent<HTMLInputElement>) => {
                             const newDate = e.currentTarget.value;
@@ -99,7 +103,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                     ></input>
                     <select
                         defaultValue={mtb.mtbState}
-                        style={{ display: 'block' }}
+                        style={{ display: 'block', marginBottom: '2px' }}
                         disabled={this.isDisabled(mtb)}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                             const newState = e.target.value;
@@ -132,15 +136,10 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         onChange={() => {
                             const newGcr = !mtb.geneticCounselingRecommendation;
                             const newMtbs = this.state.mtbs.slice();
-                            console.group('MTBS');
-                            console.log(newMtbs);
-                            console.log(mtb);
                             newMtbs.find(
                                 x => x.id === mtb.id
                             )!.geneticCounselingRecommendation = newGcr;
-                            console.log(newMtbs);
                             this.setState({ mtbs: newMtbs });
-                            console.groupEnd();
                         }}
                         labelProps={{ style: { marginRight: 10 } }}
                     >
@@ -168,6 +167,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         rows={4}
                         cols={30}
                         value={mtb.generalRecommendation}
+                        placeholder="Comments"
                         disabled={this.isDisabled(mtb)}
                         onChange={(
                             e: React.ChangeEvent<HTMLTextAreaElement>
@@ -195,6 +195,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         name="samplesConsidered"
                         className="basic-multi-select"
                         classNamePrefix="select"
+                        placeholder="Select considered samples..."
                         isDisabled={this.isDisabled(mtb)}
                         onChange={(selectedOption: Array<any>) => {
                             const newSamples = [];
