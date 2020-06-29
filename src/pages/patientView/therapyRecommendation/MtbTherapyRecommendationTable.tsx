@@ -229,7 +229,8 @@ export default class MtbTherapyRecommendationTable extends React.Component<
             render: (therapyRecommendation: ITherapyRecommendation) => (
                 <div>
                     <span style={{ marginRight: 5 }}>
-                        Level <b>{therapyRecommendation.evidenceLevel}</b>
+                        Level{' '}
+                        <b>{therapyRecommendation.evidenceLevel || 'NA'}</b>
                     </span>
                     <If condition={therapyRecommendation.evidenceLevel}>
                         <DefaultTooltip
