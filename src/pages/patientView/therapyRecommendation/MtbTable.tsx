@@ -5,6 +5,7 @@ import {
     ITherapyRecommendation,
     IMtb,
     MtbState,
+    IDeletions,
 } from '../../../shared/model/TherapyRecommendation';
 import { computed, observable } from 'mobx';
 import LazyMobXTable from '../../../shared/components/lazyMobXTable/LazyMobXTable';
@@ -34,7 +35,9 @@ export type IMtbProps = {
     sampleManager: SampleManager | null;
     oncoKbAvailable: boolean;
     mtbs: IMtb[];
+    deletions: IDeletions;
     containerWidth: number;
+    onDeleteData: (deletions: IDeletions) => void;
     onSaveData: (mtbs: IMtb[]) => void;
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     cnaOncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
@@ -43,6 +46,7 @@ export type IMtbProps = {
 
 export type IMtbState = {
     mtbs: IMtb[];
+    deletions: IDeletions;
 };
 
 enum ColumnKey {
@@ -62,6 +66,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
         super(props);
         this.state = {
             mtbs: props.mtbs,
+            deletions: props.deletions,
         };
     }
 
@@ -248,6 +253,26 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
     therapyRecommendationOnDelete = (mtbId: string) => (
         therapyRecommendationToDelete: ITherapyRecommendation
     ) => {
+        this.state.deletions.therapyRecommendation.push(
+            therapyRecommendationToDelete.id
+        );
+        const newMtbs = this.state.mtbs.slice();
+        newMtbs.find(
+            x => x.id === mtbId
+        )!.therapyRecommendations = newMtbs
+            .find(x => x.id === mtbId)!
+            .therapyRecommendations.filter(
+                (therapyRecommendation: ITherapyRecommendation) =>
+                    therapyRecommendationToDelete.id !==
+                    therapyRecommendation.id
+            );
+        this.setState({ mtbs: newMtbs });
+        return true;
+    };
+
+    therapyRecommendationReplace = (mtbId: string) => (
+        therapyRecommendationToDelete: ITherapyRecommendation
+    ) => {
         const newMtbs = this.state.mtbs.slice();
         newMtbs.find(
             x => x.id === mtbId
@@ -266,7 +291,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
         therapyRecommendationToAdd?: ITherapyRecommendation
     ) => {
         if (therapyRecommendationToAdd === undefined) return false;
-        this.therapyRecommendationOnDelete(mtbId)(therapyRecommendationToAdd);
+        this.therapyRecommendationReplace(mtbId)(therapyRecommendationToAdd);
 
         const newMtbs = this.state.mtbs.slice();
         newMtbs
@@ -295,6 +320,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
     }
 
     private deleteMtb(mtbToDelete: IMtb) {
+        this.state.deletions.mtb.push(mtbToDelete.id);
         const newMtbs = this.state.mtbs
             .slice()
             .filter((mtb: IMtb) => mtbToDelete.id !== mtb.id);
@@ -302,6 +328,13 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
     }
 
     private saveMtbs() {
+        if (
+            this.state.deletions.mtb.length > 0 ||
+            this.state.deletions.therapyRecommendation.length > 0
+        ) {
+            console.log('Save deletions');
+            this.props.onDeleteData(this.state.deletions);
+        }
         console.group('Save mtbs');
         this.props.onSaveData(this.state.mtbs);
         console.groupEnd();

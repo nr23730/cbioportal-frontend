@@ -75,3 +75,8 @@ export interface IGeneticAlteration {
     alteration?: string;
     chromosome?: string;
 }
+
+export interface IDeletions {
+    mtb: string[];
+    therapyRecommendation: string[];
+}

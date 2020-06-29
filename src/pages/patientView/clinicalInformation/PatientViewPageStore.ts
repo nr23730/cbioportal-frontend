@@ -131,7 +131,7 @@ import autobind from 'autobind-decorator';
 import { createVariantAnnotationsByMutationFetcher } from 'shared/components/mutationMapper/MutationMapperUtils';
 import { USE_DEFAULT_PUBLIC_INSTANCE_FOR_ONCOKB } from 'react-mutation-mapper';
 
-import { IMtb } from '../../../shared/model/TherapyRecommendation';
+import { IMtb, IDeletions } from '../../../shared/model/TherapyRecommendation';
 import {
     StudyListEntry,
     StudyList,
@@ -149,6 +149,7 @@ import { searchStudiesForKeywordAsString } from 'shared/api/ClinicalTrialMatchAP
 import {
     fetchMtbsUsingGET,
     updateMtbUsingPUT,
+    deleteMtbUsingDELETE,
 } from 'shared/api/TherapyRecommendationAPI';
 import { RecruitingStatus } from 'shared/enums/ClinicalTrialsGovRecruitingStatus';
 
@@ -1755,10 +1756,25 @@ export class PatientViewPageStore {
     );
 
     updateMtbs = (mtbs: IMtb[]) => {
+        console.log('update');
         updateMtbUsingPUT(
             this.getSafePatientId(),
             this.getMtbJsonStoreUrl(this.getSafePatientId()),
             mtbs
+        );
+    };
+
+    readonly deletions: IDeletions = {
+        mtb: [],
+        therapyRecommendation: [],
+    };
+
+    deleteMtbs = (deletions: IDeletions) => {
+        console.log('delete');
+        deleteMtbUsingDELETE(
+            this.getSafePatientId(),
+            this.getMtbJsonStoreUrl(this.getSafePatientId()),
+            deletions
         );
     };
 

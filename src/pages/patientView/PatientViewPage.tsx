@@ -1630,8 +1630,16 @@ export default class PatientViewPage extends React.Component<
                                                     this.patientViewPageStore
                                                         .mtbs.result
                                                 }
+                                                deletions={
+                                                    this.patientViewPageStore
+                                                        .deletions
+                                                }
                                                 containerWidth={
                                                     WindowStore.size.width - 20
+                                                }
+                                                onDeleteData={
+                                                    this.patientViewPageStore
+                                                        .deleteMtbs
                                                 }
                                                 onSaveData={
                                                     this.patientViewPageStore
