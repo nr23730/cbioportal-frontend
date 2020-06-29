@@ -1,4 +1,4 @@
-import { IMtb } from 'shared/model/TherapyRecommendation';
+import { IMtb, IDeletions } from 'shared/model/TherapyRecommendation';
 import * as request from 'superagent';
 
 export function flattenArray(x: Array<any>): Array<any> {
@@ -88,6 +88,36 @@ export async function updateMtbUsingPUT(id: string, url: string, mtbs: IMtb[]) {
         })
         .catch(err => {
             console.group('### MTB ### ERROR catched PUTting ' + url);
+            console.log(err);
+            console.groupEnd();
+        });
+}
+
+export async function deleteMtbUsingDELETE(
+    id: string,
+    url: string,
+    deletions: IDeletions
+) {
+    console.log('### MTB ### Calling DELETE: ' + url);
+    return request
+        .delete(url)
+        .set('Content-Type', 'application/json')
+        .send(JSON.stringify(deletions))
+        .then(res => {
+            if (res.ok) {
+                deletions.mtb = [];
+                deletions.therapyRecommendation = [];
+                console.group('### MTB ### Success DELETEing ' + url);
+                console.log(JSON.parse(res.text));
+                console.groupEnd();
+            } else {
+                console.group('### MTB ### ERROR res not ok DELETEing ' + url);
+                console.log(JSON.parse(res.text));
+                console.groupEnd();
+            }
+        })
+        .catch(err => {
+            console.group('### MTB ### ERROR catched DELETEing ' + url);
             console.log(err);
             console.groupEnd();
         });

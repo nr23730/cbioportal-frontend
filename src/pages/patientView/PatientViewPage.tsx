@@ -80,6 +80,8 @@ import { MakeMobxView } from '../../shared/components/MobxView';
 import ResourceTab from '../../shared/components/resources/ResourceTab';
 import { ClinicalTrialMatchTable } from './clinicalTrialMatch/ClinicalTrialMatchTable';
 import MtbTable from './therapyRecommendation/MtbTable';
+import { empty } from 'shared/components/GeneSelectionBox/styles.module.scss';
+import { ObservableArray } from 'mobx/lib/types/observablearray';
 
 export interface IPatientViewPageProps {
     params: any; // react route
@@ -1630,8 +1632,16 @@ export default class PatientViewPage extends React.Component<
                                                     this.patientViewPageStore
                                                         .mtbs.result
                                                 }
+                                                deletions={
+                                                    this.patientViewPageStore
+                                                        .deletions
+                                                }
                                                 containerWidth={
                                                     WindowStore.size.width - 20
+                                                }
+                                                onDeleteData={
+                                                    this.patientViewPageStore
+                                                        .deleteMtbs
                                                 }
                                                 onSaveData={
                                                     this.patientViewPageStore
