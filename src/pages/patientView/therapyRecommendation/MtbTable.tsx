@@ -270,11 +270,28 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
         return true;
     };
 
+    therapyRecommendationReplace = (mtbId: string) => (
+        therapyRecommendationToDelete: ITherapyRecommendation
+    ) => {
+        const newMtbs = this.state.mtbs.slice();
+        newMtbs.find(
+            x => x.id === mtbId
+        )!.therapyRecommendations = newMtbs
+            .find(x => x.id === mtbId)!
+            .therapyRecommendations.filter(
+                (therapyRecommendation: ITherapyRecommendation) =>
+                    therapyRecommendationToDelete.id !==
+                    therapyRecommendation.id
+            );
+        this.setState({ mtbs: newMtbs });
+        return true;
+    };
+
     therapyRecommendationOnAddOrEdit = (mtbId: string) => (
         therapyRecommendationToAdd?: ITherapyRecommendation
     ) => {
         if (therapyRecommendationToAdd === undefined) return false;
-        this.therapyRecommendationOnDelete(mtbId)(therapyRecommendationToAdd);
+        this.therapyRecommendationReplace(mtbId)(therapyRecommendationToAdd);
 
         const newMtbs = this.state.mtbs.slice();
         newMtbs

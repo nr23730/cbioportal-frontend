@@ -80,8 +80,6 @@ import { MakeMobxView } from '../../shared/components/MobxView';
 import ResourceTab from '../../shared/components/resources/ResourceTab';
 import { ClinicalTrialMatchTable } from './clinicalTrialMatch/ClinicalTrialMatchTable';
 import MtbTable from './therapyRecommendation/MtbTable';
-import { empty } from 'shared/components/GeneSelectionBox/styles.module.scss';
-import { ObservableArray } from 'mobx/lib/types/observablearray';
 
 export interface IPatientViewPageProps {
     params: any; // react route
