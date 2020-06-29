@@ -100,8 +100,20 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                     <select
                         defaultValue={mtb.mtbState}
                         style={{ display: 'block' }}
+                        disabled={this.isDisabled(mtb)}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                             const newState = e.target.value;
+                            // if ((newState === MtbState.ARCHIVED.toUpperCase()))
+                            //     if(!window.confirm(
+                            //         'Are you sure you wish to archive this MTB session to disable editing?'
+                            //     )) {
+                            //         const newMtbs = this.state.mtbs.slice();
+                            //         e.target.value = newMtbs.find(x => x.id === mtb.id)!.mtbState;
+                            //         e.preventDefault();
+                            //         e.stopPropagation();
+                            //         this.setState({ mtbs: newMtbs });
+                            //         return;
+                            //     }
                             const newMtbs = this.state.mtbs.slice();
                             newMtbs.find(x => x.id === mtb.id)!.mtbState =
                                 MtbState[newState as keyof typeof MtbState];
