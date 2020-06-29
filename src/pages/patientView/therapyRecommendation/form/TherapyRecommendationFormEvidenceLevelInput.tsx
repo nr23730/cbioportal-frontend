@@ -47,9 +47,10 @@ export default class TherapyRecommendationFormEvidenceLevelInput extends React.C
         };
 
         const evidenceLevelDefault = {
-            label: this.props.data.evidenceLevel,
+            label: this.props.data.evidenceLevel || 'NA',
             value: EvidenceLevel[this.props.data.evidenceLevel],
         };
+        console.log(evidenceLevelDefault);
         const evidenceLevelOptions = Object.entries(EvidenceLevel)
             .filter(([key, value]) => typeof value === 'string')
             .map(([key, value]) => ({
