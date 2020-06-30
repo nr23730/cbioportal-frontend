@@ -3,16 +3,17 @@ import React from 'react';
 import { PatientViewPageStore } from '../clinicalInformation/PatientViewPageStore';
 import { ClinicalTrialMatchTextfield } from '../clinicalTrialMatch/ClinicalTrialMatchTextfield';
 import { RecruitingStatus } from 'shared/enums/ClinicalTrialsGovRecruitingStatus';
+import Select from 'react-select';
 
 interface IClinicalTrialOptionsMatchProps {
     store: PatientViewPageStore;
 }
 
 interface IClinicalTrialOptionsMatchState {
-    checkedItems: Map<string, boolean>;
+    checkedItems: Array<string>;
     queryBoxValue: string;
     countryString: string;
-    checkedRecruitingItems: Map<string, boolean>;
+    checkedRecruitingItems: Array<string>;
     value?: string;
 }
 
@@ -26,10 +27,10 @@ class ClinicalTrialMatchTableOptions extends React.Component<
         super(props);
 
         this.state = {
-            checkedItems: new Map(),
+            checkedItems: new Array<string>(),
             queryBoxValue: '',
             countryString: '',
-            checkedRecruitingItems: new Map(),
+            checkedRecruitingItems: new Array<string>(),
         };
 
         this.recruiting_values = [
@@ -44,10 +45,10 @@ class ClinicalTrialMatchTableOptions extends React.Component<
             RecruitingStatus.Withdrawn,
         ];
 
-        this.handleChange = this.handleChange.bind(this);
+        // this.handleChange = this.handleChange.bind(this);
         this.handleTextChange = this.handleTextChange.bind(this);
         this.handleCountryChange = this.handleCountryChange.bind(this);
-        this.handleRecChange = this.handleRecChange.bind(this);
+        // this.handleRecChange = this.handleRecChange.bind(this);
     }
 
     getRecruitingKeyFromValueString(value: string): RecruitingStatus {
@@ -58,18 +59,6 @@ class ClinicalTrialMatchTableOptions extends React.Component<
         }
 
         return RecruitingStatus.Invalid;
-    }
-
-    handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const item = e.target.name;
-        const isChecked = e.target.checked;
-        this.setState(prevState => ({
-            checkedItems: prevState.checkedItems.set(item, isChecked),
-            queryBoxValue: prevState.queryBoxValue,
-            countryString: prevState.countryString,
-            checkedRecruitingItems: prevState.checkedRecruitingItems,
-        }));
-        console.log(this.state);
     }
 
     handleTextChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -94,49 +83,15 @@ class ClinicalTrialMatchTableOptions extends React.Component<
         console.log(this.state);
     }
 
-    handleRecChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const item = e.target.name;
-        const isChecked = e.target.checked;
-        this.setState(prevState => ({
-            checkedItems: prevState.checkedItems,
-            queryBoxValue: prevState.queryBoxValue,
-            countryString: prevState.countryString,
-            checkedRecruitingItems: prevState.checkedRecruitingItems.set(
-                item,
-                isChecked
-            ),
-        }));
-
-        console.log(this.state);
-    }
-
     setSearchParams() {
-        var symbols: string[] = [];
-        var recruiting_stati: RecruitingStatus[] = [];
-
-        this.props.store.mutationHugoGeneSymbols.forEach(
-            function(value: string) {
-                console.log(value + ' ' + this.state.checkedItems.get(value));
-                if (this.state.checkedItems.get(value)) {
-                    symbols.push(value);
-                }
-            }.bind(this)
+        var symbols: string[] = this.state.checkedItems;
+        var recruiting_stati: RecruitingStatus[] = this.state.checkedRecruitingItems.map(
+            item => this.getRecruitingKeyFromValueString(item)
         );
 
-        this.recruiting_values.forEach(
-            function(value: RecruitingStatus) {
-                console.log(
-                    value.toString() +
-                        ' ' +
-                        this.state.checkedRecruitingItems.get(value.toString())
-                );
-                if (this.state.checkedRecruitingItems.get(value.toString())) {
-                    recruiting_stati.push(
-                        this.getRecruitingKeyFromValueString(value)
-                    );
-                }
-            }.bind(this)
-        );
+        console.group('TRIALS start search');
+        console.log(this.state);
+        console.groupEnd();
 
         this.props.store.setClinicalTrialSearchParams(
             this.state.queryBoxValue,
@@ -155,62 +110,112 @@ class ClinicalTrialMatchTableOptions extends React.Component<
     render() {
         return (
             <React.Fragment>
-                <div>
+                <div
+                    style={{
+                        display: 'block',
+                        maxWidth: '40%',
+                    }}
+                >
                     <div>
                         <input
                             type="text"
                             value={this.state.value}
                             onChange={this.handleTextChange}
                             placeholder="Additional Query"
+                            style={{
+                                display: 'block',
+                                margin: '5px',
+                            }}
                         />
                     </div>
-                    <br></br>
                     <div>
                         <input
                             type="text"
                             value={this.state.value}
                             onChange={this.handleCountryChange}
                             placeholder="Country"
+                            style={{
+                                display: 'block',
+                                margin: '5px',
+                            }}
                         />
                     </div>
-                    <br></br>
-                    <div>
-                        {this.props.store.mutationHugoGeneSymbols.map(item => (
-                            <div>
-                                <label key={item}>
-                                    <Checkbox
-                                        name={item}
-                                        checked={this.state.checkedItems.get(
-                                            item
-                                        )}
-                                        onChange={this.handleChange}
-                                    />
-                                    {item}
-                                </label>
-                            </div>
-                        ))}
+                    <div
+                        style={{
+                            display: 'block',
+                            marginLeft: '5px',
+                            marginBottom: '5px',
+                        }}
+                    >
+                        <Select
+                            options={this.props.store.mutationHugoGeneSymbols.map(
+                                geneSymbol => ({
+                                    label: geneSymbol,
+                                    value: geneSymbol,
+                                })
+                            )}
+                            isMulti
+                            name="mutationSearch"
+                            className="basic-multi-select"
+                            classNamePrefix="select"
+                            placeholder="Select mutations..."
+                            onChange={(selectedOption: Array<any>) => {
+                                const newMutations = [];
+                                if (selectedOption !== null) {
+                                    const mutations = selectedOption.map(
+                                        item => item.value
+                                    );
+                                    newMutations.push(...mutations);
+                                }
+                                this.setState({ checkedItems: newMutations });
+
+                                console.group('TRIALS Mutation Changed');
+                                console.log(this.state.checkedItems);
+                                console.groupEnd();
+                            }}
+                        />
                     </div>
-                    <br></br>
-                    <div>
-                        {this.recruiting_values.map(item => (
-                            <div>
-                                <label key={item}>
-                                    <Checkbox
-                                        name={item.toString()}
-                                        checked={this.state.checkedRecruitingItems.get(
-                                            item
-                                        )}
-                                        onChange={this.handleRecChange}
-                                    />
-                                    {item}
-                                </label>
-                            </div>
-                        ))}
+                    <div
+                        style={{
+                            display: 'block',
+                            marginLeft: '5px',
+                            marginBottom: '5px',
+                        }}
+                    >
+                        <Select
+                            options={this.recruiting_values.map(recStatus => ({
+                                label: recStatus,
+                                value: recStatus,
+                            }))}
+                            isMulti
+                            name="recruitingStatusSearch"
+                            className="basic-multi-select"
+                            classNamePrefix="select"
+                            placeholder="Select status..."
+                            onChange={(selectedOption: Array<any>) => {
+                                const newStatuses = [];
+                                if (selectedOption !== null) {
+                                    const statuses = selectedOption.map(
+                                        item => item.value
+                                    );
+                                    newStatuses.push(...statuses);
+                                }
+                                this.setState({
+                                    checkedRecruitingItems: newStatuses,
+                                });
+                            }}
+                        />
                     </div>
                 </div>
-                <br></br>
                 <div>
-                    <button onClick={this.setSearchParams.bind(this)}>
+                    <button
+                        onClick={this.setSearchParams.bind(this)}
+                        className={'btn btn-default'}
+                        style={{
+                            display: 'block',
+                            marginLeft: '5px',
+                        }}
+                    >
                         Search
                     </button>
                 </div>
