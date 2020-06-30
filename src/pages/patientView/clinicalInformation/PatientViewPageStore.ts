@@ -1780,7 +1780,7 @@ export class PatientViewPageStore {
 
     private getMtbJsonStoreUrl(id: string) {
         let host = window.location.hostname;
-        let port = '';
+        let port = ':' + window.location.port;
         if (
             AppConfig.fhirspark &&
             AppConfig.fhirspark.host &&
