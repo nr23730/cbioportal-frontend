@@ -13,7 +13,10 @@ import { AppStore } from '../../../AppStore';
 
 import './mutations.scss';
 import AlterationFilterWarning from '../../../shared/components/banners/AlterationFilterWarning';
-import { getOncoKbApiUrl } from 'shared/api/urls';
+import {
+    getMutationAlignerUrlTemplate,
+    getOncoKbApiUrl,
+} from 'shared/api/urls';
 
 export interface IMutationsPageProps {
     routing?: any;
@@ -155,14 +158,12 @@ export default class Mutations extends React.Component<
                                 this.props.store
                                     .genomeNexusMutationAssessorCache
                             }
-                            genomeNexusMyVariantInfoCache={
-                                this.props.store.genomeNexusMyVariantInfoCache
-                            }
                             pdbHeaderCache={this.props.store.pdbHeaderCache}
                             userEmailAddress={this.props.appStore.userName!}
                             generateGenomeNexusHgvsgUrl={
                                 this.props.store.generateGenomeNexusHgvsgUrl
                             }
+                            mutationAlignerUrlTemplate={getMutationAlignerUrlTemplate()}
                         />
                     </MSKTab>
                 );
