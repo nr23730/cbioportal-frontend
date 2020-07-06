@@ -74,6 +74,12 @@ export interface IGeneticAlteration {
     hugoSymbol: string;
     alteration?: string;
     chromosome?: string;
+    start?: number;
+    end?: number;
+    ref?: string;
+    alt?: string;
+    aminoAcidChange?: string;
+    alleleFreqency?: number;
 }
 
 export interface IDeletions {

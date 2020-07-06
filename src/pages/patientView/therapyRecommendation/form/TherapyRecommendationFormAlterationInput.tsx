@@ -7,6 +7,7 @@ import { Mutation, DiscreteCopyNumberData } from 'cbioportal-ts-api-client';
 import Select from 'react-select';
 import _ from 'lodash';
 import { flattenArray } from '../TherapyRecommendationTableUtils';
+import AlleleFreqColumnFormatter from '../../mutation/column/AlleleFreqColumnFormatter';
 
 interface TherapyRecommendationFormAlterationInputProps {
     data: ITherapyRecommendation;
@@ -28,6 +29,14 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
                 alteration: mutation.proteinChange,
                 entrezGeneId: mutation.entrezGeneId,
                 chromosome: mutation.chr,
+                start: mutation.startPosition,
+                end: mutation.endPosition,
+                ref: mutation.referenceAllele,
+                alt: mutation.variantAllele,
+                aminoAcidChange: mutation.aminoAcidChange,
+                alleleFreqency: AlleleFreqColumnFormatter.calcFrequency(
+                    mutation
+                ),
             } as IGeneticAlteration;
         });
 
