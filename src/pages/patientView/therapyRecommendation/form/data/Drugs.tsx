@@ -198,10 +198,6 @@ export const Drugs = [
         name: 'Ivosidenib',
     },
     {
-        ncit_code: 'C134987',
-        name: 'LOXO-292',
-    },
-    {
         ncit_code: 'C26653',
         name: 'Lapatinib',
     },
@@ -262,6 +258,10 @@ export const Drugs = [
         name: 'Pembrolizumab',
     },
     {
+        ncit_code: 'C121553',
+        name: 'Pemigatinib',
+    },
+    {
         ncit_code: 'C38692',
         name: 'Pertuzumab',
     },
@@ -296,6 +296,10 @@ export const Drugs = [
     {
         ncit_code: 'C77888',
         name: 'Ruxolitinib',
+    },
+    {
+        ncit_code: 'C134987',
+        name: 'Selpercatinib',
     },
     {
         ncit_code: 'C66939',
@@ -348,6 +352,10 @@ export const Drugs = [
     {
         ncit_code: 'C1647',
         name: 'Trastuzumab',
+    },
+    {
+        ncit_code: 'C128799',
+        name: 'Trastuzumab Deruxtecan',
     },
     {
         ncit_code: 'C2737',
