@@ -19,10 +19,7 @@ export default class TherapyRecommendationFormDrugInput extends React.Component<
     {}
 > {
     public render() {
-        let allDrugs = Drugs.filter(
-            (drug: ITreatment) =>
-                !drug.name.includes(',') && !drug.name.includes('+')
-        );
+        let allDrugs = Drugs;
 
         let drugOptions = allDrugs.map((drug: ITreatment) => ({
             value: drug,

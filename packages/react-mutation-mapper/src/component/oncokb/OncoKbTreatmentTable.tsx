@@ -105,7 +105,7 @@ export default class OncoKbTreatmentTable extends React.Component<
             request
                 .get(
                     'https://componc.github.io/cancerdrugs/drugs/' +
-                        drug +
+                        drug.replace(' ', '_') +
                         '.json'
                 )
                 .end((err, res) => {
