@@ -52,7 +52,7 @@ export interface IReference {
 
 export interface ITreatment {
     name: string;
-    ncit_code?: string;
+    ncit_code: string;
     synonyms?: string;
 }
 

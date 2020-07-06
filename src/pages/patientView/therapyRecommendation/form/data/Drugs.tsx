@@ -1,349 +1,364 @@
-import { ITreatment } from "shared/model/TherapyRecommendation";
+import { ITreatment } from 'shared/model/TherapyRecommendation';
 
 export const Drugs = [
     {
-      name: "AMG-510"
+        ncit_code: 'C154287',
+        name: 'AMG-510',
     },
     {
-      name: "AZD4547, BGJ398, Debio1347"
+        ncit_code: 'C88272',
+        name: 'AZD4547',
     },
     {
-      name: "AZD4547, BGJ398, Erdafitinib, Debio1347"
+        ncit_code: 'C102564',
+        name: 'AZD5363',
     },
     {
-      name: "AZD4547, Debio1347, BGJ398, Erdafitinib"
+        ncit_code: 'C107684',
+        name: 'AZD8186',
     },
     {
-      name: "AZD5363"
+        ncit_code: 'C122834',
+        name: 'AZD9496',
     },
     {
-      name: "AZD8186, GSK2636771"
+        ncit_code: 'C97660',
+        name: 'Abemaciclib',
     },
     {
-      name: "Abemaciclib, Palbociclib"
+        ncit_code: 'C82492',
+        name: 'Ado-Trastuzumab Emtansine',
     },
     {
-      name: "Ado-Trastuzumab Emtansine"
+        ncit_code: 'C66940',
+        name: 'Afatinib',
     },
     {
-      name: "Afatinib"
+        ncit_code: 'C101790',
+        name: 'Alectinib',
     },
     {
-      name: "Afatinib, Erlotinib, Gefitinib"
+        ncit_code: 'C94214',
+        name: 'Alpelisib',
     },
     {
-      name: "Afatinib, Gefitinib, Erlotinib"
+        ncit_code: 'C114494',
+        name: 'Asciminib',
     },
     {
-      name: "Alectinib"
+        ncit_code: 'C123827',
+        name: 'Avapritinib',
     },
     {
-      name: "Alpelisib + Fulvestrant"
+        ncit_code: 'C88302',
+        name: 'BGJ398',
     },
     {
-      name: "Asciminib"
+        ncit_code: 'C132295',
+        name: 'BLU-667',
     },
     {
-      name: "Avapritinib"
+        ncit_code: 'C84865',
+        name: 'Binimetinib',
     },
     {
-      name: "BGJ398, AZD4547, Debio1347"
+        ncit_code: 'C60809',
+        name: 'Bosutinib',
     },
     {
-      name: "BGJ398, Debio1347, AZD4547"
+        ncit_code: 'C98831',
+        name: 'Brigatinib',
     },
     {
-      name: "BLU-667"
+        ncit_code: 'C90565',
+        name: 'Buparlisib',
     },
     {
-      name: "Binimetinib"
+        ncit_code: 'C52200',
+        name: 'Cabozantinib',
     },
     {
-      name: "Binimetinib + Encorafenib"
+        ncit_code: 'C90564',
+        name: 'Capmatinib',
     },
     {
-      name: "Binimetinib + Ribociclib"
+        ncit_code: 'C63402',
+        name: 'Carboplatin-Taxol Regimen',
     },
     {
-      name: "Binimetinib, Trametinib, Cobimetinib"
+        ncit_code: 'C121540',
+        name: 'Cemiplimab',
     },
     {
-      name: "Bosutinib"
+        ncit_code: 'C115112',
+        name: 'Ceritinib',
     },
     {
-      name: "Brigatinib"
+        ncit_code: 'C1723',
+        name: 'Cetuximab',
     },
     {
-      name: "Cabozantinib"
+        ncit_code: 'C376',
+        name: 'Cisplatin',
     },
     {
-      name: "Cabozantinib, Crizotinib, Capmatinib"
+        ncit_code: 'C68923',
+        name: 'Cobimetinib',
     },
     {
-      name: "Capmatinib"
+        ncit_code: 'C96796',
+        name: 'Copanlisib',
     },
     {
-      name: "Capmatinib, Crizotinib"
+        ncit_code: 'C64639',
+        name: 'Crenolanib',
     },
     {
-      name: "Cemiplimab, Pembrolizumab, Nivolumab"
+        ncit_code: 'C74061',
+        name: 'Crizotinib',
     },
     {
-      name: "Ceritinib"
+        ncit_code: 'C82386',
+        name: 'Dabrafenib',
     },
     {
-      name: "Cetuximab"
+        ncit_code: 'C53398',
+        name: 'Dacomitinib',
     },
     {
-      name: "Cetuximab, Panitumumab"
+        ncit_code: 'C38713',
+        name: 'Dasatinib',
     },
     {
-      name: "Cisplatin"
+        ncit_code: 'C111988',
+        name: 'Debio1347',
     },
     {
-      name: "Cobimetinib"
+        ncit_code: 'C111573',
+        name: 'Enasidenib',
     },
     {
-      name: "Cobimetinib + Vemurafenib"
+        ncit_code: 'C98283',
+        name: 'Encorafenib',
     },
     {
-      name: "Cobimetinib, Trametinib"
+        ncit_code: 'C114984',
+        name: 'Entrectinib',
     },
     {
-      name: "Copanlisib + Fulvestrant"
+        ncit_code: 'C103273',
+        name: 'Erdafitinib',
     },
     {
-      name: "Crenolanib"
+        ncit_code: 'C65530',
+        name: 'Erlotinib',
     },
     {
-      name: "Crizotinib"
+        ncit_code: 'C48387',
+        name: 'Everolimus',
     },
     {
-      name: "Dabrafenib"
+        ncit_code: 'C1379',
+        name: 'Fulvestrant',
     },
     {
-      name: "Dabrafenib + Trametinib"
+        ncit_code: 'C132166',
+        name: 'GDC-0077',
     },
     {
-      name: "Dabrafenib + Trametinib + Panitumumab, Binimetinib + Encorafenib + Cetuximab"
+        ncit_code: 'C106261',
+        name: 'GSK2636771',
     },
     {
-      name: "Dacomitinib"
+        ncit_code: 'C1855',
+        name: 'Gefitinib',
     },
     {
-      name: "Dasatinib"
+        ncit_code: 'C116722',
+        name: 'Gilteritinib',
     },
     {
-      name: "Debio1347, BGJ398, AZD4547, Erdafitinib"
+        ncit_code: 'C129546',
+        name: 'H3B-8800',
     },
     {
-      name: "Debio1347, BGJ398, Erdafitinib, AZD4547"
+        ncit_code: 'C15807',
+        name: 'High Dose Chemotherapy',
     },
     {
-      name: "Enasidenib"
+        ncit_code: 'C62035',
+        name: 'Imatinib',
     },
     {
-      name: "Encorafenib + Binimetinib"
+        ncit_code: 'C74052',
+        name: 'Iodine I 131-6-Beta-Iodomethyl-19-Norcholesterol',
     },
     {
-      name: "Entrectinib"
+        ncit_code: 'C114383',
+        name: 'Ivosidenib',
     },
     {
-      name: "Erdafitinib"
+        ncit_code: 'C134987',
+        name: 'LOXO-292',
     },
     {
-      name: "Erdafitinib, AZD4547, BGJ398, Debio1347"
+        ncit_code: 'C26653',
+        name: 'Lapatinib',
     },
     {
-      name: "Erdafitinib, Debio1347, AZD4547, BGJ398"
+        ncit_code: 'C115977',
+        name: 'Larotrectinib',
     },
     {
-      name: "Erlotinib"
+        ncit_code: 'C113655',
+        name: 'Lorlatinib',
     },
     {
-      name: "Erlotinib, Afatinib, Gefitinib"
+        ncit_code: 'C1872',
+        name: 'Midostaurin',
     },
     {
-      name: "Erlotinib, Gefitinib, Afatinib"
+        ncit_code: 'C107384',
+        name: 'Milademetan Tosylate',
     },
     {
-      name: "Erlotinib, Gefitinib, Osimertinib"
+        ncit_code: 'C49094',
+        name: 'Neratinib',
     },
     {
-      name: "Everolimus"
+        ncit_code: 'C48375',
+        name: 'Nilotinib',
     },
     {
-      name: "Everolimus, Temsirolimus"
+        ncit_code: 'C80059',
+        name: 'Niraparib',
     },
     {
-      name: "Fulvestrant, AZD9496"
+        ncit_code: 'C68814',
+        name: 'Nivolumab',
     },
     {
-      name: "GDC-0077"
+        ncit_code: 'C71721',
+        name: 'Olaparib',
     },
     {
-      name: "Gefitinib"
+        ncit_code: 'C116377',
+        name: 'Osimertinib',
     },
     {
-      name: "Gefitinib, Afatinib, Erlotinib"
+        ncit_code: 'C113330',
+        name: 'PLX8394',
     },
     {
-      name: "Gefitinib, Erlotinib, Afatinib"
+        ncit_code: 'C49176',
+        name: 'Palbociclib',
     },
     {
-      name: "Gilteritinib"
+        ncit_code: 'C1857',
+        name: 'Panitumumab',
     },
     {
-      name: "H3B-8800"
+        ncit_code: 'C106432',
+        name: 'Pembrolizumab',
     },
     {
-      name: "High Dose Chemotherapy + Midostaurin"
+        ncit_code: 'C38692',
+        name: 'Pertuzumab',
     },
     {
-      name: "Imatinib"
+        ncit_code: 'C95777',
+        name: 'Ponatinib',
     },
     {
-      name: "Imatinib, Bosutinib, Dasatinib, Nilotinib"
+        ncit_code: 'C98838',
+        name: 'Poziotinib',
     },
     {
-      name: "Ipilimumab + Nivolumab"
+        ncit_code: 'C68936',
+        name: 'Quizartinib',
     },
     {
-      name: "Ivosidenib"
+        ncit_code: 'C91724',
+        name: 'RO5045337',
     },
     {
-      name: "LOXO-292"
+        ncit_code: 'C78204',
+        name: 'Regorafenib',
     },
     {
-      name: "Lapatinib"
+        ncit_code: 'C95701',
+        name: 'Ribociclib',
     },
     {
-      name: "Lapatinib + Trastuzumab"
+        ncit_code: 'C137800',
+        name: 'Rucaparib',
     },
     {
-      name: "Larotrectinib"
+        ncit_code: 'C77888',
+        name: 'Ruxolitinib',
     },
     {
-      name: "Lorlatinib"
+        ncit_code: 'C66939',
+        name: 'Selumetinib',
     },
     {
-      name: "Milademetan Tosylate"
+        ncit_code: 'C98844',
+        name: 'Serabelisib',
     },
     {
-      name: "Neratinib"
+        ncit_code: 'C82385',
+        name: 'Sonidegib',
     },
     {
-      name: "Nilotinib"
+        ncit_code: 'C61948',
+        name: 'Sorafenib',
     },
     {
-      name: "Nilotinib, Imatinib, Bosutinib, Dasatinib"
+        ncit_code: 'C71622',
+        name: 'Sunitinib',
     },
     {
-      name: "Niraparib"
+        ncit_code: 'C125657',
+        name: 'TK216',
     },
     {
-      name: "Nivolumab"
+        ncit_code: 'C95733',
+        name: 'Talazoparib',
     },
     {
-      name: "Olaparib"
+        ncit_code: 'C116876',
+        name: 'Taselisib',
     },
     {
-      name: "Osimertinib"
+        ncit_code: 'C107506',
+        name: 'Tazemetostat',
     },
     {
-      name: "PLX8394"
+        ncit_code: 'C1844',
+        name: 'Temsirolimus',
     },
     {
-      name: "Palbociclib, Abemaciclib"
+        ncit_code: 'C1703',
+        name: 'Tipifarnib',
     },
     {
-      name: "Panitumumab"
+        ncit_code: 'C77908',
+        name: 'Trametinib',
     },
     {
-      name: "Panitumumab, Cetuximab"
+        ncit_code: 'C1647',
+        name: 'Trastuzumab',
     },
     {
-      name: "Pembrolizumab"
+        ncit_code: 'C2737',
+        name: 'Vandetanib',
     },
     {
-      name: "Ponatinib"
+        ncit_code: 'C64768',
+        name: 'Vemurafenib',
     },
     {
-      name: "Poziotinib"
+        ncit_code: 'C74038',
+        name: 'Vismodegib',
     },
-    {
-      name: "Quizartinib"
-    },
-    {
-      name: "RO5045337"
-    },
-    {
-      name: "Regorafenib"
-    },
-    {
-      name: "Ribociclib, Palbociclib, Abemaciclib"
-    },
-    {
-      name: "Rucaparib"
-    },
-    {
-      name: "Ruxolitinib"
-    },
-    {
-      name: "Selumetinib + Iodine I 131-6-Beta-Iodomethyl-19-Norcholesterol"
-    },
-    {
-      name: "Sonidegib"
-    },
-    {
-      name: "Sorafenib"
-    },
-    {
-      name: "Sunitinib"
-    },
-    {
-      name: "TK216"
-    },
-    {
-      name: "Talazoparib"
-    },
-    {
-      name: "Tazemetostat"
-    },
-    {
-      name: "Temsirolimus"
-    },
-    {
-      name: "Tipifarnib"
-    },
-    {
-      name: "Trametinib"
-    },
-    {
-      name: "Trametinib + Dabrafenib"
-    },
-    {
-      name: "Trametinib, Cobimetinib"
-    },
-    {
-      name: "Trastuzumab"
-    },
-    {
-      name: "Trastuzumab + Carboplatin-Taxol Regimen"
-    },
-    {
-      name: "Trastuzumab + Pertuzumab"
-    },
-    {
-      name: "Vandetanib"
-    },
-    {
-      name: "Vemurafenib"
-    },
-    {
-      name: "Vemurafenib + Cobimetinib"
-    },
-    {
-      name: "Vismodegib"
-    }
-  ] as ITreatment[]
+] as ITreatment[];
