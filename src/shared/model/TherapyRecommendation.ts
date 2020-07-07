@@ -79,8 +79,8 @@ export interface IGeneticAlteration {
     ref?: string;
     alt?: string;
     aminoAcidChange?: string;
-    alleleFreqency?: number;
-    dbsnp: string;
+    alleleFreqency?: number | null;
+    dbsnp?: string;
     clinvar?: number;
     cosmic?: string;
     gnomad?: number;

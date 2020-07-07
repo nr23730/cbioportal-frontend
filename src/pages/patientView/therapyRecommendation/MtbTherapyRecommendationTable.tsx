@@ -660,6 +660,13 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         oncoKbResult={this.props.oncoKbData}
                         cnaOncoKbResult={this.props.cnaOncoKbData}
                         pubMedCache={this.props.pubMedCache}
+                        mutations={this.props.mutations}
+                        indexedVariantAnnotations={
+                            this.props.indexedVariantAnnotations
+                        }
+                        indexedMyVariantInfoAnnotations={
+                            this.props.indexedMyVariantInfoAnnotations
+                        }
                         onHide={(
                             therapyRecommendations?:
                                 | ITherapyRecommendation
