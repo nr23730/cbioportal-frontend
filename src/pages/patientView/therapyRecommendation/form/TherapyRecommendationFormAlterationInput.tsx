@@ -77,7 +77,7 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
                 ref: mutation.referenceAllele,
                 alt: mutation.variantAllele,
                 aminoAcidChange: mutation.aminoAcidChange,
-                alleleFreqency: AlleleFreqColumnFormatter.calcFrequency(
+                alleleFrequency: AlleleFreqColumnFormatter.calcFrequency(
                     mutation
                 ),
                 dbsnp,
