@@ -80,6 +80,10 @@ export interface IGeneticAlteration {
     alt?: string;
     aminoAcidChange?: string;
     alleleFreqency?: number;
+    dbsnp: string;
+    clinvar?: number;
+    cosmic?: string;
+    gnomad?: number;
 }
 
 export interface IDeletions {
