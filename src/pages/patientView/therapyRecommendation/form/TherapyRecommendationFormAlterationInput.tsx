@@ -8,10 +8,14 @@ import Select from 'react-select';
 import _ from 'lodash';
 import { flattenArray } from '../TherapyRecommendationTableUtils';
 import AlleleFreqColumnFormatter from '../../mutation/column/AlleleFreqColumnFormatter';
+import { VariantAnnotation } from 'genome-nexus-ts-api-client';
 
 interface TherapyRecommendationFormAlterationInputProps {
     data: ITherapyRecommendation;
     mutations: Mutation[];
+    indexedVariantAnnotations:
+        | { [genomicLocation: string]: VariantAnnotation }
+        | undefined;
     cna: DiscreteCopyNumberData[];
     onChange: (alterations: IGeneticAlteration[]) => void;
 }
@@ -24,6 +28,23 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
 > {
     public render() {
         let allAlterations = this.props.mutations.map((mutation: Mutation) => {
+            const annotation = this.props.indexedVariantAnnotations![
+                mutation.chr +
+                    ',' +
+                    mutation.startPosition +
+                    ',' +
+                    mutation.endPosition +
+                    ',' +
+                    mutation.referenceAllele +
+                    ',' +
+                    mutation.variantAllele
+            ];
+            let dbsnp;
+            if (annotation && annotation.colocatedVariants) {
+                dbsnp = annotation.colocatedVariants.filter(value =>
+                    value.dbSnpId.startsWith('rs')
+                )[0].dbSnpId;
+            }
             return {
                 hugoSymbol: mutation.gene.hugoGeneSymbol,
                 alteration: mutation.proteinChange,
@@ -37,6 +58,7 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
                 alleleFreqency: AlleleFreqColumnFormatter.calcFrequency(
                     mutation
                 ),
+                dbsnp,
             } as IGeneticAlteration;
         });
 

@@ -1607,6 +1607,11 @@ export default class PatientViewPage extends React.Component<
                                                     this.patientViewPageStore
                                                         .mutationData.result
                                                 }
+                                                indexedVariantAnnotations={
+                                                    this.patientViewPageStore
+                                                        .indexedVariantAnnotations
+                                                        .result
+                                                }
                                                 cna={
                                                     this.patientViewPageStore
                                                         .discreteCNAData.result

@@ -17,11 +17,15 @@ import Select from 'react-select';
 import TherapyRecommendationFormReferenceInput from './TherapyRecommendationFormReferenceInput';
 import TherapyRecommendationFormCommentInput from './TherapyRecommendationFormCommentInput';
 import TherapyRecommendationFormEvidenceLevelInput from './TherapyRecommendationFormEvidenceLevelInput';
+import { VariantAnnotation } from 'genome-nexus-ts-api-client';
 
 interface ITherapyRecommendationFormProps {
     show: boolean;
     data: ITherapyRecommendation;
     mutations: Mutation[];
+    indexedVariantAnnotations:
+        | { [genomicLocation: string]: VariantAnnotation }
+        | undefined;
     cna: DiscreteCopyNumberData[];
     clinicalData: ClinicalData[];
     title: string;
@@ -56,6 +60,9 @@ export default class TherapyRecommendationForm extends React.Component<
                             <TherapyRecommendationFormAlterationPositiveInput
                                 data={therapyRecommendation}
                                 mutations={this.props.mutations}
+                                indexedVariantAnnotations={
+                                    this.props.indexedVariantAnnotations
+                                }
                                 cna={this.props.cna}
                                 onChange={alterations =>
                                     (therapyRecommendation.reasoning.geneticAlterations = alterations)
