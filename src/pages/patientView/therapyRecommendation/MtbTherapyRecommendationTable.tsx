@@ -39,10 +39,17 @@ import { RemoteData } from 'react-mutation-mapper';
 import { IOncoKbData } from 'cbioportal-frontend-commons';
 import TherapyRecommendationFormOncoKb from './form/TherapyRecommendationFormOncoKb';
 import PubMedCache from 'shared/cache/PubMedCache';
+import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';
 
 export type ITherapyRecommendationProps = {
     patientId: string;
     mutations: Mutation[];
+    indexedVariantAnnotations:
+        | { [genomicLocation: string]: VariantAnnotation }
+        | undefined;
+    indexedMyVariantInfoAnnotations:
+        | { [genomicLocation: string]: MyVariantInfo }
+        | undefined;
     cna: DiscreteCopyNumberData[];
     clinicalData: ClinicalData[];
     sampleManager: SampleManager | null;
@@ -627,6 +634,12 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         show={!!this.selectedTherapyRecommendation}
                         data={this.selectedTherapyRecommendation}
                         mutations={this.props.mutations}
+                        indexedVariantAnnotations={
+                            this.props.indexedVariantAnnotations
+                        }
+                        indexedMyVariantInfoAnnotations={
+                            this.props.indexedMyVariantInfoAnnotations
+                        }
                         cna={this.props.cna}
                         clinicalData={this.props.clinicalData}
                         onHide={(
@@ -647,6 +660,13 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         oncoKbResult={this.props.oncoKbData}
                         cnaOncoKbResult={this.props.cnaOncoKbData}
                         pubMedCache={this.props.pubMedCache}
+                        mutations={this.props.mutations}
+                        indexedVariantAnnotations={
+                            this.props.indexedVariantAnnotations
+                        }
+                        indexedMyVariantInfoAnnotations={
+                            this.props.indexedMyVariantInfoAnnotations
+                        }
                         onHide={(
                             therapyRecommendations?:
                                 | ITherapyRecommendation

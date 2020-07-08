@@ -12,6 +12,9 @@ import { RemoteData } from 'react-mutation-mapper';
 import { IOncoKbData } from 'cbioportal-frontend-commons';
 import PubMedCache from 'shared/cache/PubMedCache';
 import { ICache } from 'cbioportal-frontend-commons';
+import { Mutation } from 'cbioportal-ts-api-client';
+import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';
+import AlleleFreqColumnFormatter from 'pages/patientView/mutation/column/AlleleFreqColumnFormatter';
 
 interface ITherapyRecommendationFormOncoKbProps {
     show: boolean;
@@ -21,6 +24,13 @@ interface ITherapyRecommendationFormOncoKbProps {
     pubMedCache?: PubMedCache;
     title: string;
     userEmailAddress: string;
+    mutations: Mutation[];
+    indexedVariantAnnotations:
+        | { [genomicLocation: string]: VariantAnnotation }
+        | undefined;
+    indexedMyVariantInfoAnnotations:
+        | { [genomicLocation: string]: MyVariantInfo }
+        | undefined;
     onHide: (
         newTherapyRecommendation?:
             | ITherapyRecommendation
@@ -114,12 +124,50 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
             );
         }
 
+        const mutation = this.props.mutations.filter(
+            value =>
+                value.entrezGeneId == result.query.entrezGeneId &&
+                value.gene.hugoGeneSymbol == result.query.hugoSymbol &&
+                value.proteinChange === result.query.alteration
+        )[0];
+        const index =
+            mutation.chr +
+            ',' +
+            mutation.startPosition +
+            ',' +
+            mutation.endPosition +
+            ',' +
+            mutation.referenceAllele +
+            ',' +
+            mutation.variantAllele;
+        const annotation = this.props.indexedVariantAnnotations![index];
+        const myVariantInfo = this.props.indexedMyVariantInfoAnnotations![
+            index
+        ];
+        let dbsnp;
+        let clinvar;
+        let cosmic;
+        let gnomad;
+
         // Reasoning
         therapyRecommendation.reasoning.geneticAlterations = [
             {
-                hugoSymbol: result.query.hugoSymbol,
-                entrezGeneId: result.query.entrezGeneId,
-                alteration: result.query.alteration,
+                hugoSymbol: mutation.gene.hugoGeneSymbol,
+                alteration: mutation.proteinChange,
+                entrezGeneId: mutation.entrezGeneId,
+                chromosome: mutation.chr,
+                start: mutation.startPosition,
+                end: mutation.endPosition,
+                ref: mutation.referenceAllele,
+                alt: mutation.variantAllele,
+                aminoAcidChange: mutation.aminoAcidChange,
+                alleleFrequency: AlleleFreqColumnFormatter.calcFrequency(
+                    mutation
+                ),
+                dbsnp,
+                clinvar,
+                cosmic,
+                gnomad,
             },
         ];
 

@@ -7,10 +7,18 @@ import { Mutation, DiscreteCopyNumberData } from 'cbioportal-ts-api-client';
 import Select from 'react-select';
 import _ from 'lodash';
 import { flattenArray } from '../TherapyRecommendationTableUtils';
+import AlleleFreqColumnFormatter from '../../mutation/column/AlleleFreqColumnFormatter';
+import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';
 
 interface TherapyRecommendationFormAlterationInputProps {
     data: ITherapyRecommendation;
     mutations: Mutation[];
+    indexedVariantAnnotations:
+        | { [genomicLocation: string]: VariantAnnotation }
+        | undefined;
+    indexedMyVariantInfoAnnotations:
+        | { [genomicLocation: string]: MyVariantInfo }
+        | undefined;
     cna: DiscreteCopyNumberData[];
     onChange: (alterations: IGeneticAlteration[]) => void;
 }
@@ -23,11 +31,59 @@ export class TherapyRecommendationFormAlterationPositiveInput extends React.Comp
 > {
     public render() {
         let allAlterations = this.props.mutations.map((mutation: Mutation) => {
+            const index =
+                mutation.chr +
+                ',' +
+                mutation.startPosition +
+                ',' +
+                mutation.endPosition +
+                ',' +
+                mutation.referenceAllele +
+                ',' +
+                mutation.variantAllele;
+            const annotation = this.props.indexedVariantAnnotations![index];
+            const myVariantInfo = this.props.indexedMyVariantInfoAnnotations![
+                index
+            ];
+            let dbsnp;
+            let clinvar;
+            let cosmic;
+            let gnomad;
+
+            if (annotation && annotation.colocatedVariants) {
+                const f = annotation.colocatedVariants.filter(value =>
+                    value.dbSnpId.startsWith('rs')
+                );
+                if (f.length > 0) dbsnp = f[0].dbSnpId;
+            }
+            if (myVariantInfo) {
+                if (myVariantInfo.clinVar) {
+                    clinvar = myVariantInfo.clinVar.variantId;
+                }
+                if (myVariantInfo.cosmic) {
+                    cosmic = myVariantInfo.cosmic.cosmicId;
+                }
+                if (myVariantInfo.gnomadExome) {
+                    gnomad = myVariantInfo.gnomadExome.alleleFrequency.af;
+                }
+            }
             return {
                 hugoSymbol: mutation.gene.hugoGeneSymbol,
                 alteration: mutation.proteinChange,
                 entrezGeneId: mutation.entrezGeneId,
                 chromosome: mutation.chr,
+                start: mutation.startPosition,
+                end: mutation.endPosition,
+                ref: mutation.referenceAllele,
+                alt: mutation.variantAllele,
+                aminoAcidChange: mutation.aminoAcidChange,
+                alleleFrequency: AlleleFreqColumnFormatter.calcFrequency(
+                    mutation
+                ),
+                dbsnp,
+                clinvar,
+                cosmic,
+                gnomad,
             } as IGeneticAlteration;
         });
 

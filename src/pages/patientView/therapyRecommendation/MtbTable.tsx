@@ -26,10 +26,17 @@ import LabeledCheckbox from 'shared/components/labeledCheckbox/LabeledCheckbox';
 import WindowStore from 'shared/components/window/WindowStore';
 import MtbTherapyRecommendationTable from './MtbTherapyRecommendationTable';
 import Select from 'react-select';
+import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';
 
 export type IMtbProps = {
     patientId: string;
     mutations: Mutation[];
+    indexedVariantAnnotations:
+        | { [genomicLocation: string]: VariantAnnotation }
+        | undefined;
+    indexedMyVariantInfoAnnotations:
+        | { [genomicLocation: string]: MyVariantInfo }
+        | undefined;
     cna: DiscreteCopyNumberData[];
     clinicalData: ClinicalData[];
     sampleManager: SampleManager | null;
@@ -245,6 +252,12 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                 <MtbTherapyRecommendationTable
                     patientId={this.props.patientId}
                     mutations={this.props.mutations}
+                    indexedVariantAnnotations={
+                        this.props.indexedVariantAnnotations
+                    }
+                    indexedMyVariantInfoAnnotations={
+                        this.props.indexedMyVariantInfoAnnotations
+                    }
                     cna={this.props.cna}
                     clinicalData={this.props.clinicalData}
                     sampleManager={this.props.sampleManager}
