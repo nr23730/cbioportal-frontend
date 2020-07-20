@@ -162,6 +162,7 @@ import {
     deleteMtbUsingDELETE,
 } from 'shared/api/TherapyRecommendationAPI';
 import { RecruitingStatus } from 'shared/enums/ClinicalTrialsGovRecruitingStatus';
+import { ageAsNumber } from '../clinicalTrialMatch/utils/AgeSexConverter';
 
 type PageMode = 'patient' | 'sample';
 
@@ -1879,7 +1880,7 @@ export class PatientViewPageStore {
                     oncotree_codes_in_samples
                 );
 
-                study_list.calculateScores(trials_for_condtion);
+                study_list.calculateScores(trials_for_condtion, 20, 'female');
 
                 console.log(study_list);
 
@@ -1919,10 +1920,6 @@ export class PatientViewPageStore {
                     var locationModule: Location[] = [];
                     var interventionModule: Intervention[] = [];
                     var eligibilityCriteria: string = '';
-                    var sex: string = '';
-                    var minimumAge: String;
-                    var maximumAge: String;
-                    var minimumAge: String;
 
                     try {
                         locationModule = std.getStudy().ProtocolSection
@@ -1946,27 +1943,6 @@ export class PatientViewPageStore {
                             .EligibilityModule.EligibilityCriteria;
                     } catch (e) {
                         eligibilityCriteria = '';
-                    }
-
-                    try {
-                        minimumAge = std.getStudy().ProtocolSection
-                            .EligibilityModule.MinimumAge;
-                    } catch (e) {
-                        minimumAge = '';
-                    }
-
-                    try {
-                        minimumAge = std.getStudy().ProtocolSection
-                            .EligibilityModule.MaximumAge;
-                    } catch (e) {
-                        maximumAge = '';
-                    }
-
-                    try {
-                        sex = std.getStudy().ProtocolSection.EligibilityModule
-                            .Gender;
-                    } catch (e) {
-                        sex = '';
                     }
 
                     for (let i = 0; i < locationModule.length; i++) {
