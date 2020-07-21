@@ -268,17 +268,20 @@ class ClinicalTrialsSearchParams {
     clinicalTrialsCountires: string[] = [];
     clinicalTrialsRecruitingStatus: RecruitingStatus[] = [];
     symbolsToSearch: string[] = [];
+    necSymbolsToSearch: string[] = [];
     gender: string;
 
     constructor(
         clinicalTrialsCountires: string[],
         clinicalTrialsRecruitingStatus: RecruitingStatus[],
         symbolsToSearch: string[] = [],
+        necSymbolsToSearch: string[] = [],
         gender: string
     ) {
         this.clinicalTrialsRecruitingStatus = clinicalTrialsRecruitingStatus;
         this.clinicalTrialsCountires = clinicalTrialsCountires;
         this.symbolsToSearch = symbolsToSearch;
+        this.necSymbolsToSearch = necSymbolsToSearch;
         this.gender = gender;
     }
 }
@@ -293,6 +296,7 @@ export class PatientViewPageStore {
 
     @observable
     private clinicalTrialSerchParams: ClinicalTrialsSearchParams = new ClinicalTrialsSearchParams(
+        [],
         [],
         [],
         [],
@@ -1847,20 +1851,27 @@ export class PatientViewPageStore {
                 var all_gene_symbols: string[] = this.mutationHugoGeneSymbols;
                 var clinicalTrialQuery = this.clinicalTrialSerchParams;
                 var search_symbols = clinicalTrialQuery.symbolsToSearch;
+                var nec_search_symbols = clinicalTrialQuery.necSymbolsToSearch;
                 var gene_symbols: string[] = [];
                 var study_dictionary: IOncoKBStudyDictionary = await this
                     .getStudiesFromOncoKBSortedByCondition.result;
                 var trials_for_condtion: string[] = [];
 
-                if (search_symbols.length == 0) {
+                gene_symbols = [];
+                if (
+                    search_symbols.length == 0 &&
+                    nec_search_symbols.length == 0
+                ) {
                     gene_symbols = [];
                 } else {
-                    gene_symbols = search_symbols;
+                    gene_symbols = search_symbols.concat(nec_search_symbols);
+                    gene_symbols = [...new Set(gene_symbols)];
                 }
 
                 for (const symbol of gene_symbols) {
                     var result: Study[] = await this.getAllStudiesForKeyword(
-                        symbol
+                        symbol,
+                        nec_search_symbols
                     );
                     for (const std of result) {
                         study_list.addStudy(std, symbol);
@@ -1996,11 +2007,15 @@ export class PatientViewPageStore {
         []
     );
 
-    private async getAllStudiesForKeyword(keyword: string): Promise<Study[]> {
+    private async getAllStudiesForKeyword(
+        keyword: string,
+        nec_search_symbols: string[]
+    ): Promise<Study[]> {
         const STEPSIZE = 100;
         var all_studies: Study[] = [];
         var result: ClinicalTrialsGovStudies = await searchStudiesForKeywordAsString(
             keyword,
+            nec_search_symbols,
             1,
             1,
             this.clinicalTrialSerchParams.clinicalTrialsCountires,
@@ -2018,6 +2033,7 @@ export class PatientViewPageStore {
         //get first batch of avialable studies
         result = await searchStudiesForKeywordAsString(
             keyword,
+            nec_search_symbols,
             current_min,
             current_max,
             this.clinicalTrialSerchParams.clinicalTrialsCountires,
@@ -2035,6 +2051,7 @@ export class PatientViewPageStore {
 
             result = await searchStudiesForKeywordAsString(
                 keyword,
+                nec_search_symbols,
                 current_min,
                 current_max,
                 this.clinicalTrialSerchParams.clinicalTrialsCountires,
@@ -2052,6 +2069,7 @@ export class PatientViewPageStore {
         countries: string[],
         status: RecruitingStatus[],
         symbols: string[],
+        necSymbols: string[],
         gender: string
     ) {
         var cntr: string[] = [];
@@ -2062,10 +2080,14 @@ export class PatientViewPageStore {
             cntr = countries;
         }
 
+        console.log('||||||||||||||||||||||||||');
+        console.log(necSymbols);
+
         this.clinicalTrialSerchParams = new ClinicalTrialsSearchParams(
             cntr,
             status,
             symbols,
+            necSymbols,
             gender
         );
     }
