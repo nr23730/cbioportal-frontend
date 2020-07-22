@@ -2080,9 +2080,6 @@ export class PatientViewPageStore {
             cntr = countries;
         }
 
-        console.log('||||||||||||||||||||||||||');
-        console.log(necSymbols);
-
         this.clinicalTrialSerchParams = new ClinicalTrialsSearchParams(
             cntr,
             status,
