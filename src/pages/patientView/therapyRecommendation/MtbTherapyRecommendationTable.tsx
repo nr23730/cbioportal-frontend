@@ -35,8 +35,7 @@ import {
     DiscreteCopyNumberData,
 } from 'cbioportal-ts-api-client';
 import TherapyRecommendationForm from './form/TherapyRecommendationForm';
-import { RemoteData } from 'react-mutation-mapper';
-import { IOncoKbData } from 'cbioportal-frontend-commons';
+import { RemoteData, IOncoKbData } from 'cbioportal-utils';
 import TherapyRecommendationFormOncoKb from './form/TherapyRecommendationFormOncoKb';
 import PubMedCache from 'shared/cache/PubMedCache';
 import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';

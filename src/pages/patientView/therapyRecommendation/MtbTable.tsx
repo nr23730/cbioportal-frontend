@@ -19,8 +19,7 @@ import {
     DiscreteCopyNumberData,
 } from 'cbioportal-ts-api-client';
 import { SimpleCopyDownloadControls } from 'shared/components/copyDownloadControls/SimpleCopyDownloadControls';
-import { RemoteData } from 'react-mutation-mapper';
-import { IOncoKbData } from 'cbioportal-frontend-commons';
+import { RemoteData, IOncoKbData } from 'cbioportal-utils';
 import PubMedCache from 'shared/cache/PubMedCache';
 import LabeledCheckbox from 'shared/components/labeledCheckbox/LabeledCheckbox';
 import WindowStore from 'shared/components/window/WindowStore';

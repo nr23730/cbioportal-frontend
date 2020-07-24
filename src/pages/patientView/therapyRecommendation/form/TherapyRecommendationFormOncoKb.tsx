@@ -8,8 +8,7 @@ import {
 import Select from 'react-select';
 import { IndicatorQueryResp } from 'oncokb-ts-api-client';
 import { getNewTherapyRecommendation } from '../TherapyRecommendationTableUtils';
-import { RemoteData } from 'react-mutation-mapper';
-import { IOncoKbData } from 'cbioportal-frontend-commons';
+import { RemoteData, IOncoKbData } from 'cbioportal-utils';
 import PubMedCache from 'shared/cache/PubMedCache';
 import { ICache } from 'cbioportal-frontend-commons';
 import { Mutation } from 'cbioportal-ts-api-client';
