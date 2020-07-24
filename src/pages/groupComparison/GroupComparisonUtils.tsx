@@ -56,6 +56,7 @@ export type StudyViewComparisonGroup = Omit<GroupData, 'studies' | 'color'> & {
     uid: string; // unique in the session
     studies: { id: string; samples: string[]; patients: string[] }[]; // include patients, filter out nonexistent samples
     nonExistentSamples: SampleIdentifier[]; // samples specified in the group which no longer exist in our DB
+    isSharedGroup?: boolean;
 };
 
 export type ClinicalDataEnrichmentWithQ = ClinicalDataEnrichment & {
@@ -292,6 +293,23 @@ export function getNumPatients(
     group: Pick<StudyViewComparisonGroup, 'studies'>
 ) {
     return _.sum(group.studies.map(study => study.patients.length));
+}
+
+export function filterStudiesAttr(
+    studiesAttr: SessionGroupData['studies'],
+    filter: (s: SampleIdentifier) => boolean
+) {
+    return studiesAttr
+        .map(studyObj => {
+            const studyId = studyObj.id;
+            return {
+                id: studyId,
+                samples: studyObj.samples.filter(sampleId =>
+                    filter({ studyId, sampleId })
+                ),
+            };
+        })
+        .filter(studyObj => studyObj.samples.length > 0);
 }
 
 export function finalizeStudiesAttr(

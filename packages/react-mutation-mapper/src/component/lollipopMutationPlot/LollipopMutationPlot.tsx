@@ -1,5 +1,5 @@
 import autobind from 'autobind-decorator';
-import { Mutation } from 'cbioportal-utils';
+import { MobxCache, Mutation } from 'cbioportal-utils';
 import { PfamDomain, PfamDomainRange } from 'genome-nexus-ts-api-client';
 import _ from 'lodash';
 import { action, computed, observable } from 'mobx';
@@ -12,7 +12,6 @@ import $ from 'jquery';
 import { DomainSpec } from '../../model/DomainSpec';
 import { LollipopPlotControlsConfig } from '../../model/LollipopPlotControlsConfig';
 import { LollipopPlacement, LollipopSpec } from '../../model/LollipopSpec';
-import { MobxCache } from '../../model/MobxCache';
 import { MutationMapperStore } from '../../model/MutationMapperStore';
 import { SequenceSpec } from '../../model/SequenceSpec';
 import { DefaultLollipopPlotControlsConfig } from '../../store/DefaultLollipopPlotControlsConfig';
@@ -266,13 +265,15 @@ export default class LollipopMutationPlot extends React.Component<
                 (this.props.store.allTranscripts.isComplete &&
                     this.props.store.allTranscripts.result &&
                     this.props.store.activeTranscript &&
+                    this.props.store.activeTranscript.isComplete &&
+                    this.props.store.activeTranscript.result &&
                     this.props.store.transcriptsByTranscriptId[
-                        this.props.store.activeTranscript
+                        this.props.store.activeTranscript.result
                     ] &&
                     // we want to show the stop codon too (so we allow proteinLength +1 as well)
                     codon >
                         this.props.store.transcriptsByTranscriptId[
-                            this.props.store.activeTranscript
+                            this.props.store.activeTranscript.result
                         ].proteinLength +
                             1)
             ) {
@@ -334,21 +335,25 @@ export default class LollipopMutationPlot extends React.Component<
             this.props.store.pfamDomainData.result.length === 0 ||
             !this.props.store.allTranscripts.isComplete ||
             !this.props.store.allTranscripts.result ||
-            !this.props.store.activeTranscript ||
+            !(
+                this.props.store.activeTranscript &&
+                this.props.store.activeTranscript.isComplete
+            ) ||
+            !this.props.store.activeTranscript.result ||
             !this.props.store.transcriptsByTranscriptId[
-                this.props.store.activeTranscript
+                this.props.store.activeTranscript.result
             ] ||
             !this.props.store.transcriptsByTranscriptId[
-                this.props.store.activeTranscript
+                this.props.store.activeTranscript.result
             ].pfamDomains ||
             this.props.store.transcriptsByTranscriptId[
-                this.props.store.activeTranscript
+                this.props.store.activeTranscript.result
             ].pfamDomains.length === 0
         ) {
             return [];
         } else {
             return this.props.store.transcriptsByTranscriptId[
-                this.props.store.activeTranscript
+                this.props.store.activeTranscript.result
             ].pfamDomains.map((range: PfamDomainRange) => {
                 const domain = this.domainMap[range.pfamDomainId];
                 return {
@@ -378,19 +383,21 @@ export default class LollipopMutationPlot extends React.Component<
             !this.props.store.allTranscripts.isPending &&
             this.props.store.allTranscripts.result &&
             this.props.store.activeTranscript &&
+            !this.props.store.activeTranscript.isPending &&
+            this.props.store.activeTranscript.result &&
             this.props.store.transcriptsByTranscriptId[
-                this.props.store.activeTranscript
+                this.props.store.activeTranscript.result
             ] &&
             this.props.store.transcriptsByTranscriptId[
-                this.props.store.activeTranscript
+                this.props.store.activeTranscript.result
             ].pfamDomains &&
             this.props.store.transcriptsByTranscriptId[
-                this.props.store.activeTranscript
+                this.props.store.activeTranscript.result
             ].pfamDomains.length > 0
         ) {
             return generatePfamDomainColorMap(
                 this.props.store.transcriptsByTranscriptId[
-                    this.props.store.activeTranscript
+                    this.props.store.activeTranscript.result
                 ].pfamDomains
             );
         } else {
@@ -417,11 +424,12 @@ export default class LollipopMutationPlot extends React.Component<
         return (
             (this.props.store.allTranscripts.result &&
                 this.props.store.activeTranscript &&
+                this.props.store.activeTranscript.result &&
                 this.props.store.transcriptsByTranscriptId[
-                    this.props.store.activeTranscript
+                    this.props.store.activeTranscript.result
                 ] &&
                 this.props.store.transcriptsByTranscriptId[
-                    this.props.store.activeTranscript
+                    this.props.store.activeTranscript.result
                 ].proteinLength) ||
             // Math.round(this.props.store.gene.length / 3);
             DEFAULT_PROTEIN_LENGTH
