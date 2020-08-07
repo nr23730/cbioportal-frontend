@@ -128,7 +128,9 @@ export function getMutationByTranscriptId(
             (tc: TranscriptConsequenceSummary) =>
                 tc.transcriptId === ensemblTranscriptId
         );
-
+    if (isCanonicalTranscript) {
+        return mutation;
+    }
     if (
         variantAnnotation &&
         transcriptConsequenceSummaries &&
@@ -148,7 +150,6 @@ export function getMutationByTranscriptId(
         }
         return annotatedMutation as Mutation;
     } else {
-        // if mutation is not annotatable or can't map back (due to genomic location normalization or other reasons), return undefined
         return undefined;
     }
 }
@@ -325,10 +326,8 @@ export function indexAnnotationsByGenomicLocation(
     variantAnnotations: VariantAnnotation[]
 ): { [genomicLocation: string]: VariantAnnotation } {
     return _.keyBy(variantAnnotations, annotation =>
-        annotation.annotation_summary
-            ? genomicLocationString(
-                  annotation.annotation_summary.genomicLocation
-              )
+        annotation.originalVariantQuery
+            ? annotation.originalVariantQuery
             : genomicLocationStringFromVariantAnnotation(annotation)
     );
 }
