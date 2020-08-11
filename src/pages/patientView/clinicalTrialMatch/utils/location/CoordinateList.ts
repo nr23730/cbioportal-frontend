@@ -1,4 +1,4 @@
-import { Coordinate } from './coordinate';
+import { Coordinate } from './Coordinate';
 
 const cities_and_coordinates: { [name: string]: Coordinate } = {
     Erlangen: new Coordinate(49.6, 11.0),

@@ -112,19 +112,20 @@ export function getAllStudyNctIdsByOncoTreeCode(
 }
 
 export function getAllStudyNctIdsByOncoTreeCodes(
-    studyDictionary: IOncoKBStudyDictionary,
+    studyDictionary: IOncoKBStudyDictionary | undefined,
     oncoTreeCodes: string[]
 ): string[] {
     var result: string[] = [];
 
     for (var oc = 0; oc < oncoTreeCodes.length; oc++) {
         var oncoTreeCode: string = oncoTreeCodes[oc];
-        var studyList: IOncoKBStudyListByOncoTreeCode =
-            studyDictionary[oncoTreeCode];
+        var studyList: IOncoKBStudyListByOncoTreeCode = studyDictionary![
+            oncoTreeCode
+        ];
         var trials: IOncoKBStudy[];
 
         if (studyList) {
-            trials = studyDictionary[oncoTreeCode].trials;
+            trials = studyDictionary![oncoTreeCode].trials;
             for (var std of trials) {
                 result.push(std.nctId);
             }

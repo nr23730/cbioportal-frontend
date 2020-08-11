@@ -1853,7 +1853,9 @@ export class PatientViewPageStore {
                 var search_symbols = clinicalTrialQuery.symbolsToSearch;
                 var nec_search_symbols = clinicalTrialQuery.necSymbolsToSearch;
                 var gene_symbols: string[] = [];
-                var study_dictionary: IOncoKBStudyDictionary = await this
+                var study_dictionary:
+                    | IOncoKBStudyDictionary
+                    | undefined = await this
                     .getStudiesFromOncoKBSortedByCondition.result;
                 var trials_for_condtion: string[] = [];
 
@@ -1882,13 +1884,15 @@ export class PatientViewPageStore {
                 var samples = patientData.samples;
                 var oncotree_codes_in_samples: string[] = [];
 
-                for (var i = 0; i < samples.length; i++) {
+                for (var i = 0; i < samples!.length; i++) {
                     oncotree_codes_in_samples.push(
-                        samples[i].clinicalData[6].value
+                        samples![i].clinicalData[6].value
                     );
                 }
 
-                var study_dictionary: IOncoKBStudyDictionary = await this
+                var study_dictionary:
+                    | IOncoKBStudyDictionary
+                    | undefined = await this
                     .getStudiesFromOncoKBSortedByCondition.result;
                 trials_for_condtion = getAllStudyNctIdsByOncoTreeCodes(
                     study_dictionary,
