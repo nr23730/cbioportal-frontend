@@ -74,7 +74,7 @@ export default class TherapyRecommendationForm extends React.Component<
                                     (therapyRecommendation.reasoning.geneticAlterations = alterations)
                                 }
                             />
-                            <h6>Clinical data:</h6>
+                            <h6>Clinical data / molecular diagnostics:</h6>
                             <TherapyRecommendationFormClinicalInput
                                 data={therapyRecommendation}
                                 clinicalData={this.props.clinicalData}
