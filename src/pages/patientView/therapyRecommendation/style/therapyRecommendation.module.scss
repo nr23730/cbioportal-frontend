@@ -84,6 +84,14 @@
 .edit {
     font-size: 14px;
 
+    .repositionButton {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: auto;
+        margin-top: 10px;
+    }
+
     .editButton {
         display: block;
         margin-left: auto;

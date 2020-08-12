@@ -19,6 +19,7 @@ declare const styles: {
   readonly "powered": string;
   readonly "reasoningContainer": string;
   readonly "reasoningInfoContainer": string;
+  readonly "repositionButton": string;
   readonly "sampleIdsContainer": string;
   readonly "secondLeft": string;
   readonly "secondRight": string;

@@ -57,6 +57,10 @@ export type ITherapyRecommendationProps = {
     containerWidth: number;
     onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
     onAddOrEdit: (therapyRecommendation?: ITherapyRecommendation) => boolean;
+    onReposition: (
+        therapyRecommendation: ITherapyRecommendation,
+        newIndex: number
+    ) => boolean;
     oncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     cnaOncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     pubMedCache?: PubMedCache;
@@ -68,6 +72,7 @@ export type ITherapyRecommendationState = {
 };
 
 enum ColumnKey {
+    PRIO = 'Prio',
     THERAPY = 'Therapy',
     COMMENT = 'Comment',
     REASONING = 'Reasoning',
@@ -77,6 +82,7 @@ enum ColumnKey {
 }
 
 enum ColumnWidth {
+    PRIO = 30,
     THERAPY = 140,
     COMMENT = 340,
     REASONING = 240,
@@ -117,6 +123,57 @@ export default class MtbTherapyRecommendationTable extends React.Component<
     @observable showOncoKBForm: boolean;
 
     private _columns = [
+        {
+            name: ColumnKey.PRIO,
+            render: (therapyRecommendation: ITherapyRecommendation) => (
+                <div className={styles.editContainer}>
+                    <span className={styles.edit}>
+                        <Button
+                            type="button"
+                            className={'btn ' + styles.repositionButton}
+                            disabled={
+                                this.props.isDisabled ||
+                                this.findIndex(therapyRecommendation) <= 0
+                            }
+                            onClick={() =>
+                                this.props.onReposition(
+                                    therapyRecommendation,
+                                    this.findIndex(therapyRecommendation) - 1
+                                )
+                            }
+                        >
+                            <i
+                                className={`fa fa-arrow-up fa-lg`}
+                                aria-hidden="true"
+                            ></i>{' '}
+                        </Button>
+                    </span>
+                    <span className={styles.edit}>
+                        <Button
+                            type="button"
+                            className={'btn ' + styles.repositionButton}
+                            disabled={
+                                this.props.isDisabled ||
+                                this.findIndex(therapyRecommendation) >=
+                                    this.props.therapyRecommendations.length - 1
+                            }
+                            onClick={() =>
+                                this.props.onReposition(
+                                    therapyRecommendation,
+                                    this.findIndex(therapyRecommendation) + 1
+                                )
+                            }
+                        >
+                            <i
+                                className={`fa fa-arrow-down fa-lg`}
+                                aria-hidden="true"
+                            ></i>{' '}
+                        </Button>
+                    </span>
+                </div>
+            ),
+            //width: this.columnWidths[ColumnKey.PRIO],
+        },
         {
             name: ColumnKey.REASONING,
             render: (therapyRecommendation: ITherapyRecommendation) => (
@@ -373,6 +430,12 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                     </span>
                 ))}
             </React.Fragment>
+        );
+    }
+
+    private findIndex(therapyRecommendation: ITherapyRecommendation) {
+        return this.props.therapyRecommendations.findIndex(
+            x => x.id === therapyRecommendation.id
         );
     }
 
