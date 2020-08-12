@@ -223,7 +223,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                                     }
                                 >
                                     <div className={styles.firstRight}>
-                                        Clinical data:
+                                        Clinical data / molecular diagnostics:
                                         {therapyRecommendation.reasoning
                                             .clinicalData &&
                                             therapyRecommendation.reasoning.clinicalData.map(
