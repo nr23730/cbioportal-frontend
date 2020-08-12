@@ -295,33 +295,51 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
         return true;
     };
 
-    therapyRecommendationReplace = (mtbId: string) => (
+    therapyRecommendationSuspendAndGetIndex = (mtbId: string) => (
         therapyRecommendationToDelete: ITherapyRecommendation
     ) => {
+        var therapyRecommendationIndex = -1;
         const newMtbs = this.state.mtbs.slice();
-        newMtbs.find(
-            x => x.id === mtbId
-        )!.therapyRecommendations = newMtbs
+        newMtbs.find(x => x.id === mtbId)!.therapyRecommendations = newMtbs
             .find(x => x.id === mtbId)!
             .therapyRecommendations.filter(
-                (therapyRecommendation: ITherapyRecommendation) =>
-                    therapyRecommendationToDelete.id !==
-                    therapyRecommendation.id
+                (therapyRecommendation: ITherapyRecommendation, index) => {
+                    if (
+                        therapyRecommendationToDelete.id !==
+                        therapyRecommendation.id
+                    ) {
+                        return true;
+                    } else {
+                        therapyRecommendationIndex = index;
+                        return false;
+                    }
+                }
             );
         this.setState({ mtbs: newMtbs });
-        return true;
+        return therapyRecommendationIndex;
     };
 
     therapyRecommendationOnAddOrEdit = (mtbId: string) => (
         therapyRecommendationToAdd?: ITherapyRecommendation
     ) => {
         if (therapyRecommendationToAdd === undefined) return false;
-        this.therapyRecommendationReplace(mtbId)(therapyRecommendationToAdd);
-
+        const index = this.therapyRecommendationSuspendAndGetIndex(mtbId)(
+            therapyRecommendationToAdd
+        );
         const newMtbs = this.state.mtbs.slice();
-        newMtbs
-            .find(x => x.id === mtbId)!
-            .therapyRecommendations.push(therapyRecommendationToAdd);
+        if (index === -1) {
+            newMtbs
+                .find(x => x.id === mtbId)!
+                .therapyRecommendations.push(therapyRecommendationToAdd);
+        } else {
+            newMtbs
+                .find(x => x.id === mtbId)!
+                .therapyRecommendations.splice(
+                    index,
+                    0,
+                    therapyRecommendationToAdd
+                );
+        }
         this.setState({ mtbs: newMtbs });
         return true;
     };
