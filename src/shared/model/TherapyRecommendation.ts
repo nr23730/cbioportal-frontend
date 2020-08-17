@@ -11,9 +11,9 @@ export enum EvidenceLevel {
 }
 
 export enum MtbState {
-    DRAFT = 'Draft',
-    COMPLETED = 'Completed',
-    ARCHIVED = 'Archived',
+    PARTIAL = 'Partial',
+    PRELIMINARY = 'Preliminary',
+    FINAL = 'Final',
 }
 
 export interface IRecommender {

@@ -118,20 +118,25 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         disabled={this.isDisabled(mtb)}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                             const newState = e.target.value;
-                            // if ((newState === MtbState.ARCHIVED.toUpperCase()))
-                            //     if(!window.confirm(
-                            //         'Are you sure you wish to archive this MTB session to disable editing?'
-                            //     )) {
-                            //         const newMtbs = this.state.mtbs.slice();
-                            //         e.target.value = newMtbs.find(x => x.id === mtb.id)!.mtbState;
-                            //         e.preventDefault();
-                            //         e.stopPropagation();
-                            //         this.setState({ mtbs: newMtbs });
-                            //         return;
-                            //     }
+                            if (newState === MtbState.FINAL.toUpperCase())
+                                if (
+                                    !window.confirm(
+                                        'Are you sure you wish to finalize this MTB session to disable editing?'
+                                    )
+                                ) {
+                                    const newMtbs = this.state.mtbs.slice();
+                                    e.target.value = newMtbs.find(
+                                        x => x.id === mtb.id
+                                    )!.mtbState;
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    this.setState({ mtbs: newMtbs });
+                                    return;
+                                }
                             const newMtbs = this.state.mtbs.slice();
-                            newMtbs.find(x => x.id === mtb.id)!.mtbState =
-                                MtbState[newState as keyof typeof MtbState];
+                            newMtbs.find(
+                                x => x.id === mtb.id
+                            )!.mtbState = newState as MtbState;
                             this.setState({ mtbs: newMtbs });
                         }}
                     >
@@ -370,7 +375,10 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
             rebiopsyRecommendation: false,
             therapyRecommendations: [],
             date: now.toISOString().split('T')[0],
-            mtbState: MtbState.DRAFT,
+            mtbState: Object.keys(MtbState).find(
+                key =>
+                    MtbState[key as keyof typeof MtbState] === MtbState.PARTIAL
+            ),
             samples: [],
             author: getAuthor(),
         } as IMtb;
@@ -400,7 +408,12 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
     }
 
     private isDisabled(mtb: IMtb) {
-        return mtb.mtbState === MtbState.ARCHIVED;
+        return (
+            (mtb.mtbState as MtbState) ===
+            Object.keys(MtbState).find(
+                key => MtbState[key as keyof typeof MtbState] === MtbState.FINAL
+            )
+        );
     }
 
     private test() {
