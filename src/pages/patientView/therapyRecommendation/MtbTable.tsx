@@ -118,7 +118,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         disabled={this.isDisabled(mtb)}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                             const newState = e.target.value;
-                            if (newState === MtbState.ARCHIVED.toUpperCase())
+                            if (newState === MtbState.FINAL.toUpperCase())
                                 if (
                                     !window.confirm(
                                         'Are you sure you wish to finalize this MTB session to disable editing?'
@@ -376,7 +376,8 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
             therapyRecommendations: [],
             date: now.toISOString().split('T')[0],
             mtbState: Object.keys(MtbState).find(
-                key => MtbState[key as keyof typeof MtbState] === MtbState.DRAFT
+                key =>
+                    MtbState[key as keyof typeof MtbState] === MtbState.PARTIAL
             ),
             samples: [],
             author: getAuthor(),
@@ -410,8 +411,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
         return (
             (mtb.mtbState as MtbState) ===
             Object.keys(MtbState).find(
-                key =>
-                    MtbState[key as keyof typeof MtbState] === MtbState.ARCHIVED
+                key => MtbState[key as keyof typeof MtbState] === MtbState.FINAL
             )
         );
     }
