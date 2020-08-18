@@ -76,6 +76,7 @@
 }
 .editContainer {
     margin: 20% 0 20% 0;
+    text-align: center;
 
     a:hover {
         text-decoration: none;
@@ -90,6 +91,10 @@
         margin-right: auto;
         width: auto;
         margin-top: 10px;
+    }
+
+    .editIcon {
+        display: inline-block;
     }
 
     .editButton {

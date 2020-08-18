@@ -26,6 +26,7 @@ import {
     flattenObject,
     flattenArray,
     getTooltipEvidenceContent,
+    getTooltipAuthorContent,
 } from './TherapyRecommendationTableUtils';
 import AppConfig from 'appConfig';
 import { Button } from 'react-bootstrap';
@@ -297,13 +298,13 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                     </span>
                     <If condition={therapyRecommendation.evidenceLevel}>
                         <DefaultTooltip
-                            placement="bottomLeft"
+                            //placement="bottomLeft"
                             trigger={['hover', 'focus']}
                             overlay={getTooltipEvidenceContent(
                                 therapyRecommendation.evidenceLevel
                             )}
                             destroyTooltipOnHide={false}
-                            onPopupAlign={placeArrowBottomLeft}
+                            //onPopupAlign={placeArrowBottomLeft}
                         >
                             <i
                                 className={'fa fa-info-circle ' + styles.icon}
@@ -370,6 +371,24 @@ export default class MtbTherapyRecommendationTable extends React.Component<
             name: ColumnKey.EDIT,
             render: (therapyRecommendation: ITherapyRecommendation) => (
                 <div className={styles.editContainer}>
+                    <span className={styles.edit}>
+                        <DefaultTooltip
+                            //placement="bottomLeft"
+                            trigger={['hover', 'focus']}
+                            overlay={getTooltipAuthorContent(
+                                'Therapy Recommendation',
+                                therapyRecommendation.author
+                            )}
+                            destroyTooltipOnHide={false}
+                            //onPopupAlign={placeArrowBottomLeft}
+                        >
+                            <i
+                                className={
+                                    'fa fa-user-circle ' + styles.editIcon
+                                }
+                            ></i>
+                        </DefaultTooltip>
+                    </span>
                     <span className={styles.edit}>
                         <Button
                             type="button"

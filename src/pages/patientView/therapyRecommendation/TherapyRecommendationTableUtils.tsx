@@ -8,6 +8,7 @@ import _ from 'lodash';
 import request from 'superagent';
 import * as React from 'react';
 import styles from './style/therapyRecommendation.module.scss';
+import { If, Then, Else } from 'react-if';
 
 export function truncate(
     s: string | undefined,
@@ -171,6 +172,22 @@ export function flattenObject(x: any): any {
         y[i] = x[i];
     }
     return y;
+}
+
+export function getTooltipAuthorContent(entryType: string, author: string) {
+    return (
+        <div className={styles.tooltip} style={{ width: '300px' }}>
+            <If condition={author === 'anonymousUser'}>
+                <Then>
+                    {entryType} was authored by an anonymous user. Identifying
+                    authors is only available in portals which require login.
+                </Then>
+                <Else>
+                    {entryType} was authored by <b>{author}</b>.
+                </Else>
+            </If>
+        </div>
+    );
 }
 
 export function getTooltipEvidenceContent(evidenceLevel: any) {

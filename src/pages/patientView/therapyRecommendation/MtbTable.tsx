@@ -11,8 +11,13 @@ import { computed, observable } from 'mobx';
 import LazyMobXTable from '../../../shared/components/lazyMobXTable/LazyMobXTable';
 import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from '../SampleManager';
-import { flattenStringify, getAuthor } from './TherapyRecommendationTableUtils';
+import {
+    flattenStringify,
+    getAuthor,
+    getTooltipAuthorContent,
+} from './TherapyRecommendationTableUtils';
 import { Button } from 'react-bootstrap';
+import { DefaultTooltip } from 'cbioportal-frontend-commons';
 import {
     Mutation,
     ClinicalData,
@@ -96,6 +101,18 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
             name: ColumnKey.INFO,
             render: (mtb: IMtb) => (
                 <div>
+                    <span className={styles.edit}>
+                        <DefaultTooltip
+                            trigger={['hover', 'focus']}
+                            overlay={getTooltipAuthorContent(
+                                'MTB session',
+                                mtb.author
+                            )}
+                            destroyTooltipOnHide={false}
+                        >
+                            <i className={'fa fa-user-circle'}></i>
+                        </DefaultTooltip>
+                    </span>
                     <input
                         type="date"
                         value={mtb.date}
