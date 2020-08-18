@@ -9,6 +9,7 @@ declare const styles: {
   readonly "edit": string;
   readonly "editButton": string;
   readonly "editContainer": string;
+  readonly "editIcon": string;
   readonly "firstLeft": string;
   readonly "firstRight": string;
   readonly "genomicInfoContainer": string;
