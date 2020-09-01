@@ -208,6 +208,8 @@ describe('StudyViewUtils', () => {
                         ],
                     },
                 ],
+                sampleTreatmentFilters: { filters: [] },
+                patientTreatmentFilters: { filters: [] },
                 genomicDataFilters: [],
                 geneFilters: [
                     {
@@ -246,6 +248,7 @@ describe('StudyViewUtils', () => {
                 numberOfSamplesPerPatient: [],
                 genomicProfiles: [],
                 caseLists: [],
+                genericAssayDataFilters: [],
             } as StudyViewFilterWithSampleIdentifierFilters;
 
             assert.isTrue(
