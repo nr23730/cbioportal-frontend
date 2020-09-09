@@ -270,19 +270,22 @@ class ClinicalTrialsSearchParams {
     symbolsToSearch: string[] = [];
     necSymbolsToSearch: string[] = [];
     gender: string;
+    patientLocation: string;
 
     constructor(
         clinicalTrialsCountires: string[],
         clinicalTrialsRecruitingStatus: RecruitingStatus[],
         symbolsToSearch: string[] = [],
         necSymbolsToSearch: string[] = [],
-        gender: string
+        gender: string,
+        patientLocation: string
     ) {
         this.clinicalTrialsRecruitingStatus = clinicalTrialsRecruitingStatus;
         this.clinicalTrialsCountires = clinicalTrialsCountires;
         this.symbolsToSearch = symbolsToSearch;
         this.necSymbolsToSearch = necSymbolsToSearch;
         this.gender = gender;
+        this.patientLocation = patientLocation;
     }
 }
 
@@ -300,6 +303,7 @@ export class PatientViewPageStore {
         [],
         [],
         [],
+        '',
         ''
     );
 
@@ -1902,7 +1906,8 @@ export class PatientViewPageStore {
                 study_list.calculateScores(
                     trials_for_condtion,
                     20,
-                    clinicalTrialQuery.gender
+                    clinicalTrialQuery.gender,
+                    clinicalTrialQuery.patientLocation
                 );
 
                 console.log(study_list);
@@ -2074,7 +2079,8 @@ export class PatientViewPageStore {
         status: RecruitingStatus[],
         symbols: string[],
         necSymbols: string[],
-        gender: string
+        gender: string,
+        patientLocation: string
     ) {
         var cntr: string[] = [];
 
@@ -2089,7 +2095,8 @@ export class PatientViewPageStore {
             status,
             symbols,
             necSymbols,
-            gender
+            gender,
+            patientLocation
         );
     }
 
