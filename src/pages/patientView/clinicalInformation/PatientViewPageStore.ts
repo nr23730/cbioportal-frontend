@@ -271,6 +271,7 @@ class ClinicalTrialsSearchParams {
     necSymbolsToSearch: string[] = [];
     gender: string;
     patientLocation: string;
+    age: number;
 
     constructor(
         clinicalTrialsCountires: string[],
@@ -278,7 +279,8 @@ class ClinicalTrialsSearchParams {
         symbolsToSearch: string[] = [],
         necSymbolsToSearch: string[] = [],
         gender: string,
-        patientLocation: string
+        patientLocation: string,
+        age: number
     ) {
         this.clinicalTrialsRecruitingStatus = clinicalTrialsRecruitingStatus;
         this.clinicalTrialsCountires = clinicalTrialsCountires;
@@ -286,6 +288,7 @@ class ClinicalTrialsSearchParams {
         this.necSymbolsToSearch = necSymbolsToSearch;
         this.gender = gender;
         this.patientLocation = patientLocation;
+        this.age = age;
     }
 }
 
@@ -298,13 +301,17 @@ export class PatientViewPageStore {
     public internalClient: CBioPortalAPIInternal;
 
     @observable
+    public isClinicalTrialsLoading: boolean = false;
+
+    @observable
     private clinicalTrialSerchParams: ClinicalTrialsSearchParams = new ClinicalTrialsSearchParams(
         [],
         [],
         [],
         [],
         '',
-        ''
+        '',
+        0
     );
 
     @observable public activeTabId = '';
@@ -1905,7 +1912,7 @@ export class PatientViewPageStore {
 
                 study_list.calculateScores(
                     trials_for_condtion,
-                    20,
+                    clinicalTrialQuery.age,
                     clinicalTrialQuery.gender,
                     clinicalTrialQuery.patientLocation
                 );
@@ -2009,7 +2016,6 @@ export class PatientViewPageStore {
                     };
                     result.push(newTrial);
                 }
-
                 return result;
             },
         },
@@ -2080,7 +2086,8 @@ export class PatientViewPageStore {
         symbols: string[],
         necSymbols: string[],
         gender: string,
-        patientLocation: string
+        patientLocation: string,
+        age: number
     ) {
         var cntr: string[] = [];
 
@@ -2090,13 +2097,16 @@ export class PatientViewPageStore {
             cntr = countries;
         }
 
+        this.isClinicalTrialsLoading = true;
+
         this.clinicalTrialSerchParams = new ClinicalTrialsSearchParams(
             cntr,
             status,
             symbols,
             necSymbols,
             gender,
-            patientLocation
+            patientLocation,
+            age
         );
     }
 
