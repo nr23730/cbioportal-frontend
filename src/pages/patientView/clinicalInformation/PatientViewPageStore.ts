@@ -1344,8 +1344,9 @@ export class PatientViewPageStore {
             await: () => [this.civicGenes, this.mutationData],
             invoke: async () => {
                 if (this.cnaCivicGenes.status == 'complete') {
-                    return fetchCivicVariants(this.cnaCivicGenes
-                        .result as ICivicGene);
+                    return fetchCivicVariants(
+                        this.cnaCivicGenes.result as ICivicGene
+                    );
                 }
             },
             onError: (err: Error) => {
@@ -1896,9 +1897,15 @@ export class PatientViewPageStore {
                 var oncotree_codes_in_samples: string[] = [];
 
                 for (var i = 0; i < samples!.length; i++) {
-                    oncotree_codes_in_samples.push(
-                        samples![i].clinicalData[6].value
-                    );
+                    for (var k = 0; k < samples![i].clinicalData.length; k++) {
+                        if (
+                            samples![i].clinicalData[k].value == 'Oncotree Code'
+                        ) {
+                            oncotree_codes_in_samples.push(
+                                samples![i].clinicalData[k].value
+                            );
+                        }
+                    }
                 }
 
                 var study_dictionary:
