@@ -1,36 +1,29 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import { PatientSurvival } from '../../../shared/model/PatientSurvival';
-import { action, computed, observable, runInAction } from 'mobx';
+import { action, computed, observable } from 'mobx';
 import Slider from 'react-rangeslider';
-import { Popover, Table } from 'react-bootstrap';
+import { Popover } from 'react-bootstrap';
 import styles from './styles.module.scss';
 import './styles.scss';
 import { sleep } from '../../../shared/lib/TimeUtils';
 import * as _ from 'lodash';
 import {
     VictoryChart,
-    VictoryContainer,
     VictoryLine,
-    VictoryTooltip,
     VictoryAxis,
     VictoryLegend,
     VictoryLabel,
     VictoryScatter,
-    VictoryTheme,
     VictoryZoomContainer,
 } from 'victory';
 import {
     getEstimates,
-    getMedian,
     getLineData,
     getScatterData,
     getScatterDataWithOpacity,
     getStats,
-    calculateLogRank,
     getDownloadContent,
-    convertScatterDataToDownloadData,
-    downSampling,
     GroupedScatterData,
     filterScatterData,
     SurvivalPlotFilters,
@@ -51,6 +44,7 @@ import {
     EditableSpan,
     pluralize,
 } from 'cbioportal-frontend-commons';
+import { logRankTest } from 'pages/resultsView/survival/logRankTest';
 
 export enum LegendLocation {
     TOOLTIP = 'tooltip',
@@ -304,15 +298,11 @@ export default class SurvivalChart
     }
 
     @computed get logRankTestPVal(): number | null {
-        if (this.analysisGroupsWithData.length === 2) {
-            // log rank test only makes sense with two groups
-            return calculateLogRank(
-                this.sortedGroupedSurvivals[
-                    this.analysisGroupsWithData[0].value
-                ],
-                this.sortedGroupedSurvivals[
-                    this.analysisGroupsWithData[1].value
-                ]
+        if (this.analysisGroupsWithData.length > 1) {
+            return logRankTest(
+                ...this.analysisGroupsWithData.map(group => {
+                    return this.sortedGroupedSurvivals[group.value];
+                })
             );
         } else {
             return null;
