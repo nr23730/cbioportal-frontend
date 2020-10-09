@@ -33,6 +33,10 @@ const LOCATION_TOOLTIP: string =
 const MAX_DISTANCE_TOOLTIP: string =
     'Select the maximum distance from patient to closest recruiting site. Other studies are not shown, unless none of the locations were recognized';
 
+const components = {
+    DropdownIndicator: null,
+};
+
 interface IClinicalTrialOptionsMatchProps {
     store: PatientViewPageStore;
 }
@@ -44,10 +48,11 @@ interface IClinicalTrialOptionsMatchState {
     recruitingItems: Array<string>;
     gender: string;
     patientLocation: string;
-    value?: string;
+    value: Array<any>;
     age: number;
     maxDistance: string;
     isOpened: boolean;
+    inputValue: string;
 }
 
 class ClinicalTrialMatchTableOptions extends React.Component<
@@ -73,6 +78,8 @@ class ClinicalTrialMatchTableOptions extends React.Component<
             age: 0,
             maxDistance: '',
             isOpened: false,
+            value: new Array<any>(),
+            inputValue: '',
         };
 
         this.recruiting_values = recruitingValueNames;
@@ -317,24 +324,61 @@ class ClinicalTrialMatchTableOptions extends React.Component<
                                 marginBottom: '5px',
                             }}
                         >
-                            <Select
-                                options={this.ageList.map(age => ({
-                                    label: age,
-                                    value: age,
-                                }))}
-                                name="ageSearch"
-                                className="basic-select"
-                                classNamePrefix="select"
-                                placeholder="Select age..."
-                                onChange={(selectedOption: any) => {
-                                    var newStatuses = '';
-                                    if (selectedOption !== null) {
-                                        newStatuses = selectedOption.value;
+                            <CreatableSelect
+                                components={components}
+                                isClearable
+                                isMulti={false}
+                                menuIsOpen={false}
+                                onInputChange={(
+                                    inputValue: any,
+                                    actionMeta: any
+                                ) => {
+                                    if (
+                                        inputValue !== null &&
+                                        inputValue !== ''
+                                    ) {
+                                        this.setState({
+                                            age: +inputValue,
+                                            inputValue,
+                                        });
                                     }
+                                }}
+                                placeholder="Select age..."
+                                onKeyDown={(
+                                    event: React.KeyboardEvent<HTMLElement>
+                                ) => {
+                                    if (!this.state.age) return;
+                                    switch (event.key) {
+                                        case 'Enter':
+                                        case 'Tab':
+                                            let newValue: any = {
+                                                value: this.state.age,
+                                                label: this.state.age,
+                                            };
+                                            this.setState({
+                                                age: this.state.age,
+                                                inputValue: '',
+                                                value: [newValue],
+                                            });
+                                    }
+                                }}
+                                onFocusOut={() => {
+                                    if (!this.state.age) return;
+                                    let newValue: any = {
+                                        value: this.state.age,
+                                        label: this.state.age,
+                                    };
                                     this.setState({
-                                        age: +newStatuses,
+                                        age: this.state.age,
+                                        inputValue: '',
+                                        value: [newValue],
                                     });
                                 }}
+                                onChange={(value: any, actionMeta: any) => {
+                                    this.setState({ value, age: 0 });
+                                }}
+                                value={this.state.value}
+                                inputValue={this.state.inputValue}
                             />
                         </div>
                     </DefaultTooltip>
