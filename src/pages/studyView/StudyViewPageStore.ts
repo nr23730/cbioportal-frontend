@@ -3628,9 +3628,11 @@ export class StudyViewPageStore {
 
         if (
             this.displayTreatments.result &&
-            ['triage-portal', 'genie-portal'].includes(
-                AppConfig.serverConfig.app_name!
-            )
+            [
+                'triage-portal',
+                'genie-portal',
+                'cbioportal-genie-private',
+            ].includes(AppConfig.serverConfig.app_name!)
         ) {
             _chartMetaSet['SAMPLE_TREATMENTS'] = {
                 uniqueKey: 'SAMPLE_TREATMENTS',
@@ -3647,9 +3649,11 @@ export class StudyViewPageStore {
 
         if (
             this.displayTreatments.result &&
-            ['triage-portal', 'genie-portal'].includes(
-                AppConfig.serverConfig.app_name!
-            )
+            [
+                'triage-portal',
+                'genie-portal',
+                'cbioportal-genie-private',
+            ].includes(AppConfig.serverConfig.app_name!)
         ) {
             _chartMetaSet['PATIENT_TREATMENTS'] = {
                 uniqueKey: 'PATIENT_TREATMENTS',
@@ -6003,7 +6007,7 @@ export class StudyViewPageStore {
                         )
                     );
                     // samples countaing this data would be the samples profiled for these molecular profiles
-                    ret[uniqueKey] = _.sumBy(
+                    let count = _.sumBy(
                         this.structuralVariantProfiles.result,
                         profile =>
                             (
@@ -6012,6 +6016,16 @@ export class StudyViewPageStore {
                                 ] || []
                             ).length
                     );
+
+                    if (count === 0) {
+                        const key = getUniqueKeyFromMolecularProfileIds(
+                            this.mutationProfiles.result.map(
+                                profile => profile.molecularProfileId
+                            )
+                        );
+                        count = ret[key];
+                    }
+                    ret[uniqueKey] = count;
                 }
 
                 if (!_.isEmpty(this.cnaProfiles.result)) {
