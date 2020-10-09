@@ -2046,8 +2046,11 @@ export class PatientViewPageStore {
                         keywords: std.getKeywords().toString(),
                         conditions: std.getStudy().ProtocolSection
                             .ConditionsModule.ConditionList.Condition,
-                        title: std.getStudy().ProtocolSection
-                            .IdentificationModule.OfficialTitle,
+                        title:
+                            std.getStudy().ProtocolSection.IdentificationModule
+                                .OfficialTitle ||
+                            std.getStudy().ProtocolSection.IdentificationModule
+                                .BriefTitle,
                         nct: std.getStudy().ProtocolSection.IdentificationModule
                             .NCTId,
                         status: std.getStudy().ProtocolSection.StatusModule
