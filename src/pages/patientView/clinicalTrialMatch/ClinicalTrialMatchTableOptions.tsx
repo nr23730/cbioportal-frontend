@@ -1,7 +1,5 @@
-import Checkbox from './ClinicalTrialMatchTableCheckbox';
 import React from 'react';
 import { PatientViewPageStore } from '../clinicalInformation/PatientViewPageStore';
-import { ClinicalTrialMatchTextfield } from '../clinicalTrialMatch/ClinicalTrialMatchTextfield';
 import { RecruitingStatus } from 'shared/enums/ClinicalTrialsGovRecruitingStatus';
 import Select from 'react-select';
 import CreatableSelect from 'react-select/creatable';
@@ -9,7 +7,6 @@ import {
     recruitingValueNames,
     countriesNames,
     genderNames,
-    ages,
 } from './utils/SelectValues';
 import { CITIES_AND_COORDINATES } from './utils/location/CoordinateList';
 import { Collapse } from 'react-collapse';
@@ -48,25 +45,33 @@ interface IClinicalTrialOptionsMatchState {
     recruitingItems: Array<string>;
     gender: string;
     patientLocation: string;
-    value: Array<any>;
     age: number;
     maxDistance: string;
     isOpened: boolean;
-    inputValue: string;
 }
 
 class ClinicalTrialMatchTableOptions extends React.Component<
     IClinicalTrialOptionsMatchProps,
     IClinicalTrialOptionsMatchState
-> {
+    > {
     recruiting_values: RecruitingStatus[] = [];
     countries: Array<String>;
     genders: Array<String>;
     locationsWithCoordinates: Array<String>;
-    ageList: Array<number>;
+    gender: any;
+    age: string;
+
 
     constructor(props: IClinicalTrialOptionsMatchProps) {
         super(props);
+
+        this.gender = { label: 'All', value: 'All' };
+        let sex = this.props.store.clinicalDataPatient.result.find(attribute => attribute.clinicalAttributeId === 'SEX')?.value;
+        if (sex !== undefined && sex.length > 0) {
+            this.gender = { label: sex, value: sex };
+        }
+
+        this.age = this.props.store.clinicalDataPatient.result.find(attribute => attribute.clinicalAttributeId === 'AGE')?.value || '0';
 
         this.state = {
             mutationSymbolItems: new Array<string>(),
@@ -74,12 +79,10 @@ class ClinicalTrialMatchTableOptions extends React.Component<
             countryItems: new Array<string>(),
             recruitingItems: new Array<string>(),
             patientLocation: '',
-            gender: 'All',
-            age: 0,
+            gender: sex || 'All',
+            age: +this.age,
             maxDistance: '',
             isOpened: false,
-            value: new Array<any>(),
-            inputValue: '',
         };
 
         this.recruiting_values = recruitingValueNames;
@@ -87,7 +90,7 @@ class ClinicalTrialMatchTableOptions extends React.Component<
         this.genders = genderNames;
         this.countries = countriesNames;
         this.locationsWithCoordinates = Object.keys(CITIES_AND_COORDINATES);
-        this.ageList = ages;
+
     }
 
     getRecruitingKeyFromValueString(value: string): RecruitingStatus {
@@ -136,7 +139,6 @@ class ClinicalTrialMatchTableOptions extends React.Component<
         console.log(necSymbols);
         console.log('dist');
 
-        //this.props.store.setSymbolsToSearch(symbols);
     }
 
     render() {
@@ -325,60 +327,23 @@ class ClinicalTrialMatchTableOptions extends React.Component<
                             }}
                         >
                             <CreatableSelect
-                                components={components}
                                 isClearable
                                 isMulti={false}
-                                menuIsOpen={false}
-                                onInputChange={(
-                                    inputValue: any,
-                                    actionMeta: any
-                                ) => {
-                                    if (
-                                        inputValue !== null &&
-                                        inputValue !== ''
-                                    ) {
+                                components={components}
+                                placeholder="Select age..."
+                                onChange={(newValue: any) => {
+                                    if (newValue !== null) {
                                         this.setState({
-                                            age: +inputValue,
-                                            inputValue,
+                                            age: +newValue.value
+                                        });
+                                    } else {
+                                        this.setState({
+                                            age: 0
                                         });
                                     }
                                 }}
-                                placeholder="Select age..."
-                                onKeyDown={(
-                                    event: React.KeyboardEvent<HTMLElement>
-                                ) => {
-                                    if (!this.state.age) return;
-                                    switch (event.key) {
-                                        case 'Enter':
-                                        case 'Tab':
-                                            let newValue: any = {
-                                                value: this.state.age,
-                                                label: this.state.age,
-                                            };
-                                            this.setState({
-                                                age: this.state.age,
-                                                inputValue: '',
-                                                value: [newValue],
-                                            });
-                                    }
-                                }}
-                                onFocusOut={() => {
-                                    if (!this.state.age) return;
-                                    let newValue: any = {
-                                        value: this.state.age,
-                                        label: this.state.age,
-                                    };
-                                    this.setState({
-                                        age: this.state.age,
-                                        inputValue: '',
-                                        value: [newValue],
-                                    });
-                                }}
-                                onChange={(value: any, actionMeta: any) => {
-                                    this.setState({ value, age: 0 });
-                                }}
-                                value={this.state.value}
-                                inputValue={this.state.inputValue}
+                                defaultValue={[{ label: this.age, value: this.age }]}
+                                options={[{ label: this.age, value: this.age }]}
                             />
                         </div>
                     </DefaultTooltip>
@@ -402,7 +367,7 @@ class ClinicalTrialMatchTableOptions extends React.Component<
                                     value: gender,
                                 }))}
                                 name="genderSearch"
-                                defaultValue={{ label: 'All', value: 'All' }}
+                                defaultValue={this.gender}
                                 className="basic-select"
                                 classNamePrefix="select"
                                 placeholder="Select gender..."

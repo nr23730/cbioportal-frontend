@@ -1,18 +1,10 @@
 import * as React from 'react';
-import { action, computed, observable } from 'mobx';
+import { observable } from 'mobx';
 import { PatientViewPageStore } from '../clinicalInformation/PatientViewPageStore';
 import { observer } from 'mobx-react';
 
 import { Collapse } from 'react-collapse';
-import {
-    searchStudiesForKeyword,
-    searchStudiesForKeywordAsString,
-} from '../../../shared/api/ClinicalTrialMatchAPI';
-import {
-    ClinicalTrialsGovStudies,
-    Study,
-} from '../../../shared/api/ClinicalTrialsGovStudyStrucutre';
-import { StudyList, StudyListEntry } from './utils/StudyList';
+import { StudyListEntry } from './utils/StudyList';
 import LazyMobXTable from '../../../shared/components/lazyMobXTable/LazyMobXTable';
 import ClinicalTrialMatchTableOptions from './ClinicalTrialMatchTableOptions';
 import LoadingIndicator from 'shared/components/loadingIndicator/LoadingIndicator';
