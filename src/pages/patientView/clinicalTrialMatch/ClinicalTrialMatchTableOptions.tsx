@@ -60,6 +60,7 @@ class ClinicalTrialMatchTableOptions extends React.Component<
     locationsWithCoordinates: Array<String>;
     gender: any;
     age: string;
+    ageDefault: any;
 
 
     constructor(props: IClinicalTrialOptionsMatchProps) {
@@ -72,6 +73,7 @@ class ClinicalTrialMatchTableOptions extends React.Component<
         }
 
         this.age = this.props.store.clinicalDataPatient.result.find(attribute => attribute.clinicalAttributeId === 'AGE')?.value || '0';
+        this.ageDefault = this.age != '0' ? [{ label: this.age, value: this.age}] : null;
 
         this.state = {
             mutationSymbolItems: new Array<string>(),
@@ -342,8 +344,8 @@ class ClinicalTrialMatchTableOptions extends React.Component<
                                         });
                                     }
                                 }}
-                                defaultValue={[{ label: this.age, value: this.age }]}
-                                options={[{ label: this.age, value: this.age }]}
+                                defaultValue={this.ageDefault}
+                                options={this.ageDefault}
                             />
                         </div>
                     </DefaultTooltip>
