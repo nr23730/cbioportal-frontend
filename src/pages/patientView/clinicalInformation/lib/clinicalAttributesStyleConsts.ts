@@ -161,13 +161,6 @@ export const config: { [key: string]: configAttribute } = {
         primary: true,
         order: 6,
     },
-    TUMOR_MUTATIONAL_BURDEN: {
-        primary: true,
-        formatter: (t: string) => {
-            return `TMB: ${t}%`;
-        },
-        order: 6,
-    },
     TUMOR_STAGE_2009: {
         primary: true,
         order: 6,
