@@ -481,25 +481,32 @@ export default class PatientViewPage extends React.Component<
             const resourceDataById = this.patientViewPageStore
                 .resourceIdToResourceData.result!;
 
-            const tabs: JSX.Element[] = sorted.reduce((list, def) => {
-                const data = resourceDataById[def.resourceId];
-                if (data && data.length > 0) {
-                    list.push(
-                        <MSKTab
-                            key={getPatientViewResourceTabId(def.resourceId)}
-                            id={getPatientViewResourceTabId(def.resourceId)}
-                            linkText={def.displayName}
-                            onClickClose={this.closeResourceTab}
-                        >
-                            <ResourceTab
-                                resourceData={resourceDataById[def.resourceId]}
-                                urlWrapper={this.urlWrapper}
-                            />
-                        </MSKTab>
-                    );
-                }
-                return list;
-            }, [] as JSX.Element[]);
+            const tabs: JSX.Element[] = sorted.reduce(
+                (list, def) => {
+                    const data = resourceDataById[def.resourceId];
+                    if (data && data.length > 0) {
+                        list.push(
+                            <MSKTab
+                                key={getPatientViewResourceTabId(
+                                    def.resourceId
+                                )}
+                                id={getPatientViewResourceTabId(def.resourceId)}
+                                linkText={def.displayName}
+                                onClickClose={this.closeResourceTab}
+                            >
+                                <ResourceTab
+                                    resourceData={
+                                        resourceDataById[def.resourceId]
+                                    }
+                                    urlWrapper={this.urlWrapper}
+                                />
+                            </MSKTab>
+                        );
+                    }
+                    return list;
+                },
+                [] as JSX.Element[]
+            );
             return tabs;
         },
     });
@@ -1644,6 +1651,7 @@ export default class PatientViewPage extends React.Component<
                                             key={42}
                                             id={PatientViewPageTabs.Mtb}
                                             linkText="MTB"
+                                            unmountOnHide={false}
                                         >
                                             <MtbTable
                                                 patientId={
@@ -1722,6 +1730,7 @@ export default class PatientViewPage extends React.Component<
                                     key={8}
                                     id={PatientViewPageTabs.ClinicalTrialsGov}
                                     linkText="ClinicalTrialsGov"
+                                    unmountOnHide={false}
                                 >
                                     <ClinicalTrialMatchTable
                                         store={this.patientViewPageStore}
