@@ -83,6 +83,17 @@ import { Mutation } from 'cbioportal-ts-api-client';
 import ClinicalEventsTables from './timeline2/ClinicalEventsTables';
 import { ClinicalTrialMatchTable } from './clinicalTrialMatch/ClinicalTrialMatchTable';
 import MtbTable from './therapyRecommendation/MtbTable';
+import { OncoKB } from 'react-mutation-mapper';
+import {
+    getSampleNumericalClinicalDataValue,
+    OTHER_BIOMARKERS_CLINICAL_ATTR,
+} from 'shared/lib/StoreUtils';
+import { CLINICAL_ATTRIBUTE_ID_ENUM } from 'shared/constants';
+import {
+    OTHER_BIOMARKER_HUGO_SYMBOL,
+    OtherBiomarkersQueryType,
+} from 'react-mutation-mapper';
+import { OtherBiomarkerAnnotation } from 'pages/patientView/oncokb/OtherBiomarkerAnnotation';
 
 export interface IPatientViewPageProps {
     params: any; // react route
@@ -567,6 +578,35 @@ export default class PatientViewPage extends React.Component<
         this.urlWrapper.setResourceUrl(resource.url);
     }
 
+    getOncoKbOtherBiomarkerAnnotationComponent(
+        type: OtherBiomarkersQueryType,
+        sampleId: string
+    ) {
+        const numericalData = getSampleNumericalClinicalDataValue(
+            this.patientViewPageStore.clinicalDataForSamples.result,
+            sampleId,
+            OTHER_BIOMARKERS_CLINICAL_ATTR[type]
+        );
+
+        return this.patientViewPageStore.getOtherBiomarkersOncoKbData.result[
+            sampleId
+        ][type] && numericalData !== undefined ? (
+            <span>
+                ,{' '}
+                <OtherBiomarkerAnnotation
+                    type={type}
+                    isPublicOncoKbInstance={
+                        this.patientViewPageStore.usingPublicOncoKbInstance
+                    }
+                    annotation={
+                        this.patientViewPageStore.getOtherBiomarkersOncoKbData
+                            .result[sampleId][type]
+                    }
+                />
+            </span>
+        ) : null;
+    }
+
     @autobind
     @action
     private closeResourceTab(tabId: string) {
@@ -726,6 +766,22 @@ export default class PatientViewPage extends React.Component<
                                         uniqueSampleKey={sample.id}
                                     />
                                 )}
+
+                            {this.patientViewPageStore
+                                .getOtherBiomarkersOncoKbData.result[
+                                sample.id
+                            ] && (
+                                <>
+                                    {this.getOncoKbOtherBiomarkerAnnotationComponent(
+                                        OtherBiomarkersQueryType.MSIH,
+                                        sample.id
+                                    )}
+                                    {this.getOncoKbOtherBiomarkerAnnotationComponent(
+                                        OtherBiomarkersQueryType.TMBH,
+                                        sample.id
+                                    )}
+                                </>
+                            )}
                         </div>
                     );
                 }
