@@ -56,9 +56,9 @@ export type ITherapyRecommendationProps = {
     oncoKbAvailable: boolean;
     therapyRecommendations: ITherapyRecommendation[];
     containerWidth: number;
-    onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
-    onAddOrEdit: (therapyRecommendation?: ITherapyRecommendation) => boolean;
-    onReposition: (
+    onDelete?: (therapyRecommendation: ITherapyRecommendation) => boolean;
+    onAddOrEdit?: (therapyRecommendation?: ITherapyRecommendation) => boolean;
+    onReposition?: (
         therapyRecommendation: ITherapyRecommendation,
         newIndex: number
     ) => boolean;
@@ -139,6 +139,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                                 this.findIndex(therapyRecommendation) <= 0
                             }
                             onClick={() =>
+                                this.props.onReposition &&
                                 this.props.onReposition(
                                     therapyRecommendation,
                                     this.findIndex(therapyRecommendation) - 1
@@ -161,6 +162,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                                     this.props.therapyRecommendations.length - 1
                             }
                             onClick={() =>
+                                this.props.onReposition &&
                                 this.props.onReposition(
                                     therapyRecommendation,
                                     this.findIndex(therapyRecommendation) + 1
@@ -513,7 +515,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
     }
 
     public openDeleteForm(therapyRecommendation: ITherapyRecommendation) {
-        if (this.props.onDelete(therapyRecommendation))
+        if (this.props.onDelete && this.props.onDelete(therapyRecommendation))
             this.updateTherapyRecommendationTable();
     }
 
@@ -568,14 +570,15 @@ export default class MtbTherapyRecommendationTable extends React.Component<
             isTherapyRecommendationEmpty(newTherapyRecommendation)
         ) {
             if (this.backupTherapyRecommendation) {
-                this.props.onAddOrEdit(undefined);
+                this.props.onAddOrEdit && this.props.onAddOrEdit(undefined);
                 this.backupTherapyRecommendation = undefined;
             }
         } else {
             newTherapyRecommendation = setAuthorInTherapyRecommendation(
                 newTherapyRecommendation
             );
-            this.props.onAddOrEdit(newTherapyRecommendation);
+            this.props.onAddOrEdit &&
+                this.props.onAddOrEdit(newTherapyRecommendation);
         }
         this.showOncoKBForm = false;
         this.updateTherapyRecommendationTable();
