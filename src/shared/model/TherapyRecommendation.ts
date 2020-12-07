@@ -109,4 +109,5 @@ export interface IGeneticAlteration {
 export interface IDeletions {
     mtb: string[];
     therapyRecommendation: string[];
+    followUp: string[];
 }
