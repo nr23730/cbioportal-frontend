@@ -190,7 +190,11 @@ import {
     MutationalSignatureStableIdKeyWord,
 } from 'shared/lib/GenericAssayUtils/MutationalSignaturesUtils';
 
-import { IMtb, IDeletions } from '../../../shared/model/TherapyRecommendation';
+import {
+    IMtb,
+    IDeletions,
+    IFollowUp,
+} from '../../../shared/model/TherapyRecommendation';
 import {
     StudyListEntry,
     StudyList,
@@ -2275,9 +2279,21 @@ export class PatientViewPageStore {
         );
     };
 
+    updateFollowUps = (followUps: IFollowUp[]) => {
+        console.log('update');
+        // TODO
+
+        // updateMtbUsingPUT(
+        //     this.getSafePatientId(),
+        //     this.getMtbJsonStoreUrl(this.getSafePatientId()),
+        //     mtbs
+        // );
+    };
+
     readonly deletions: IDeletions = {
         mtb: [],
         therapyRecommendation: [],
+        followUp: [],
     };
 
     deleteMtbs = (deletions: IDeletions) => {
@@ -2287,6 +2303,17 @@ export class PatientViewPageStore {
             this.getMtbJsonStoreUrl(this.getSafePatientId()),
             deletions
         );
+    };
+
+    deleteFollowUps = (deletions: IDeletions) => {
+        console.log('delete');
+        // TODO
+
+        // deleteMtbUsingDELETE(
+        //     this.getSafePatientId(),
+        //     this.getMtbJsonStoreUrl(this.getSafePatientId()),
+        //     deletions
+        // );
     };
 
     private getMtbJsonStoreUrl(id: string) {

@@ -93,6 +93,7 @@ import { OtherBiomarkersQueryType } from 'react-mutation-mapper';
 import { OtherBiomarkerAnnotation } from 'pages/patientView/oncokb/OtherBiomarkerAnnotation';
 import MutationalSignaturesContainer from './mutationalSignatures/MutationalSignaturesContainer';
 import SampleSummaryList from './sampleHeader/SampleSummaryList';
+import FollowUpTable from './therapyRecommendation/FollowUpTable';
 
 export interface IPatientViewPageProps {
     params: any; // react route
@@ -393,6 +394,12 @@ export default class PatientViewPage extends React.Component<
         return true;
     }
 
+    private shouldShowFollowUpTab(
+        patientViewPageStore: PatientViewPageStore
+    ): boolean {
+        return true;
+    }
+
     @autobind
     private customTabMountCallback(div: HTMLDivElement, tab: any) {
         showCustomTab(
@@ -548,32 +555,25 @@ export default class PatientViewPage extends React.Component<
             const resourceDataById = this.patientViewPageStore
                 .resourceIdToResourceData.result!;
 
-            const tabs: JSX.Element[] = sorted.reduce(
-                (list, def) => {
-                    const data = resourceDataById[def.resourceId];
-                    if (data && data.length > 0) {
-                        list.push(
-                            <MSKTab
-                                key={getPatientViewResourceTabId(
-                                    def.resourceId
-                                )}
-                                id={getPatientViewResourceTabId(def.resourceId)}
-                                linkText={def.displayName}
-                                onClickClose={this.closeResourceTab}
-                            >
-                                <ResourceTab
-                                    resourceData={
-                                        resourceDataById[def.resourceId]
-                                    }
-                                    urlWrapper={this.urlWrapper}
-                                />
-                            </MSKTab>
-                        );
-                    }
-                    return list;
-                },
-                [] as JSX.Element[]
-            );
+            const tabs: JSX.Element[] = sorted.reduce((list, def) => {
+                const data = resourceDataById[def.resourceId];
+                if (data && data.length > 0) {
+                    list.push(
+                        <MSKTab
+                            key={getPatientViewResourceTabId(def.resourceId)}
+                            id={getPatientViewResourceTabId(def.resourceId)}
+                            linkText={def.displayName}
+                            onClickClose={this.closeResourceTab}
+                        >
+                            <ResourceTab
+                                resourceData={resourceDataById[def.resourceId]}
+                                urlWrapper={this.urlWrapper}
+                            />
+                        </MSKTab>
+                    );
+                }
+                return list;
+            }, [] as JSX.Element[]);
             return tabs;
         },
     });
@@ -1725,6 +1725,105 @@ export default class PatientViewPage extends React.Component<
                                                     this.patientViewPageStore
                                                         .pubMedCache
                                                 }
+                                            />
+                                        </MSKTab>
+                                    )}
+
+                                {this.shouldShowFollowUpTab(
+                                    this.patientViewPageStore
+                                ) &&
+                                    this.patientViewPageStore.mutationData
+                                        .isComplete &&
+                                    this.patientViewPageStore.discreteCNAData
+                                        .isComplete &&
+                                    (this.patientViewPageStore.oncoKbData
+                                        .isComplete ||
+                                        this.patientViewPageStore.oncoKbData
+                                            .isError) &&
+                                    (this.patientViewPageStore.mtbs
+                                        .isComplete ||
+                                        this.patientViewPageStore.mtbs
+                                            .isError) &&
+                                    (this.patientViewPageStore.cnaOncoKbData
+                                        .isComplete ||
+                                        this.patientViewPageStore.cnaOncoKbData
+                                            .isError) && (
+                                        <MSKTab
+                                            key={43}
+                                            id={PatientViewPageTabs.FollowUp}
+                                            linkText="Follow-up"
+                                            unmountOnHide={true}
+                                        >
+                                            <FollowUpTable
+                                                patientId={
+                                                    this.patientViewPageStore
+                                                        .patientId
+                                                }
+                                                mutations={
+                                                    this.patientViewPageStore
+                                                        .mutationData.result
+                                                }
+                                                indexedVariantAnnotations={
+                                                    this.patientViewPageStore
+                                                        .indexedVariantAnnotations
+                                                        .result
+                                                }
+                                                indexedMyVariantInfoAnnotations={
+                                                    this.patientViewPageStore
+                                                        .indexedMyVariantInfoAnnotations
+                                                        .result
+                                                }
+                                                cna={
+                                                    this.patientViewPageStore
+                                                        .discreteCNAData.result
+                                                }
+                                                clinicalData={this.patientViewPageStore.clinicalDataPatient.result.concat(
+                                                    this.patientViewPageStore
+                                                        .clinicalDataForSamples
+                                                        .result
+                                                )}
+                                                sampleManager={sampleManager}
+                                                oncoKbAvailable={
+                                                    AppConfig.serverConfig
+                                                        .show_oncokb &&
+                                                    !this.patientViewPageStore
+                                                        .cnaOncoKbData
+                                                        .isError &&
+                                                    !this.patientViewPageStore
+                                                        .oncoKbData.isError
+                                                }
+                                                mtbs={
+                                                    this.patientViewPageStore
+                                                        .mtbs.result
+                                                }
+                                                deletions={
+                                                    this.patientViewPageStore
+                                                        .deletions
+                                                }
+                                                containerWidth={
+                                                    WindowStore.size.width - 20
+                                                }
+                                                onDeleteData={
+                                                    this.patientViewPageStore
+                                                        .deleteFollowUps
+                                                }
+                                                onSaveData={
+                                                    this.patientViewPageStore
+                                                        .updateFollowUps
+                                                }
+                                                oncoKbData={
+                                                    this.patientViewPageStore
+                                                        .oncoKbData
+                                                }
+                                                cnaOncoKbData={
+                                                    this.patientViewPageStore
+                                                        .cnaOncoKbData
+                                                }
+                                                pubMedCache={
+                                                    this.patientViewPageStore
+                                                        .pubMedCache
+                                                }
+                                                followUps={[]}
                                             />
                                         </MSKTab>
                                     )}
