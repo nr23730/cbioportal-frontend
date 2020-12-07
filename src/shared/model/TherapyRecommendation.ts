@@ -22,6 +22,26 @@ export interface IRecommender {
     email?: string;
 }
 
+export interface IResponseCriteria {
+    cr: boolean;
+    pr: boolean;
+    sd: boolean;
+    pd: boolean;
+}
+
+export interface IFollowUp {
+    id: string;
+    therapyRecommendation: ITherapyRecommendation;
+    date: string;
+    author: string;
+    therapyRecommendationRealized: boolean;
+    sideEffect?: boolean;
+    responseMonthThree?: IResponseCriteria;
+    responseMonthSix?: IResponseCriteria;
+    responseMonthTwelve?: IResponseCriteria;
+    comment: string;
+}
+
 export interface IMtb {
     id: string;
     therapyRecommendations: ITherapyRecommendation[];
