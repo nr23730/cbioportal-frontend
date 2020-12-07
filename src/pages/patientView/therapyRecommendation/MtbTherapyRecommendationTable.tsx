@@ -66,6 +66,8 @@ export type ITherapyRecommendationProps = {
     cnaOncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     pubMedCache?: PubMedCache;
     isDisabled: boolean;
+    showButtons: boolean;
+    columnVisibility?: { [columnId: string]: boolean };
 };
 
 export type ITherapyRecommendationState = {
@@ -662,54 +664,62 @@ export default class MtbTherapyRecommendationTable extends React.Component<
     render() {
         return (
             <div>
-                <p className={styles.edit}>
-                    <Button
-                        type="button"
-                        className={'btn btn-default ' + styles.addButton}
-                        disabled={this.props.isDisabled}
-                        onClick={() => this.openAddForm()}
-                    >
-                        <i
-                            className={`fa fa-plus ${styles.marginLeft}`}
-                            aria-hidden="true"
-                        ></i>{' '}
-                        Add
-                    </Button>
-                    <If condition={this.props.oncoKbAvailable}>
-                        <Then>
+                <If condition={this.props.showButtons}>
+                    <Then>
+                        <p className={styles.edit}>
                             <Button
                                 type="button"
                                 className={
-                                    'btn btn-default ' + styles.addOncoKbButton
+                                    'btn btn-default ' + styles.addButton
                                 }
                                 disabled={this.props.isDisabled}
-                                onClick={() => this.openAddOncoKbForm()}
+                                onClick={() => this.openAddForm()}
                             >
                                 <i
                                     className={`fa fa-plus ${styles.marginLeft}`}
                                     aria-hidden="true"
                                 ></i>{' '}
-                                Add from OncoKB
+                                Add
                             </Button>
-                        </Then>
-                        <Else>
-                            <Button
-                                type="button"
-                                className={
-                                    'btn btn-default ' + styles.addOncoKbButton
-                                }
-                                disabled={true}
-                            >
-                                <i
-                                    className={`fa fa-exclamation-triangle ${styles.marginLeft}`}
-                                    aria-hidden="true"
-                                ></i>{' '}
-                                OncoKB unavailable
-                            </Button>
-                        </Else>
-                    </If>
-                    {/* <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button> */}
-                </p>
+                            <If condition={this.props.oncoKbAvailable}>
+                                <Then>
+                                    <Button
+                                        type="button"
+                                        className={
+                                            'btn btn-default ' +
+                                            styles.addOncoKbButton
+                                        }
+                                        disabled={this.props.isDisabled}
+                                        onClick={() => this.openAddOncoKbForm()}
+                                    >
+                                        <i
+                                            className={`fa fa-plus ${styles.marginLeft}`}
+                                            aria-hidden="true"
+                                        ></i>{' '}
+                                        Add from OncoKB
+                                    </Button>
+                                </Then>
+                                <Else>
+                                    <Button
+                                        type="button"
+                                        className={
+                                            'btn btn-default ' +
+                                            styles.addOncoKbButton
+                                        }
+                                        disabled={true}
+                                    >
+                                        <i
+                                            className={`fa fa-exclamation-triangle ${styles.marginLeft}`}
+                                            aria-hidden="true"
+                                        ></i>{' '}
+                                        OncoKB unavailable
+                                    </Button>
+                                </Else>
+                            </If>
+                            {/* <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button> */}
+                        </p>
+                    </Then>
+                </If>
                 {this.selectedTherapyRecommendation && (
                     <TherapyRecommendationForm
                         show={!!this.selectedTherapyRecommendation}
@@ -765,8 +775,9 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                     data={this.props.therapyRecommendations}
                     columns={this._columns}
                     showCopyDownload={false}
-                    // showFilter={false}
+                    showFilter={false}
                     showColumnVisibility={false}
+                    columnVisibility={this.props.columnVisibility} //{{"Edit": false, "Comment": true}}
                 />
                 {/* <SimpleCopyDownloadControls
                     downloadData={() =>
