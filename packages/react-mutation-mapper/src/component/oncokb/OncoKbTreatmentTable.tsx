@@ -185,6 +185,7 @@ export default class OncoKbTreatmentTable extends React.Component<
                         href={
                             'http://cancerdrugs.s3-website.eu-central-1.amazonaws.com'
                         }
+                        target={'_blank'}
                     >
                         Search on cancerdrugs
                     </a>
@@ -199,6 +200,7 @@ export default class OncoKbTreatmentTable extends React.Component<
                             'http://cancerdrugs.s3-website.eu-central-1.amazonaws.com/drug/' +
                             drugName
                         }
+                        target={'_blank'}
                     >
                         More info on cancerdrugs
                     </a>
@@ -215,6 +217,7 @@ export default class OncoKbTreatmentTable extends React.Component<
                             'http://cancerdrugs.s3-website.eu-central-1.amazonaws.com/drug/' +
                             drugName
                         }
+                        target={'_blank'}
                     >
                         More info on cancerdrugs
                     </a>
