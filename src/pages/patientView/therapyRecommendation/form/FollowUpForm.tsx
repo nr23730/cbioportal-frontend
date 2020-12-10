@@ -24,13 +24,6 @@ export default class FollowUpForm extends React.Component<
     IFollowUpFormProps,
     {}
 > {
-    private indicationSort(a: string, b: string): number {
-        // Increase ascii code of parentheses to put these entries after text in the sort order
-        a = a.trim().replace('(', '{');
-        b = b.trim().replace('(', '{');
-        return a < b ? -1 : 1;
-    }
-
     public render() {
         let selectedTherapyRecommendation: ITherapyRecommendation;
         const groupStyles = {
@@ -72,9 +65,13 @@ export default class FollowUpForm extends React.Component<
                                             therapyRecommendation,
                                             therapyRecommendationIndex
                                         ) => ({
-                                            label: therapyRecommendation.treatments.map(
-                                                treatment => treatment.name
-                                            ),
+                                            label: therapyRecommendation
+                                                .treatments.length
+                                                ? therapyRecommendation.treatments.map(
+                                                      treatment =>
+                                                          treatment.name
+                                                  )
+                                                : 'No treatment specified',
                                             value: {
                                                 mtb,
                                                 therapyRecommendation,
