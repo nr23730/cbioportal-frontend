@@ -221,6 +221,9 @@ import {
     fetchMtbsUsingGET,
     updateMtbUsingPUT,
     deleteMtbUsingDELETE,
+    fetchFollowupUsingGET,
+    updateFollowupUsingPUT,
+    deleteFollowupUsingDELETE,
 } from 'shared/api/TherapyRecommendationAPI';
 import { RecruitingStatus } from 'shared/enums/ClinicalTrialsGovRecruitingStatus';
 import { ageAsNumber } from '../clinicalTrialMatch/utils/AgeSexConverter';
@@ -2270,6 +2273,19 @@ export class PatientViewPageStore {
         []
     );
 
+    readonly followups = remoteData<IFollowUp[]>(
+        {
+            invoke: () => {
+                return fetchFollowupUsingGET(
+                    this.getMtbJsonStoreUrl(
+                        'followup/' + this.getSafePatientId()
+                    )
+                );
+            },
+        },
+        []
+    );
+
     updateMtbs = (mtbs: IMtb[]) => {
         console.log('update');
         updateMtbUsingPUT(
@@ -2281,13 +2297,12 @@ export class PatientViewPageStore {
 
     updateFollowUps = (followUps: IFollowUp[]) => {
         console.log('update');
-        // TODO
 
-        // updateMtbUsingPUT(
-        //     this.getSafePatientId(),
-        //     this.getMtbJsonStoreUrl(this.getSafePatientId()),
-        //     mtbs
-        // );
+        updateFollowupUsingPUT(
+            this.getSafePatientId(),
+            this.getMtbJsonStoreUrl('followup/' + this.getSafePatientId()),
+            followUps
+        );
     };
 
     readonly deletions: IDeletions = {
@@ -2307,13 +2322,11 @@ export class PatientViewPageStore {
 
     deleteFollowUps = (deletions: IDeletions) => {
         console.log('delete');
-        // TODO
-
-        // deleteMtbUsingDELETE(
-        //     this.getSafePatientId(),
-        //     this.getMtbJsonStoreUrl(this.getSafePatientId()),
-        //     deletions
-        // );
+        deleteFollowupUsingDELETE(
+            this.getSafePatientId(),
+            this.getMtbJsonStoreUrl('followup/' + this.getSafePatientId()),
+            deletions
+        );
     };
 
     private getMtbJsonStoreUrl(id: string) {
