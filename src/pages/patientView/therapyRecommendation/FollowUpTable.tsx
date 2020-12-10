@@ -34,6 +34,7 @@ import Select from 'react-select';
 import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';
 import FollowUpForm from './form/FollowUpForm';
 import AppConfig from 'appConfig';
+import { Collapse } from 'react-collapse';
 
 export type IFollowUpProps = {
     patientId: string;
@@ -151,6 +152,9 @@ export default class FollowUpTable extends React.Component<
                     >
                         <span style={{ marginTop: '-2px' }}>Realized</span>
                     </LabeledCheckbox>
+                    <Collapse isOpened={followUp.therapyRecommendationRealized}>
+                        <span>Tumor response criteria</span>
+                    </Collapse>
                     <textarea
                         title="Comments"
                         rows={4}
