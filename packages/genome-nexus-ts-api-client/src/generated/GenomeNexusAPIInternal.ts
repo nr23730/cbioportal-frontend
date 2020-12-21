@@ -2347,9 +2347,11 @@ export default class GenomeNexusAPIInternal {
         $queryParameters ? : any
     }): string {
         let queryParameters: any = {};
-        let path = '/signal/search/{keyword}';
+        let path = '/signal/search';
+        if (parameters['keyword'] !== undefined) {
+            queryParameters['keyword'] = parameters['keyword'];
+        }
 
-        path = path.replace('{keyword}', parameters['keyword'] + '');
         if (parameters['limit'] !== undefined) {
             queryParameters['limit'] = parameters['limit'];
         }
@@ -2368,8 +2370,8 @@ export default class GenomeNexusAPIInternal {
      * Performs search by gene, protein change, variant or region.
      * @method
      * @name GenomeNexusAPIInternal#searchSignalByKeywordGETUsingGET
-     * @param {string} keyword - keyword. For example BRCA; 13:32906640-32906640; 13:g.32890665G>A
-     * @param {integer} limit - Max number matching results to return
+     * @param {string} keyword - keyword. For example BRCA; BRAF V600; 13:32906640-32906640; 13:g.32890665G>A
+     * @param {integer} limit - Max number of matching results to return
      */
     searchSignalByKeywordGETUsingGETWithHttpInfo(parameters: {
         'keyword': string,
@@ -2380,7 +2382,7 @@ export default class GenomeNexusAPIInternal {
         const domain = parameters.$domain ? parameters.$domain : this.domain;
         const errorHandlers = this.errorHandlers;
         const request = this.request;
-        let path = '/signal/search/{keyword}';
+        let path = '/signal/search';
         let body: any;
         let queryParameters: any = {};
         let headers: any = {};
@@ -2389,7 +2391,9 @@ export default class GenomeNexusAPIInternal {
             headers['Accept'] = 'application/json';
             headers['Content-Type'] = 'application/json';
 
-            path = path.replace('{keyword}', parameters['keyword'] + '');
+            if (parameters['keyword'] !== undefined) {
+                queryParameters['keyword'] = parameters['keyword'];
+            }
 
             if (parameters['keyword'] === undefined) {
                 reject(new Error('Missing required  parameter: keyword'));
@@ -2416,8 +2420,8 @@ export default class GenomeNexusAPIInternal {
      * Performs search by gene, protein change, variant or region.
      * @method
      * @name GenomeNexusAPIInternal#searchSignalByKeywordGETUsingGET
-     * @param {string} keyword - keyword. For example BRCA; 13:32906640-32906640; 13:g.32890665G>A
-     * @param {integer} limit - Max number matching results to return
+     * @param {string} keyword - keyword. For example BRCA; BRAF V600; 13:32906640-32906640; 13:g.32890665G>A
+     * @param {integer} limit - Max number of matching results to return
      */
     searchSignalByKeywordGETUsingGET(parameters: {
             'keyword': string,
