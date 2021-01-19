@@ -2,7 +2,14 @@ import * as React from 'react';
 import { observer, Observer } from 'mobx-react';
 import autobind from 'autobind-decorator';
 import LoadingIndicator from 'shared/components/loadingIndicator/LoadingIndicator';
-import { action, autorun, computed, IReactionDisposer, observable } from 'mobx';
+import {
+    action,
+    autorun,
+    computed,
+    IReactionDisposer,
+    makeObservable,
+    observable,
+} from 'mobx';
 import { SimpleGetterLazyMobXTableApplicationDataStore } from 'shared/lib/ILazyMobXTableApplicationDataStore';
 import ClinicalDataEnrichmentsTable from './ClinicalDataEnrichmentsTable';
 import _ from 'lodash';
@@ -29,6 +36,7 @@ import { scatterPlotSize } from 'shared/components/plots/PlotUtils';
 import {
     CLINICAL_TAB_NOT_ENOUGH_GROUPS_MSG,
     ClinicalDataEnrichmentWithQ,
+    getStatisticalCautionInfo,
 } from './GroupComparisonUtils';
 import MultipleCategoryBarPlot from '../../shared/components/plots/MultipleCategoryBarPlot';
 import ReactSelect from 'react-select1';
@@ -39,6 +47,7 @@ import ErrorMessage from '../../shared/components/ErrorMessage';
 import ComplexKeyMap from 'shared/lib/complexKeyDataStructures/ComplexKeyMap';
 import { Sample } from 'cbioportal-ts-api-client';
 import ComparisonStore from '../../shared/lib/comparison/ComparisonStore';
+import { createSurvivalAttributeIdsDict } from 'pages/resultsView/survival/SurvivalUtil';
 
 export interface IClinicalDataProps {
     store: ComparisonStore;
@@ -101,6 +110,11 @@ export default class ClinicalData extends React.Component<
     IClinicalDataProps,
     {}
 > {
+    constructor(props: IClinicalDataProps) {
+        super(props);
+        makeObservable(this);
+    }
+
     @observable.ref highlightedRow: ClinicalDataEnrichmentWithQ | undefined;
 
     private scrollPane: HTMLDivElement;
@@ -131,7 +145,10 @@ export default class ClinicalData extends React.Component<
                 );
             } else {
                 content.push(
-                    <OverlapExclusionIndicator store={this.props.store} />
+                    <div className={'tabMessageContainer'}>
+                        {getStatisticalCautionInfo()}
+                        <OverlapExclusionIndicator store={this.props.store} />
+                    </div>
                 );
                 content.push(this.overlapUI.component);
             }
@@ -179,7 +196,21 @@ export default class ClinicalData extends React.Component<
 
     private tableDataStore = new ClinicalDataEnrichmentStore(
         () => {
-            return this.props.store.clinicalDataEnrichmentsWithQValues.result;
+            // ClinicalData is only used in Group Comparison Page and Group Comparison Tab
+            // And survival related attributes are used to create KM plots in survival tab
+            // We are doing the proper statistical tests in the survival tab and the used tests for the clinical tab are not appropriate for that type of data
+            // There is no need to still keep them in clinical tab
+            // So, exclude them from the data store
+            const survivalAttributeIdsDict = createSurvivalAttributeIdsDict(
+                this.props.store.survivalClinicalAttributesPrefix.result || []
+            );
+            return this.props.store.clinicalDataEnrichmentsWithQValues.result.filter(
+                d =>
+                    !(
+                        d.clinicalAttribute.clinicalAttributeId in
+                        survivalAttributeIdsDict
+                    )
+            );
         },
         () => {
             return this.highlightedRow;
@@ -203,8 +234,7 @@ export default class ClinicalData extends React.Component<
     @observable swapAxes = false;
     @observable horizontalBars = false;
 
-    @autobind
-    @action
+    @action.bound
     private onClickLogScale() {
         this.logScale = !this.logScale;
         if (this.logScale) {
@@ -220,14 +250,12 @@ export default class ClinicalData extends React.Component<
         }
     }
 
-    @autobind
-    @action
+    @action.bound
     private onClickSwapAxes() {
         this.swapAxes = !this.swapAxes;
     }
 
-    @autobind
-    @action
+    @action.bound
     private onClickhorizontalBars() {
         this.horizontalBars = !this.horizontalBars;
     }
@@ -535,8 +563,7 @@ export default class ClinicalData extends React.Component<
 
     @observable plotType: PlotType = PlotType.PercentageStackedBar;
 
-    @autobind
-    @action
+    @action.bound
     private onPlotTypeSelect(option: any) {
         this.plotType = option.value;
     }

@@ -24,7 +24,13 @@ import {
 import client from '../../../shared/api/cbioportalClientInstance';
 import internalClient from '../../../shared/api/cbioportalInternalClientInstance';
 import oncokbClient from '../../../shared/api/oncokbClientInstance';
-import { action, computed, observable, runInAction } from 'mobx';
+import {
+    computed,
+    observable,
+    action,
+    runInAction,
+    makeObservable,
+} from 'mobx';
 import {
     getBrowserWindow,
     remoteData,
@@ -222,6 +228,7 @@ import { RecruitingStatus } from 'shared/enums/ClinicalTrialsGovRecruitingStatus
 import { ageAsNumber } from '../clinicalTrialMatch/utils/AgeSexConverter';
 
 type PageMode = 'patient' | 'sample';
+type ResourceId = string;
 
 export async function checkForTissueImage(patientId: string): Promise<boolean> {
     if (/TCGA/.test(patientId) === false) {
@@ -357,7 +364,8 @@ class ClinicalTrialsSearchParams {
 
 export class PatientViewPageStore {
     constructor(private appStore: AppStore) {
-        labelMobxPromises(this);
+        makeObservable(this);
+        //labelMobxPromises(this);
         this.internalClient = internalClient;
     }
 
@@ -397,13 +405,12 @@ export class PatientViewPageStore {
 
     @observable _sampleId = '';
 
-    private openResourceTabMap = observable.map<boolean>();
+    private openResourceTabMap = observable.map<ResourceId, boolean>();
     @autobind
     public isResourceTabOpen(resourceId: string) {
         return !!this.openResourceTabMap.get(resourceId);
     }
-    @autobind
-    @action
+    @action.bound
     public setResourceTabOpen(resourceId: string, open: boolean) {
         this.openResourceTabMap.set(resourceId, open);
     }
@@ -2126,21 +2133,21 @@ export class PatientViewPageStore {
         this._patientId = newId;
     }
 
-    @cached get mrnaExprRankCache() {
+    @cached @computed get mrnaExprRankCache() {
         return new MrnaExprRankCache(this.mrnaRankMolecularProfileId.result);
     }
 
-    @cached get variantCountCache() {
+    @cached @computed get variantCountCache() {
         return new VariantCountCache(this.mutationMolecularProfileId.result);
     }
 
-    @cached get discreteCNACache() {
+    @cached @computed get discreteCNACache() {
         return new DiscreteCNACache(
             this.studyToMolecularProfileDiscrete.result
         );
     }
 
-    @cached get genomeNexusCache() {
+    @cached @computed get genomeNexusCache() {
         return new GenomeNexusCache(
             createVariantAnnotationsByMutationFetcher(
                 ['annotation_summary'],
@@ -2149,7 +2156,7 @@ export class PatientViewPageStore {
         );
     }
 
-    @cached get genomeNexusMutationAssessorCache() {
+    @cached @computed get genomeNexusMutationAssessorCache() {
         return new GenomeNexusMutationAssessorCache(
             createVariantAnnotationsByMutationFetcher(
                 ['annotation_summary', 'mutation_assessor'],
@@ -2158,23 +2165,23 @@ export class PatientViewPageStore {
         );
     }
 
-    @cached get pubMedCache() {
+    @cached @computed get pubMedCache() {
         return new PubMedCache();
     }
 
-    @cached get copyNumberCountCache() {
+    @cached @computed get copyNumberCountCache() {
         return new CopyNumberCountCache(this.molecularProfileIdDiscrete.result);
     }
 
-    @cached get cancerTypeCache() {
+    @cached @computed get cancerTypeCache() {
         return new CancerTypeCache();
     }
 
-    @cached get mutationCountCache() {
+    @cached @computed get mutationCountCache() {
         return new MutationCountCache();
     }
 
-    @cached get downloadDataFetcher() {
+    @cached @computed get downloadDataFetcher() {
         return new MutationTableDownloadDataFetcher(this.mutationData);
     }
 
@@ -2766,6 +2773,7 @@ export class PatientViewPageStore {
             this.getMutationPutativeDriverInfo,
             this.entrezGeneIdToGene,
             this.getOncoKbCnaAnnotationForOncoprint,
+            this.getDiscreteCNAPutativeDriverInfo,
         ],
         invoke: () =>
             Promise.resolve(

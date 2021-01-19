@@ -3,11 +3,8 @@ import * as _ from 'lodash';
 import { Sample } from 'cbioportal-ts-api-client';
 import { observer } from 'mobx-react';
 import styles from './styles.module.scss';
-import { action, computed, observable } from 'mobx';
-import { ButtonGroup, Modal, Radio } from 'react-bootstrap';
-import { CustomChart } from '../../StudyViewPageStore';
-import ErrorBox from '../../../../shared/components/errorBox/ErrorBox';
-import { STUDY_VIEW_CONFIG } from '../../StudyViewConfig';
+import { action, computed, makeObservable, observable } from 'mobx';
+import { ButtonGroup, Radio } from 'react-bootstrap';
 import {
     DEFAULT_GROUP_NAME_WITHOUT_USER_INPUT,
     CodeEnum,
@@ -18,12 +15,18 @@ import {
 import autobind from 'autobind-decorator';
 import { Collapse } from 'react-collapse';
 import { serializeEvent } from '../../../../shared/lib/tracking';
-import { ClinicalDataType, ClinicalDataTypeEnum } from '../../StudyViewUtils';
+import {
+    ClinicalDataType,
+    ClinicalDataTypeEnum,
+    DataType,
+} from '../../StudyViewUtils';
+import { CustomChart } from 'shared/api/sessionServiceAPI';
 
 export interface ICustomCaseSelectionProps {
     allSamples: Sample[];
     selectedSamples: Sample[];
     submitButtonText?: string;
+    disableSubmitButton?: boolean;
     onSubmit: (chart: CustomChart) => void;
     queriedStudies: string[];
     disableGrouping?: boolean;
@@ -48,11 +51,16 @@ export default class CustomCaseSelection extends React.Component<
     private validateContent: boolean = false;
     private chartNameValidation: ValidationResult = { warning: [], error: [] };
     @observable dataFormatCollapsed: boolean = true;
-    @observable chartName: string;
+    @observable.ref chartName: string;
     @observable showCaseIds: boolean = false;
     @observable caseIdsMode: ClinicalDataType = ClinicalDataTypeEnum.SAMPLE;
     @observable content: string = '';
     @observable validContent: string = '';
+
+    constructor(props: any) {
+        super(props);
+        makeObservable(this);
+    }
 
     public static defaultProps = {
         submitButtonText: 'Submit',
@@ -86,22 +94,24 @@ export default class CustomCaseSelection extends React.Component<
 
     @computed
     get newChartInfo(): CustomChart {
+        const displayName = this.chartName
+            ? this.chartName
+            : this.props.getDefaultChartName
+            ? this.props.getDefaultChartName()
+            : '';
         return {
-            name: this.chartName
-                ? this.chartName
-                : this.props.getDefaultChartName
-                ? this.props.getDefaultChartName()
-                : '',
+            displayName,
+            description: displayName,
+            datatype: DataType.STRING,
             patientAttribute: this.caseIdsMode === ClinicalDataTypeEnum.PATIENT,
-            groups:
+            data:
                 this.result.validationResult.error.length === 0
-                    ? this.result.groups
+                    ? this.result.data
                     : [],
-        };
+        } as CustomChart;
     }
 
-    @autobind
-    @action
+    @action.bound
     onClick(selectMode: SelectMode) {
         let selectedCases;
         if (selectMode === SelectMode.SELECTED) {
@@ -134,15 +144,13 @@ export default class CustomCaseSelection extends React.Component<
         this.validContent = this.content;
     }
 
-    @autobind
-    @action
+    @action.bound
     onChange(newContent: string) {
         this.validContent = newContent;
         this.validateContent = true;
     }
 
-    @autobind
-    @action
+    @action.bound
     onChartNameChange(event: any) {
         this.chartName = event.currentTarget.value;
         const validChartName = this.props.isChartNameValid
@@ -153,7 +161,7 @@ export default class CustomCaseSelection extends React.Component<
                 error: [
                     {
                         code: CodeEnum.INVALID,
-                        message: new Error('Chart name exists.'),
+                        message: new Error('Custom data exists.'),
                     },
                 ],
                 warning: [],
@@ -166,14 +174,12 @@ export default class CustomCaseSelection extends React.Component<
         }
     }
 
-    @autobind
-    @action
+    @action.bound
     onAddChart() {
         this.props.onSubmit(this.newChartInfo);
     }
 
-    @autobind
-    @action
+    @action.bound
     protected handleDataFormatToggle() {
         this.dataFormatCollapsed = !this.dataFormatCollapsed;
     }
@@ -181,28 +187,36 @@ export default class CustomCaseSelection extends React.Component<
     @computed
     get addChartButtonDisabled() {
         return (
+            !!this.props.disableSubmitButton ||
             this.result.validationResult.error.length > 0 ||
-            this.newChartInfo.groups.length === 0 ||
+            this.newChartInfo.data.length === 0 ||
             this.chartNameValidation.error.length > 0
         );
     }
 
     @computed
+    get exampleData() {
+        const caseIdentifier =
+            this.caseIdsMode === ClinicalDataTypeEnum.SAMPLE
+                ? 'sample_id'
+                : 'patient_id';
+        return `Example:\nstudy_id:${caseIdentifier}1${
+            this.props.disableGrouping ? '' : ' value1'
+        }\nstudy_id:${caseIdentifier}2${
+            this.props.disableGrouping ? '' : ' value2'
+        }`;
+    }
+
+    @computed
     get dataFormatContent() {
         return (
-            <span>
-                Each row can have two columns separated by space or tab:
-                <br />
-                1) study_id:
-                {this.caseIdsMode === ClinicalDataTypeEnum.SAMPLE
-                    ? 'sample_id '
-                    : 'patient_id '}
-                and
-                <br />
-                2) group_name of your choice
-                <br />
-                group_name is optional if there is only one group.
-            </span>
+            `Each row must have two columns separated by space or tab:` +
+            `\n1) study_id: ${
+                this.caseIdsMode === ClinicalDataTypeEnum.SAMPLE
+                    ? 'sample_id'
+                    : 'patient_id'
+            } and` +
+            `\n2) custom data (currently only support categorical data)`
         );
     }
 
@@ -294,7 +308,9 @@ export default class CustomCaseSelection extends React.Component<
                     </div>
                     <Collapse isOpened={!this.dataFormatCollapsed}>
                         <div style={{ marginTop: '5px' }}>
-                            {this.dataFormatContent}
+                            <span style={{ whiteSpace: 'pre-line' }}>
+                                {this.dataFormatContent}
+                            </span>
                         </div>
                     </Collapse>
                 </span>
@@ -303,6 +319,7 @@ export default class CustomCaseSelection extends React.Component<
                     className="form-control"
                     rows={5}
                     value={this.content}
+                    placeholder={this.exampleData}
                     onChange={event => {
                         this.content = event.currentTarget.value;
                         _.delay(() => {
@@ -328,7 +345,7 @@ export default class CustomCaseSelection extends React.Component<
                 <div className={styles.operations}>
                     {!this.props.disableGrouping && (
                         <input
-                            placeholder={'Chart name (optional)'}
+                            placeholder={'Title (optional)'}
                             style={{ width: '200px' }}
                             type="text"
                             onInput={this.onChartNameChange}

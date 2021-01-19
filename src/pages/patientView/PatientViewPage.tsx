@@ -27,7 +27,7 @@ import ClinicalInformationSamples from './clinicalInformation/ClinicalInformatio
 import { inject, Observer, observer } from 'mobx-react';
 import { getSpanElementsFromCleanData } from './clinicalInformation/lib/clinicalAttributesUtil.js';
 import CopyNumberTableWrapper from './copyNumberAlterations/CopyNumberTableWrapper';
-import { action, computed, observable, reaction } from 'mobx';
+import { action, computed, observable, reaction, makeObservable } from 'mobx';
 import Timeline from './timeline/Timeline';
 import { default as PatientViewMutationTable } from './mutation/PatientViewMutationTable';
 import PathologyReport from './pathologyReport/PathologyReport';
@@ -74,6 +74,7 @@ import {
     getPatientViewResourceTabId,
     PatientViewPageTabs,
 } from './PatientViewPageTabs';
+import PatientViewPathwayMapper from './pathwayMapper/PatientViewPathwayMapper';
 import ResourcesTab, { RESOURCES_TAB_NAME } from './resources/ResourcesTab';
 import { MakeMobxView } from '../../shared/components/MobxView';
 import ResourceTab from '../../shared/components/resources/ResourceTab';
@@ -134,6 +135,7 @@ export default class PatientViewPage extends React.Component<
 
     constructor(props: IPatientViewPageProps) {
         super(props);
+        makeObservable(this);
         this.urlWrapper = new PatientViewUrlWrapper(props.routing);
         this.patientViewPageStore = new PatientViewPageStore(
             this.props.appStore
@@ -252,8 +254,7 @@ export default class PatientViewPage extends React.Component<
         return AppConfig.serverConfig.patient_view_use_legacy_timeline;
     }
 
-    @autobind
-    @action
+    @action.bound
     public handleSampleClick(
         id: string,
         e: React.MouseEvent<HTMLAnchorElement>
@@ -266,8 +267,7 @@ export default class PatientViewPage extends React.Component<
         // namely that href will open in a new window/tab
     }
 
-    @autobind
-    @action
+    @action.bound
     private handlePatientClick(id: string) {
         let values = id.split(':');
         if (values.length == 2) {
@@ -474,8 +474,7 @@ export default class PatientViewPage extends React.Component<
         );
     }
 
-    @autobind
-    @action
+    @action.bound
     toggleGenePanelModal(genePanelId?: string | undefined) {
         this.genePanelModal = {
             isOpen: !this.genePanelModal.isOpen,
@@ -571,8 +570,7 @@ export default class PatientViewPage extends React.Component<
         },
     });
 
-    @autobind
-    @action
+    @action.bound
     private openResource(resource: ResourceData) {
         // first we make the resource tab visible
         this.patientViewPageStore.setResourceTabOpen(resource.resourceId, true);
@@ -584,8 +582,7 @@ export default class PatientViewPage extends React.Component<
         this.urlWrapper.setResourceUrl(resource.url);
     }
 
-    @autobind
-    @action
+    @action.bound
     private closeResourceTab(tabId: string) {
         const resourceId = extractResourceIdFromTabId(tabId);
         if (resourceId) {
@@ -603,8 +600,7 @@ export default class PatientViewPage extends React.Component<
         }
     }
 
-    @autobind
-    @action
+    @action.bound
     private onMutationalSignatureVersionChange(version: string) {
         this.patientViewPageStore.setMutationalSignaturesVersion(version);
     }
@@ -1477,6 +1473,27 @@ export default class PatientViewPage extends React.Component<
                                             />
                                         </MSKTab>
                                     )}
+                                <MSKTab
+                                    key={8}
+                                    id={PatientViewPageTabs.PathwayMapper}
+                                    linkText={'Pathways'}
+                                >
+                                    {this.patientViewPageStore.geneticTrackData
+                                        .isComplete &&
+                                    this.patientViewPageStore
+                                        .mergedMutationDataIncludingUncalledFilteredByGene ? (
+                                        <PatientViewPathwayMapper
+                                            store={this.patientViewPageStore}
+                                            sampleManager={sampleManager}
+                                        />
+                                    ) : (
+                                        <LoadingIndicator
+                                            isLoading={true}
+                                            size={'big'}
+                                            center={true}
+                                        />
+                                    )}
+                                </MSKTab>
 
                                 <MSKTab
                                     key={2}

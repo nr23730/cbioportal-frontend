@@ -1,7 +1,7 @@
 import * as React from 'react';
 import styles from './styles.module.scss';
 import { observer } from 'mobx-react';
-import { action, computed, observable } from 'mobx';
+import { action, computed, observable, makeObservable } from 'mobx';
 import _ from 'lodash';
 import {
     ChartControls,
@@ -11,7 +11,7 @@ import {
     StudyViewPageStore,
     SurvivalType,
 } from 'pages/studyView/StudyViewPageStore';
-import { ClinicalDataBin, StudyViewFilter } from 'cbioportal-ts-api-client';
+import { StudyViewFilter } from 'cbioportal-ts-api-client';
 import PieChart from 'pages/studyView/charts/pieChart/PieChart';
 import classnames from 'classnames';
 import ClinicalTable from 'pages/studyView/table/ClinicalTable';
@@ -33,6 +33,7 @@ import {
     MutationCountVsCnaYBinsMin,
     SpecialChartsUniqueKeyEnum,
     NumericalGroupComparisonType,
+    DataBin,
 } from '../StudyViewUtils';
 import { GenePanel } from 'cbioportal-ts-api-client';
 import { makeSurvivalChartData } from './survival/StudyViewSurvivalUtils';
@@ -149,6 +150,8 @@ export class ChartContainer extends React.Component<IChartContainerProps, {}> {
     constructor(props: IChartContainerProps) {
         super(props);
 
+        makeObservable(this);
+
         this.chartType = this.props.chartType;
 
         this.handlers = {
@@ -164,7 +167,7 @@ export class ChartContainer extends React.Component<IChartContainerProps, {}> {
             onChangeSelectedRows: action((values: string[]) => {
                 this.selectedRowsKeys = values;
             }),
-            onDataBinSelection: action((dataBins: ClinicalDataBin[]) => {
+            onDataBinSelection: action((dataBins: DataBin[]) => {
                 this.props.onDataBinSelection(this.props.chartMeta, dataBins);
             }),
             onToggleLogScale: action(() => {
@@ -209,6 +212,8 @@ export class ChartContainer extends React.Component<IChartContainerProps, {}> {
                 this.props.onDeleteChart(this.props.chartMeta);
             },
         };
+
+        makeObservable(this);
     }
 
     public toSVGDOMNode(): SVGElement {
@@ -252,8 +257,7 @@ export class ChartContainer extends React.Component<IChartContainerProps, {}> {
         } as ChartControls;
     }
 
-    @autobind
-    @action
+    @action.bound
     changeChartType(chartType: ChartType) {
         this.chartType = chartType;
         this.handlers.onChangeChartType(chartType);
@@ -268,8 +272,7 @@ export class ChartContainer extends React.Component<IChartContainerProps, {}> {
         );
     }
 
-    @autobind
-    @action
+    @action.bound
     openComparisonPage(params?: {
         // for numerical clinical attributes
         categorizationType?: NumericalGroupComparisonType;
@@ -290,51 +293,7 @@ export class ChartContainer extends React.Component<IChartContainerProps, {}> {
                                     .result! as ClinicalDataCountSummary[],
                             }
                         );
-                    const values = this.props.promise
-                        .result! as ClinicalDataCountSummary[];
-                    if (
-                        doesChartHaveComparisonGroupsLimit(
-                            this.props.chartMeta
-                        ) &&
-                        values.length > MAX_GROUPS_IN_SESSION
-                    ) {
-                        this.props.setComparisonConfirmationModal(hideModal => {
-                            return (
-                                <Modal
-                                    show={true}
-                                    onHide={() => {}}
-                                    backdrop="static"
-                                >
-                                    <Modal.Body>
-                                        Group comparisons are limited to 20
-                                        groups. Click OK to compare the 20
-                                        largest groups in this chart. Or, select
-                                        up to 20 specific groups in the chart to
-                                        compare.
-                                    </Modal.Body>
-                                    <Modal.Footer>
-                                        <button
-                                            className="btn btn-md btn-primary"
-                                            onClick={() => {
-                                                openComparison();
-                                                hideModal();
-                                            }}
-                                        >
-                                            OK
-                                        </button>
-                                        <button
-                                            className="btn btn-md btn-default"
-                                            onClick={hideModal}
-                                        >
-                                            Cancel
-                                        </button>
-                                    </Modal.Footer>
-                                </Modal>
-                            );
-                        });
-                    } else {
-                        openComparison();
-                    }
+                    openComparison();
                     break;
                 default:
                     this.props.store.openComparisonPage(

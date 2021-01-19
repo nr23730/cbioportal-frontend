@@ -11,6 +11,7 @@ export enum PatientViewPageTabs {
     TherapyRecommendation = 'therapyRecommendation',
     Mtb = 'mtb',
     ClinicalTrialsGov = 'clinicaltrialsGov',
+    PathwayMapper = 'pathways',
 }
 
 export const PatientViewResourceTabPrefix = 'openResource_';

@@ -35,6 +35,8 @@ const ADD_CHART_GENOMIC_TAB = '.addChartTabs a.tabAnchor_Genomic';
 const ADD_CHART_CUSTOM_DATA_TAB = '.addChartTabs a.tabAnchor_Custom_Data';
 const ADD_CHART_CUSTOM_GROUPS_ADD_CHART_BUTTON =
     "[data-test='CustomCaseSetSubmitButton']";
+const ADD_CHART_GENERIC_ASSAY_TAB =
+    '.addChartTabs a.tabAnchor_MICROBIOME_SIGNATURE';
 const ADD_CHART_CUSTOM_GROUPS_TEXTAREA = "[data-test='CustomCaseSetInput']";
 const STUDY_SUMMARY_RAW_DATA_DOWNLOAD =
     "[data-test='studySummaryRawDataDownloadIcon']";
@@ -188,7 +190,7 @@ describe('study laml_tcga tests', () => {
                     getNumberOfStudyViewCharts() + (isSelected ? 1 : -1)
             );
         });
-        describe('add custom chart', () => {
+        describe('add custom data', () => {
             before(() => {
                 if (!browser.isVisible(ADD_CHART_CUSTOM_DATA_TAB)) {
                     browser.waitForExist(ADD_CHART_BUTTON);
@@ -221,7 +223,10 @@ describe('study laml_tcga tests', () => {
                     browser.isEnabled(ADD_CHART_CUSTOM_GROUPS_ADD_CHART_BUTTON)
                 );
             });
-            it('a new chart should be added and filtered', () => {
+            //Skipping it for now since this feature is dependent on session-service and
+            // heroku instance of it not stable (would not be active/running all the time)
+            // also data-test would be dynamic and depends on chart id (session id)
+            it.skip('a new chart should be added and filtered', () => {
                 browser.waitForEnabled(
                     ADD_CHART_CUSTOM_GROUPS_ADD_CHART_BUTTON
                 );
@@ -239,7 +244,7 @@ describe('study laml_tcga tests', () => {
                 assert(
                     getTextFromElement(
                         "[data-test='chart-container-CUSTOM_FILTERS_3'] .chartTitle"
-                    ) === 'Custom Chart 1'
+                    ) === 'Custom data 1'
                 );
 
                 // make sure the chart is filtered
@@ -335,6 +340,7 @@ describe('check the fusion filter is working properly', () => {
         waitForNetworkQuiet(60000);
     });
     it('fusion filter filter study from url', function() {
+        waitForStudyViewSelectedInfo();
         const res = checkElementWithMouseDisabled('#mainColumn');
         assertScreenShotMatch(res);
     });
@@ -698,5 +704,58 @@ describe('submit genes to results view query', () => {
             query.genetic_profile_ids_PROFILE_MRNA_EXPRESSION,
             'acc_tcga_pan_can_atlas_2018_rna_seq_v2_mrna_median_Zscores'
         );
+    });
+
+    describe('chol_tcga_pan_can_atlas_2018 study generic assay tests', () => {
+        before(() => {
+            const url = `${CBIOPORTAL_URL}/study?id=chol_tcga_pan_can_atlas_2018`;
+            goToUrlAndSetLocalStorage(url);
+            waitForNetworkQuiet();
+        });
+        it('generic assay chart should be added in the summary tab', () => {
+            browser.waitForVisible(ADD_CHART_BUTTON, WAIT_FOR_VISIBLE_TIMEOUT);
+            browser.click(ADD_CHART_BUTTON);
+
+            waitForNetworkQuiet();
+
+            // Change to GENERIC ASSAY tab
+            browser.waitForVisible(
+                ADD_CHART_GENERIC_ASSAY_TAB,
+                WAIT_FOR_VISIBLE_TIMEOUT
+            );
+            browser.click(ADD_CHART_GENERIC_ASSAY_TAB);
+
+            // wait for generic assay data loading complete
+            // and select a option
+            $('div[data-test="GenericAssaySelection"]').waitForExist();
+            $('div[data-test="GenericAssaySelection"] input').setValue(
+                'Prasinovirus'
+            );
+            $('div=Select all filtered options (1)').click();
+            // close the dropdown
+            var indicators = $$('div[class$="indicatorContainer"]');
+            indicators[0].click();
+            var selectedOptions = $$('div[class$="multiValue"]');
+            assert.equal(selectedOptions.length, 1);
+
+            $('button=Add Chart').click();
+            // Wait for chart to be added
+            waitForNetworkQuiet();
+
+            const res = checkElementWithMouseDisabled('#mainColumn');
+            assertScreenShotMatch(res);
+        });
+    });
+});
+
+describe('study view treatments table', () => {
+    it('loads multiple studies with treatments tables', function() {
+        var url = `${CBIOPORTAL_URL}/study/summary?id=gbm_columbia_2019%2Clgg_ucsf_2014`;
+        goToUrlAndSetLocalStorage(url);
+        $('[data-test="PATIENT_TREATMENTS-table"]').waitForExist();
+        $('[data-test="SAMPLE_TREATMENTS-table"]').waitForExist();
+
+        const res = checkElementWithMouseDisabled('#mainColumn');
+        assertScreenShotMatch(res);
     });
 });

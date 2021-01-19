@@ -22,7 +22,7 @@ import {
     OQLLineFilterOutput,
     UnflattenedOQLLineFilterOutput,
 } from '../../shared/lib/oql/oqlfilter';
-import oql_parser from '../../shared/lib/oql/oql-parser';
+import oql_parser, { Alteration } from '../../shared/lib/oql/oql-parser';
 import { getOncoKbOncogenic, groupBy } from '../../shared/lib/StoreUtils';
 import {
     AlterationTypeConstants,
@@ -46,11 +46,11 @@ import { SpecialAttribute } from '../../shared/cache/ClinicalDataCache';
 import { isSampleProfiled } from 'shared/lib/isSampleProfiled';
 import { AlteredStatus } from './mutualExclusivity/MutualExclusivityUtil';
 import { Group } from '../../shared/api/ComparisonGroupClient';
-import { CustomGroup } from 'pages/studyView/StudyViewPageStore';
 import ComplexKeyMap from 'shared/lib/complexKeyDataStructures/ComplexKeyMap';
 import { CoverageInformation } from '../../shared/lib/GenePanelUtils';
 import { GenericAssayEnrichment } from 'cbioportal-ts-api-client/dist/generated/CBioPortalAPIInternal';
 import { GenericAssayEnrichmentWithQ } from './enrichments/EnrichmentsUtil';
+import { CustomChartSession } from 'shared/api/sessionServiceAPI';
 
 type CustomDriverAnnotationReport = {
     hasBinary: boolean;
@@ -401,7 +401,8 @@ export function getSampleAlteredMap(
     oqlQuery: string,
     coverageInformation: CoverageInformation,
     selectedMolecularProfileIds: string[],
-    studyToMolecularProfiles: _.Dictionary<MolecularProfile[]>
+    studyToMolecularProfiles: _.Dictionary<MolecularProfile[]>,
+    defaultOQLQueryAlterations: Alteration[] | false
 ) {
     const result: SampleAlteredMap = {};
     filteredAlterationData.forEach((element, key) => {
@@ -442,7 +443,12 @@ export function getSampleAlteredMap(
                     .map(sample => sample.uniqueSampleKey)
             );
             result[
-                getSingleGeneResultKey(key, oqlQuery, notGroupedOql)
+                getSingleGeneResultKey(
+                    key,
+                    oqlQuery,
+                    notGroupedOql,
+                    defaultOQLQueryAlterations
+                )
             ] = samples.map((sample: Sample) => {
                 if (sample.uniqueSampleKey in unProfiledSampleKeysMap) {
                     return AlteredStatus.UNPROFILED;
@@ -518,12 +524,16 @@ export function getSampleAlteredMap(
 export function getSingleGeneResultKey(
     key: number,
     oqlQuery: string,
-    notGroupedOql: OQLLineFilterOutput<AnnotatedExtendedAlteration>
+    notGroupedOql: OQLLineFilterOutput<AnnotatedExtendedAlteration>,
+    defaultOQLQueryAlterations: Alteration[] | false
 ) {
-    //only gene
+    // if oql for gene is the same as the default OQL, it means probably
+    //  no oql was specified, so just show the gene
     if (
-        (oql_parser.parse(oqlQuery)![key] as oql_parser.SingleGeneQuery)
-            .alterations === false
+        _.isEqual(
+            notGroupedOql.parsed_oql_line.alterations,
+            defaultOQLQueryAlterations
+        )
     ) {
         return notGroupedOql.gene;
     }
@@ -738,7 +748,7 @@ export function evaluateDiscreteCNAPutativeDriverInfo(
     cnaDatum: CustomDriverNumericGeneMolecularData,
     oncoKbDatum: IndicatorQueryResp | undefined | null | false,
     customDriverAnnotationsActive: boolean,
-    customDriverTierSelection: ObservableMap<boolean> | undefined
+    customDriverTierSelection: ObservableMap<string, boolean> | undefined
 ) {
     const oncoKb = oncoKbDatum ? getOncoKbOncogenic(oncoKbDatum) : '';
 
@@ -777,7 +787,7 @@ export function evaluateMutationPutativeDriverInfo(
     cosmicCountActive: boolean,
     cosmicCountExceeded: boolean,
     customDriverAnnotationsActive: boolean,
-    customDriverTierSelection: ObservableMap<boolean> | undefined
+    customDriverTierSelection: ObservableMap<string, boolean> | undefined
 ) {
     const oncoKb = oncoKbDatum ? getOncoKbOncogenic(oncoKbDatum) : '';
     const hotspots = hotspotAnnotationsActive && hotspotDriver;
@@ -812,29 +822,40 @@ export function evaluateMutationPutativeDriverInfo(
     };
 }
 
-export function makeCustomChartData(
-    attribute: ExtendedClinicalAttribute,
-    chartGroups: CustomGroup[],
+export function getExtendsClinicalAttributesFromCustomData(
+    customChartSessions: CustomChartSession[],
     sampleMap: ComplexKeyMap<Sample>
-): ClinicalData[] {
-    const ret = [];
-    for (const group of chartGroups) {
-        const value = group.name;
-        for (const sampleId of group.sampleIdentifiers) {
-            const sample = sampleMap.get(sampleId, ['sampleId', 'studyId']);
-            if (sample) {
-                ret.push({
-                    clinicalAttribute: attribute as ClinicalAttribute,
-                    clinicalAttributeId: attribute.clinicalAttributeId,
-                    value,
-                    patientId: sampleId.patientId,
-                    sampleId: sampleId.sampleId,
-                    studyId: sampleId.studyId,
-                    uniquePatientKey: sample.uniquePatientKey,
-                    uniqueSampleKey: sample.uniqueSampleKey,
-                });
-            }
-        }
-    }
-    return ret;
+): ExtendedClinicalAttribute[] {
+    return customChartSessions.map(customChartSession => {
+        const attr: ExtendedClinicalAttribute = {
+            datatype: customChartSession.data.datatype,
+            description: customChartSession.data.description || '',
+            displayName: customChartSession.data.displayName || '',
+            patientAttribute: customChartSession.data.patientAttribute,
+            clinicalAttributeId: customChartSession.id,
+            studyId: '',
+            priority: customChartSession.data.priority.toString(),
+        };
+
+        attr.data = _.reduce(
+            customChartSession.data.data,
+            (acc: ClinicalData[], datum) => {
+                const sample = sampleMap.get(datum, ['sampleId', 'studyId']);
+                if (sample) {
+                    acc.push({
+                        ...datum,
+                        clinicalAttribute: attr as ClinicalAttribute,
+                        clinicalAttributeId: attr.clinicalAttributeId,
+                        uniquePatientKey: sample.uniquePatientKey,
+                        uniqueSampleKey: sample.uniqueSampleKey,
+                    });
+                }
+
+                return acc;
+            },
+            []
+        );
+
+        return attr;
+    });
 }

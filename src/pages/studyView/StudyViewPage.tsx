@@ -2,9 +2,8 @@ import * as React from 'react';
 import * as _ from 'lodash';
 import { inject, Observer, observer } from 'mobx-react';
 import { MSKTab, MSKTabs } from '../../shared/components/MSKTabs/MSKTabs';
-import { action, computed, observable } from 'mobx';
+import { action, computed, observable, makeObservable } from 'mobx';
 import {
-    CustomChart,
     StudyViewPageStore,
     StudyViewPageTabDescriptions,
     StudyViewURLQuery,
@@ -44,7 +43,10 @@ import classNames from 'classnames';
 import AppConfig from 'appConfig';
 import SocialAuthButton from '../../shared/components/SocialAuthButton';
 import { ServerConfigHelpers } from '../../config/config';
-import { getButtonNameWithDownPointer } from './StudyViewUtils';
+import {
+    getButtonNameWithDownPointer,
+    ChartMetaDataTypeEnum,
+} from './StudyViewUtils';
 import { Alert, Modal } from 'react-bootstrap';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -61,7 +63,8 @@ import ResourcesTab, { RESOURCES_TAB_NAME } from './resources/ResourcesTab';
 import { ResourceData } from 'cbioportal-ts-api-client';
 import $ from 'jquery';
 import { StudyViewComparisonGroup } from 'pages/groupComparison/GroupComparisonUtils';
-import { getStudySummaryUrl } from 'shared/api/urls';
+import { CustomChart } from 'shared/api/sessionServiceAPI';
+import { parse } from 'query-string';
 
 export interface IStudyViewPageProps {
     routing: any;
@@ -118,6 +121,8 @@ export default class StudyViewPage extends React.Component<
     constructor(props: IStudyViewPageProps) {
         super(props);
 
+        makeObservable(this);
+
         this.urlWrapper = new StudyViewURLWrapper(this.props.routing);
 
         this.store = new StudyViewPageStore(
@@ -151,31 +156,27 @@ export default class StudyViewPage extends React.Component<
             'id',
             'studyId',
             'cancer_study_id',
-            'filters',
             'filterAttributeId',
             'filterValues',
         ]);
+
+        newStudyViewFilter.filterJson = query['filters'];
 
         let hashString: string = hash || getBrowserWindow().studyPageFilter;
         delete (window as any).studyPageFilter;
 
         if (hashString) {
-            hashString = hashString.substring(1);
-            hashString.split('&').forEach(datum => {
-                if (datum.startsWith('filterJson')) {
-                    const filters = datum.match(/filterJson=([^&]*)/);
-                    if (filters && filters.length > 1) {
-                        newStudyViewFilter.filters = filters[1];
-                    }
-                } else if (datum.startsWith('sharedGroups')) {
-                    const sharedGroups = datum.match(/sharedGroups=([^&]*)/);
-                    if (sharedGroups && sharedGroups.length > 1) {
-                        newStudyViewFilter.sharedGroups = sharedGroups[1];
-                        // Open group comparison manager if there are shared groups in the url
-                        this.store.showComparisonGroupUI = true;
-                    }
-                }
-            });
+            const params = parse(hashString) as Partial<StudyViewURLQuery>;
+
+            if (params.filterJson) {
+                newStudyViewFilter.filterJson = params.filterJson;
+            }
+            if (params.sharedGroups) {
+                newStudyViewFilter.sharedGroups = params.sharedGroups;
+            }
+            if (params.sharedCustomData) {
+                newStudyViewFilter.sharedCustomData = params.sharedCustomData;
+            }
         }
         if (!_.isEqual(newStudyViewFilter, this.store.studyViewQueryFilter)) {
             this.store.updateStoreFromURL(newStudyViewFilter);
@@ -226,26 +227,33 @@ export default class StudyViewPage extends React.Component<
 
     @observable showBookmarkModal = false;
 
-    @autobind
-    @action
+    @action.bound
     toggleBookmarkModal() {
         this.showBookmarkModal = !this.showBookmarkModal;
     }
 
     @observable shareLinkModal = false;
 
-    @autobind
-    @action
+    @action.bound
     toggleShareLinkModal() {
         this.shareLinkModal = !this.shareLinkModal;
         this.sharedGroups = [];
     }
 
+    @action.bound
+    toggleShareCustomDataLinkModal() {
+        this.shareCustomDataLinkModal = !this.shareCustomDataLinkModal;
+    }
+
     private getShareBookmarkUrl: Promise<any> = Promise.resolve(null);
     private sharedGroups: StudyViewComparisonGroup[] = [];
 
-    @autobind
-    @action
+    @observable shareCustomDataLinkModal = false;
+    private getShareCustomChartBookmarkUrl: Promise<any> = Promise.resolve(
+        null
+    );
+
+    @action.bound
     openShareUrlModal(groups: StudyViewComparisonGroup[]) {
         this.shareLinkModal = true;
         this.sharedGroups = groups;
@@ -259,13 +267,26 @@ export default class StudyViewPage extends React.Component<
         });
     }
 
+    @action.bound
+    openShareCustomDataUrlModal(customDataIds: string[]) {
+        this.shareCustomDataLinkModal = true;
+        this.getShareCustomChartBookmarkUrl = Promise.resolve({
+            bitlyUrl: undefined,
+            fullUrl: `${window.location.protocol}//${window.location.host}${
+                window.location.pathname
+            }${window.location.search}#sharedCustomData=${customDataIds.join(
+                ','
+            )}`,
+            sessionUrl: undefined,
+        });
+    }
+
     @autobind
     onBookmarkClick() {
         this.toggleBookmarkModal();
     }
 
-    @autobind
-    @action
+    @action.bound
     private openResource(resource: ResourceData) {
         // open tab
         this.store.setResourceTabOpen(resource.resourceId, true);
@@ -275,8 +296,7 @@ export default class StudyViewPage extends React.Component<
         this.urlWrapper.setResourceUrl(resource.url);
     }
 
-    @autobind
-    @action
+    @action.bound
     private closeResourceTab(tabId: string) {
         // close tab
         const resourceId = extractResourceIdFromTabId(tabId);
@@ -328,7 +348,6 @@ export default class StudyViewPage extends React.Component<
             return [
                 ..._.values(this.store.clinicalDataBinPromises),
                 ..._.values(this.store.clinicalDataCountPromises),
-                ..._.values(this.store.customChartsPromises),
                 this.store.mutationProfiles,
                 this.store.cnaProfiles,
                 this.store.selectedSamples,
@@ -482,6 +501,16 @@ export default class StudyViewPage extends React.Component<
                         urlPromise={this.getShareBookmarkUrl}
                         description={
                             'Please send the following link to users with whom you want to share the selected group(s).'
+                        }
+                    />
+                )}
+                {this.shareCustomDataLinkModal && (
+                    <BookmarkModal
+                        onHide={this.toggleShareCustomDataLinkModal}
+                        title={'Share custom data'}
+                        urlPromise={this.getShareCustomChartBookmarkUrl}
+                        description={
+                            'Please send the following link to users with whom you want to share the selected custom data'
                         }
                     />
                 )}
@@ -761,6 +790,12 @@ export default class StudyViewPage extends React.Component<
                                                 currentTab={
                                                     this.store.currentTab
                                                 }
+                                                defaultActiveTab={
+                                                    this.store
+                                                        .showCustomDataSelectionUI
+                                                        ? ChartMetaDataTypeEnum.CUSTOM_DATA
+                                                        : ChartMetaDataTypeEnum.CLINICAL
+                                                }
                                                 addChartOverlayClassName="studyViewAddChartOverlay"
                                                 disableCustomTab={
                                                     this.store.currentTab ===
@@ -770,9 +805,21 @@ export default class StudyViewPage extends React.Component<
                                                     this.store.currentTab ===
                                                     StudyViewPageTabKeyEnum.CLINICAL_DATA
                                                 }
+                                                disableGenericAssayTabs={
+                                                    this.store.currentTab ===
+                                                    StudyViewPageTabKeyEnum.CLINICAL_DATA
+                                                }
                                                 showResetPopup={() => {
                                                     this.showReturnToDefaultChartListModal = true;
                                                 }}
+                                                openShareCustomDataUrlModal={
+                                                    this
+                                                        .openShareCustomDataUrlModal
+                                                }
+                                                isShareLinkModalVisible={
+                                                    this
+                                                        .shareCustomDataLinkModal
+                                                }
                                             />
                                         )}
 

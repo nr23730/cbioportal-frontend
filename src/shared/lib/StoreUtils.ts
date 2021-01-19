@@ -1735,7 +1735,7 @@ export function evaluateDiscreteCNAPutativeDriverInfo(
     cnaDatum: CustomDriverNumericGeneMolecularData,
     oncoKbDatum: IndicatorQueryResp | undefined | null | false,
     customDriverAnnotationsActive: boolean,
-    customDriverTierSelection: ObservableMap<boolean> | undefined
+    customDriverTierSelection: ObservableMap<string, boolean> | undefined
 ) {
     const oncoKb = oncoKbDatum ? getOncoKbOncogenic(oncoKbDatum) : '';
 
@@ -1774,7 +1774,7 @@ export function evaluateMutationPutativeDriverInfo(
     cosmicCountActive: boolean,
     cosmicCountExceeded: boolean,
     customDriverAnnotationsActive: boolean,
-    customDriverTierSelection: ObservableMap<boolean> | undefined
+    customDriverTierSelection: ObservableMap<string, boolean> | undefined
 ) {
     const oncoKb = oncoKbDatum ? getOncoKbOncogenic(oncoKbDatum) : '';
     const hotspots = hotspotAnnotationsActive && hotspotDriver;
@@ -1830,8 +1830,9 @@ export function filterAndAnnotateMolecularData(
             getPutativeDriverInfo(datum),
             discreteCnaProfileIds
         );
-        annotatedDatum.hugoGeneSymbol =
-            entrezGeneIdToGene[datum.entrezGeneId].hugoGeneSymbol;
+        annotatedDatum.hugoGeneSymbol = (
+            entrezGeneIdToGene[datum.entrezGeneId] || datum.gene
+        ).hugoGeneSymbol;
         const isVus = !annotatedDatum.putativeDriver;
         if (isVus) {
             vus.push(annotatedDatum);
@@ -1873,8 +1874,9 @@ export function filterAndAnnotateMutations(
             mutation,
             getPutativeDriverInfo(mutation)
         ); // annotate
-        annotatedMutation.hugoGeneSymbol =
-            entrezGeneIdToGene[mutation.entrezGeneId].hugoGeneSymbol;
+        annotatedMutation.hugoGeneSymbol = (
+            entrezGeneIdToGene[mutation.entrezGeneId] || mutation.gene
+        ).hugoGeneSymbol;
         const isGermline = !isNotGermlineMutation(mutation);
         const isVus = !annotatedMutation.putativeDriver;
         if (isGermline && isVus) {

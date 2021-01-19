@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import LazyMobXTable, {
     Column,
 } from 'shared/components/lazyMobXTable/LazyMobXTable';
-import { observable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 import { Radio } from 'react-bootstrap';
 import { DefaultTooltip } from 'cbioportal-frontend-commons';
 import {
@@ -20,7 +20,7 @@ export interface IPathwayMapperTable {
     genes: string[];
 }
 
-enum IPathwayMapperTableColumnType {
+export enum IPathwayMapperTableColumnType {
     NAME,
     SCORE,
     GENES,
@@ -30,7 +30,11 @@ interface IPathwayMapperTableProps {
     data: IPathwayMapperTable[];
     selectedPathway: string;
     changePathway: (pathway: string) => void;
+    onSelectedPathwayChange?: () => void;
     initialSortColumn?: string;
+    columnsOverride?: {
+        [columnEnum: number]: Partial<PathwayMapperTableColumn>;
+    };
 }
 
 type PathwayMapperTableColumn = Column<IPathwayMapperTable>;
@@ -70,17 +74,20 @@ export default class PathwayMapperTable extends React.Component<
             IPathwayMapperTableColumnType.SCORE,
             IPathwayMapperTableColumnType.GENES,
         ],
+        columnsOverride: {},
         initialSortColumn: 'Score',
     };
     @observable protected _columns: {
         [columnEnum: number]: PathwayMapperTableColumn;
     };
-    @observable selectedPathway: string;
+    @observable.ref selectedPathway: string;
 
     constructor(props: IPathwayMapperTableProps) {
         super(props);
+        makeObservable(this);
         this._columns = {};
         this.generateColumns();
+        makeObservable(this);
     }
 
     generateColumns() {
@@ -98,6 +105,9 @@ export default class PathwayMapperTable extends React.Component<
                         style={{ marginTop: 0, marginBottom: 0 }}
                         checked={this.props.selectedPathway === d.name}
                         onChange={(e: any) => {
+                            if (this.props.onSelectedPathwayChange) {
+                                this.props.onSelectedPathwayChange();
+                            }
                             this.props.changePathway(d.name);
                         }}
                     >
@@ -123,6 +133,8 @@ export default class PathwayMapperTable extends React.Component<
             ) => d.name.toUpperCase().includes(filterStringUpper),
             sortBy: (d: IPathwayMapperTable) => d.name,
             download: (d: IPathwayMapperTable) => d.name,
+
+            ...this.props.columnsOverride![IPathwayMapperTableColumnType.NAME],
         };
 
         this._columns[IPathwayMapperTableColumnType.SCORE] = {
@@ -140,6 +152,8 @@ export default class PathwayMapperTable extends React.Component<
             ) => (d.score + '').includes(filterStringUpper),
             sortBy: (d: IPathwayMapperTable) => d.score,
             download: (d: IPathwayMapperTable) => d.score + '',
+
+            ...this.props.columnsOverride![IPathwayMapperTableColumnType.SCORE],
         };
 
         this._columns[IPathwayMapperTableColumnType.GENES] = {
@@ -159,8 +173,19 @@ export default class PathwayMapperTable extends React.Component<
                 );
             },
             tooltip: <span>Genes matched</span>,
+            filter: (
+                d: IPathwayMapperTable,
+                filterString: string,
+                filterStringUpper: string
+            ) =>
+                d.genes
+                    .join(' ')
+                    .toUpperCase()
+                    .includes(filterStringUpper),
             sortBy: (d: IPathwayMapperTable) => d.genes.length,
             download: (d: IPathwayMapperTable) => d.genes.toString(),
+
+            ...this.props.columnsOverride![IPathwayMapperTableColumnType.GENES],
         };
     }
 
