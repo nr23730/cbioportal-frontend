@@ -10,7 +10,7 @@ import {
     IClinicalData,
     EvidenceLevel,
 } from '../../../shared/model/TherapyRecommendation';
-import { computed, observable } from 'mobx';
+import { computed, makeObservable, observable } from 'mobx';
 import LazyMobXTable from '../../../shared/components/lazyMobXTable/LazyMobXTable';
 import styles from './style/therapyRecommendation.module.scss';
 import SampleManager from '../SampleManager';
@@ -106,6 +106,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
         this.state = {
             therapyRecommendations: props.therapyRecommendations,
         };
+        makeObservable(this);
     }
 
     @computed
