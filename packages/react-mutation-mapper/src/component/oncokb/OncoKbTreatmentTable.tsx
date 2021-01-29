@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { DefaultTooltip, ICache } from 'cbioportal-frontend-commons';
 import { ArticleAbstract, IndicatorQueryTreatment } from 'oncokb-ts-api-client';
 import { observer } from 'mobx-react';
