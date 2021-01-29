@@ -4253,6 +4253,16 @@ export class StudyViewPageStore {
         default: [],
         onError: error => {},
         onResult: clinicalAttributes => {
+            let therapyRecommended: ClinicalAttribute = {
+                clinicalAttributeId: 'THERAPYRECOMMENDED',
+                datatype: DataType.NUMBER,
+                description: 'Patient received therapy recommendation',
+                displayName: 'Therapy recommendation received',
+                priority: '1',
+                patientAttribute: true,
+                studyId: 'metastatic_solid_tumors_mich_2017',
+            };
+            clinicalAttributes.push(therapyRecommended);
             clinicalAttributes.forEach((obj: ClinicalAttribute) => {
                 if (obj.datatype === DataType.NUMBER) {
                     const uniqueKey = getUniqueKey(obj);
