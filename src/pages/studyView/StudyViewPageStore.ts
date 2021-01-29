@@ -4135,6 +4135,9 @@ export class StudyViewPageStore {
     readonly filteredGenePanelData = remoteData({
         await: () => [this.molecularProfiles, this.samples],
         invoke: async () => {
+            if (_.isEmpty(this.molecularProfiles.result)) {
+                return [];
+            }
             const studyMolecularProfilesSet = _.groupBy(
                 this.molecularProfiles.result,
                 molecularProfile => molecularProfile.studyId
@@ -4686,6 +4689,11 @@ export class StudyViewPageStore {
     @computed
     get chartMetaSet(): { [id: string]: ChartMeta } {
         let _chartMetaSet = _.fromPairs(this._customCharts.toJSON());
+        if (_.isEmpty(this.molecularProfiles.result)) {
+            delete _chartMetaSet[
+                SpecialChartsUniqueKeyEnum.GENOMIC_PROFILES_SAMPLE_COUNT
+            ];
+        }
         _chartMetaSet = _.merge(
             _chartMetaSet,
             _.fromPairs(this._geneSpecificCharts.toJSON()),
@@ -7296,11 +7304,34 @@ export class StudyViewPageStore {
                     );
                 }
 
+                const calculateSampleCount = (
+                    result:
+                        | (SampleTreatmentRow | PatientTreatmentRow)[]
+                        | undefined
+                ) => {
+                    if (!result) {
+                        return 0;
+                    }
+
+                    return result
+                        .map(row => row.samples)
+                        .reduce((allSamples, samples) => {
+                            samples.forEach(s =>
+                                allSamples.add(s.sampleId + '::' + s.studyId)
+                            );
+                            return allSamples;
+                        }, new Set<String>()).size;
+                };
+
                 if (!_.isEmpty(this.sampleTreatments.result)) {
-                    ret['SAMPLE_TREATMENTS'] = 1;
+                    ret['SAMPLE_TREATMENTS'] = calculateSampleCount(
+                        this.sampleTreatments.result
+                    );
                 }
                 if (!_.isEmpty(this.patientTreatments.result)) {
-                    ret['PATIENT_TREATMENTS'] = 1;
+                    ret['PATIENT_TREATMENTS'] = calculateSampleCount(
+                        this.patientTreatments.result
+                    );
                 }
 
                 if (!_.isEmpty(this.structuralVariantProfiles.result)) {

@@ -2384,21 +2384,22 @@ export class ResultsViewPageStore {
     });
 
     readonly clinicalAttributes_customCharts = remoteData({
-        await: () => [this.studies, this.sampleMap],
+        await: () => [this.sampleMap],
         invoke: async () => {
             let ret: ExtendedClinicalAttribute[] = [];
-            try {
-                const studyIds = this.studies.result!.map(s => s.studyId);
-                //Add custom data from user profile
-                const customChartSessions = await sessionServiceClient.getCustomDataForStudies(
-                    studyIds
-                );
+            if (this.appStore.isLoggedIn) {
+                try {
+                    //Add custom data from user profile
+                    const customChartSessions = await sessionServiceClient.getCustomDataForStudies(
+                        this.cancerStudyIds
+                    );
 
-                ret = getExtendsClinicalAttributesFromCustomData(
-                    customChartSessions,
-                    this.sampleMap.result!
-                );
-            } catch (e) {}
+                    ret = getExtendsClinicalAttributesFromCustomData(
+                        customChartSessions,
+                        this.sampleMap.result!
+                    );
+                } catch (e) {}
+            }
             return ret;
         },
     });
@@ -4543,8 +4544,10 @@ export class ResultsViewPageStore {
                           [
                               GENOME_NEXUS_ARG_FIELD_ENUM.ANNOTATION_SUMMARY,
                               GENOME_NEXUS_ARG_FIELD_ENUM.HOTSPOTS,
-                              GENOME_NEXUS_ARG_FIELD_ENUM.SIGNAL,
-                          ],
+                              AppConfig.serverConfig.show_signal
+                                  ? GENOME_NEXUS_ARG_FIELD_ENUM.SIGNAL
+                                  : '',
+                          ].filter(f => f),
                           AppConfig.serverConfig.isoformOverrideSource,
                           this.genomeNexusClient
                       )
