@@ -3338,6 +3338,25 @@ export class StudyViewPageStore {
                                     } as ClinicalDataCountFilter,
                                 }
                             );
+                            let therapyRecommended: ClinicalDataCountItem = {
+                                attributeId: 'THERAPYRECOMMENDED',
+                                counts: [
+                                    {
+                                        value: 'Yes',
+                                        count: 11,
+                                    },
+                                    {
+                                        value: 'No',
+                                        count: 4,
+                                    },
+                                    {
+                                        value: 'Unknown',
+                                        count: 1,
+                                    },
+                                ],
+                            };
+                            result = [];
+                            result.push(therapyRecommended);
                         } else if (!isDefaultAttr && !this.chartsAreFiltered) {
                             result = [
                                 this.unfilteredClinicalDataCountCache[
@@ -4260,7 +4279,7 @@ export class StudyViewPageStore {
                 displayName: 'Therapy recommendation received',
                 priority: '1',
                 patientAttribute: true,
-                studyId: 'metastatic_solid_tumors_mich_2017',
+                studyId: '',
             };
             clinicalAttributes.push(therapyRecommended);
             clinicalAttributes.forEach((obj: ClinicalAttribute) => {
@@ -5651,13 +5670,28 @@ export class StudyViewPageStore {
                 }),
                 attr => attr.attributeId
             );
-
-            return internalClient.fetchClinicalDataCountsUsingPOST({
+            let data = await internalClient.fetchClinicalDataCountsUsingPOST({
                 clinicalDataCountFilter: {
                     attributes,
                     studyViewFilter: this.initialFilters,
                 } as ClinicalDataCountFilter,
             });
+
+            let therapyRecommended: ClinicalDataCountItem = {
+                attributeId: 'THERAPYRECOMMENDED',
+                counts: [
+                    {
+                        value: 'Yes',
+                        count: 0,
+                    },
+                    {
+                        value: 'No',
+                        count: 0,
+                    },
+                ],
+            };
+            data.push(therapyRecommended);
+            return data;
         },
         onError: error => {},
         default: [],
