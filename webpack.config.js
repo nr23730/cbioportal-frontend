@@ -157,6 +157,10 @@ var config = {
                 : '"replace_me_env_genome_nexus_url"',
             ENV_FHIRSPARK_HOST: JSON.stringify(process.env.FHIRSPARK_HOST),
             ENV_FHIRSPARK_PORT: JSON.stringify(process.env.FHIRSPARK_PORT),
+            ENV_CANCERDRUGS_URL: JSON.stringify(process.env.CANCERDRUGS_URL),
+            ENV_CANCERDRUGSJSON_URL: JSON.stringify(
+                process.env.CANCERDRUGSJSON_URL
+            ),
         }),
         new HtmlWebpackPlugin({ cache: false, template: 'my-index.ejs' }),
         WebpackFailPlugin,
