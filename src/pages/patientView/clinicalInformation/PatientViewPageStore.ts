@@ -197,6 +197,7 @@ import { GenericAssayTypeConstants } from 'shared/lib/GenericAssayUtils/GenericA
 import {
     MutationalSignaturesVersion,
     MutationalSignatureStableIdKeyWord,
+    validateMutationalSignatureRawData,
 } from 'shared/lib/GenericAssayUtils/MutationalSignaturesUtils';
 
 import { IMtb, IDeletions } from '../../../shared/model/TherapyRecommendation';
@@ -541,7 +542,7 @@ export class PatientViewPageStore {
                 this.samples,
                 this.mutationalSignatureMolecularProfiles,
             ],
-            invoke: () => {
+            invoke: async () => {
                 const mutationalSignatureMolecularProfileIds = this.mutationalSignatureMolecularProfiles.result.map(
                     profile => profile.molecularProfileId
                 );
@@ -557,13 +558,18 @@ export class PatientViewPageStore {
                             });
                         }
                     );
-                    return client.fetchGenericAssayDataInMultipleMolecularProfilesUsingPOST(
+                    const genericAssayRawData = await client.fetchGenericAssayDataInMultipleMolecularProfilesUsingPOST(
                         {
                             genericAssayDataMultipleStudyFilter: {
                                 sampleMolecularIdentifiers,
                             } as GenericAssayDataMultipleStudyFilter,
                         }
                     );
+                    if (
+                        validateMutationalSignatureRawData(genericAssayRawData)
+                    ) {
+                        return Promise.resolve(genericAssayRawData);
+                    }
                 }
                 return Promise.resolve([]);
             },
