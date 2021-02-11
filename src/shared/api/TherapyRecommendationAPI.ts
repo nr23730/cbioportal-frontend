@@ -83,9 +83,7 @@ export async function fetchFollowupUsingGET(url: string) {
                             therapyRecommendationRealized:
                                 followup.therapyRecommendationRealized,
                             sideEffect: followup.sideEffect,
-                            responseMonthThree: followup.responseMonthThree,
-                            responseMonthSix: followup.responseMonthSix,
-                            responseMonthTwelve: followup.responseMonthTwelve,
+                            response: followup.response,
                             comment: followup.comment,
                         } as IFollowUp)
                 );
