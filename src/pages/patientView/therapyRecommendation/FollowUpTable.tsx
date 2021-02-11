@@ -7,6 +7,7 @@ import {
     MtbState,
     IDeletions,
     IMtb,
+    IResponseCriteria,
 } from '../../../shared/model/TherapyRecommendation';
 import { computed, observable } from 'mobx';
 import LazyMobXTable from '../../../shared/components/lazyMobXTable/LazyMobXTable';
@@ -153,7 +154,125 @@ export default class FollowUpTable extends React.Component<
                         <span style={{ marginTop: '-2px' }}>Realized</span>
                     </LabeledCheckbox>
                     <Collapse isOpened={followUp.therapyRecommendationRealized}>
+                        <LabeledCheckbox
+                            checked={followUp.sideEffect}
+                            onChange={() => {
+                                const newTrr = !followUp.sideEffect;
+                                const newFollowUps = this.state.followUps.slice();
+                                newFollowUps.find(
+                                    x => x.id === followUp.id
+                                )!.sideEffect = newTrr;
+                                this.setState({ followUps: newFollowUps });
+                            }}
+                            labelProps={{ style: { marginRight: 10 } }}
+                        >
+                            <span style={{ marginTop: '-2px' }}>
+                                Side effect
+                            </span>
+                        </LabeledCheckbox>
                         <span>Tumor response criteria</span>
+                        <table>
+                            <tr>
+                                <th>Months</th>
+                                <th>PD</th>
+                                <th>SD</th>
+                                <th>PR</th>
+                                <th>CR</th>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>
+                                    {this.getTreatmentResponseCheckbox(
+                                        followUp,
+                                        followUp.response,
+                                        'pd3'
+                                    )}
+                                </td>
+                                <td>
+                                    {this.getTreatmentResponseCheckbox(
+                                        followUp,
+                                        followUp.response,
+                                        'sd3'
+                                    )}
+                                </td>
+                                <td>
+                                    {this.getTreatmentResponseCheckbox(
+                                        followUp,
+                                        followUp.response,
+                                        'pr3'
+                                    )}
+                                </td>
+                                <td>
+                                    {this.getTreatmentResponseCheckbox(
+                                        followUp,
+                                        followUp.response,
+                                        'cr3'
+                                    )}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>
+                                    {this.getTreatmentResponseCheckbox(
+                                        followUp,
+                                        followUp.response,
+                                        'pd6'
+                                    )}
+                                </td>
+                                <td>
+                                    {this.getTreatmentResponseCheckbox(
+                                        followUp,
+                                        followUp.response,
+                                        'sd6'
+                                    )}
+                                </td>
+                                <td>
+                                    {this.getTreatmentResponseCheckbox(
+                                        followUp,
+                                        followUp.response,
+                                        'pr6'
+                                    )}
+                                </td>
+                                <td>
+                                    {this.getTreatmentResponseCheckbox(
+                                        followUp,
+                                        followUp.response,
+                                        'cr6'
+                                    )}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>12</td>
+                                <td>
+                                    {this.getTreatmentResponseCheckbox(
+                                        followUp,
+                                        followUp.response,
+                                        'pd12'
+                                    )}
+                                </td>
+                                <td>
+                                    {this.getTreatmentResponseCheckbox(
+                                        followUp,
+                                        followUp.response,
+                                        'sd12'
+                                    )}
+                                </td>
+                                <td>
+                                    {this.getTreatmentResponseCheckbox(
+                                        followUp,
+                                        followUp.response,
+                                        'pr12'
+                                    )}
+                                </td>
+                                <td>
+                                    {this.getTreatmentResponseCheckbox(
+                                        followUp,
+                                        followUp.response,
+                                        'cr12'
+                                    )}
+                                </td>
+                            </tr>
+                        </table>
                     </Collapse>
                     <textarea
                         title="Comments"
@@ -238,6 +357,21 @@ export default class FollowUpTable extends React.Component<
     private addFollowUp(therapyRecommendation: ITherapyRecommendation) {
         const now = new Date();
         const newFollowUps = this.state.followUps.slice();
+        // const emptyResponseCriteria = {pd: false, sd: false, pr: false, cr: false} as IResponseCriteria;
+        const emptyResponseCriteria = {
+            pd3: false,
+            sd3: false,
+            pr3: false,
+            cr3: false,
+            pd6: false,
+            sd6: false,
+            pr6: false,
+            cr6: false,
+            pd12: false,
+            sd12: false,
+            pr12: false,
+            cr12: false,
+        } as IResponseCriteria;
         const newFollowUp = {
             id: 'followUp_' + this.props.patientId + '_' + now.getTime(),
             therapyRecommendation: therapyRecommendation,
@@ -245,6 +379,11 @@ export default class FollowUpTable extends React.Component<
             author: getAuthor(),
             comment: '',
             therapyRecommendationRealized: false,
+            sideEffect: false,
+            response: emptyResponseCriteria,
+            // responseMonthThree: emptyResponseCriteria,
+            // responseMonthSix: emptyResponseCriteria,
+            // responseMonthTwelve: emptyResponseCriteria
         } as IFollowUp;
         newFollowUps.push(newFollowUp);
         this.setState({ followUps: newFollowUps });
@@ -277,6 +416,30 @@ export default class FollowUpTable extends React.Component<
         console.group('Test');
         console.log(this.props);
         console.groupEnd();
+    }
+
+    private getTreatmentResponseCheckbox(
+        followUp: IFollowUp,
+        criteria: IResponseCriteria,
+        attribute: keyof IResponseCriteria
+    ) {
+        return (
+            <LabeledCheckbox
+                checked={criteria[attribute]}
+                onChange={() => {
+                    const newCriteria = { ...criteria };
+                    newCriteria[attribute] = !criteria[attribute];
+                    const newFollowUps = this.state.followUps.slice();
+                    newFollowUps.find(
+                        x => x.id === followUp.id
+                    )!.response = newCriteria;
+                    this.setState({ followUps: newFollowUps });
+                }}
+                labelProps={{ style: { marginRight: 10 } }}
+            >
+                {/* <span style={{ marginTop: '-2px' }}>{label}</span> */}
+            </LabeledCheckbox>
+        );
     }
 
     render() {

@@ -23,10 +23,18 @@ export interface IRecommender {
 }
 
 export interface IResponseCriteria {
-    cr: boolean;
-    pr: boolean;
-    sd: boolean;
-    pd: boolean;
+    cr3: boolean;
+    pr3: boolean;
+    sd3: boolean;
+    pd3: boolean;
+    cr6: boolean;
+    pr6: boolean;
+    sd6: boolean;
+    pd6: boolean;
+    cr12: boolean;
+    pr12: boolean;
+    sd12: boolean;
+    pd12: boolean;
 }
 
 export interface IFollowUp {
@@ -35,10 +43,8 @@ export interface IFollowUp {
     date: string;
     author: string;
     therapyRecommendationRealized: boolean;
-    sideEffect?: boolean;
-    responseMonthThree?: IResponseCriteria;
-    responseMonthSix?: IResponseCriteria;
-    responseMonthTwelve?: IResponseCriteria;
+    sideEffect: boolean;
+    response: IResponseCriteria;
     comment: string;
 }
 
