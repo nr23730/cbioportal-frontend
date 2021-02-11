@@ -58,27 +58,36 @@ export default class FollowUpForm extends React.Component<
                         <div className="form-group">
                             <h5>Select therapy recommendation:</h5>
                             <Select
-                                options={this.props.mtbs.map(mtb => ({
-                                    label: 'MTB' + ' ' + mtb.date,
-                                    options: mtb.therapyRecommendations.map(
-                                        (
-                                            therapyRecommendation,
-                                            therapyRecommendationIndex
-                                        ) => ({
-                                            label: therapyRecommendation
-                                                .treatments.length
-                                                ? therapyRecommendation.treatments.map(
-                                                      treatment =>
-                                                          treatment.name
-                                                  )
-                                                : 'No treatment specified',
-                                            value: {
-                                                mtb,
+                                options={this.props.mtbs.map(mtb => {
+                                    let d = new Date(mtb.date);
+                                    let dateString =
+                                        ('0' + d.getDate()).slice(-2) +
+                                        '.' +
+                                        ('0' + (d.getMonth() + 1)).slice(-2) +
+                                        '.' +
+                                        d.getFullYear();
+                                    return {
+                                        label: 'MTB' + ' ' + dateString,
+                                        options: mtb.therapyRecommendations.map(
+                                            (
                                                 therapyRecommendation,
-                                            },
-                                        })
-                                    ),
-                                }))}
+                                                therapyRecommendationIndex
+                                            ) => ({
+                                                label: therapyRecommendation
+                                                    .treatments.length
+                                                    ? therapyRecommendation.treatments.map(
+                                                          treatment =>
+                                                              treatment.name
+                                                      )
+                                                    : 'No treatment specified',
+                                                value: {
+                                                    mtb,
+                                                    therapyRecommendation,
+                                                },
+                                            })
+                                        ),
+                                    };
+                                })}
                                 name="therapyRecommendationSelect"
                                 className="basic-select"
                                 classNamePrefix="select"
