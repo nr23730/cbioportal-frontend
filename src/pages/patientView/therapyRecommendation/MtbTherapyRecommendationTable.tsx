@@ -38,6 +38,7 @@ import {
 import TherapyRecommendationForm from './form/TherapyRecommendationForm';
 import { RemoteData, IOncoKbData } from 'cbioportal-utils';
 import TherapyRecommendationFormOncoKb from './form/TherapyRecommendationFormOncoKb';
+import TherapyRecommendationFormFhirSpark from './form/TherapyRecommendationFormFhirSpark';
 import PubMedCache from 'shared/cache/PubMedCache';
 import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';
 
@@ -66,6 +67,7 @@ export type ITherapyRecommendationProps = {
     cnaOncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     pubMedCache?: PubMedCache;
     isDisabled: boolean;
+    fhirSparkData?: RemoteData<IFhirSparkData | Error | undefined>;
 };
 
 export type ITherapyRecommendationState = {
@@ -123,6 +125,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
         | undefined;
     @observable backupTherapyRecommendation: ITherapyRecommendation | undefined;
     @observable showOncoKBForm: boolean;
+    @observable showFhirSparkForm: boolean;
 
     private _columns = [
         {
@@ -535,6 +538,14 @@ export default class MtbTherapyRecommendationTable extends React.Component<
         this.showOncoKBForm = true;
     }
 
+    private openAddFhirSparkForm() {
+        console.group('FhirSpark Test');
+        console.log('FhirSpark Data ' + this.props.fhirSparkData!.status);
+        console.log(this.props.fhirSparkData!.result);
+        console.groupEnd();
+        this.showFhirSparkForm = true;
+    }
+
     public onHideOncoKbForm(
         newTherapyRecommendations?:
             | ITherapyRecommendation
@@ -542,6 +553,23 @@ export default class MtbTherapyRecommendationTable extends React.Component<
     ) {
         if (!_.isArray(newTherapyRecommendations)) {
             this.showOncoKBForm = false;
+            this.selectedTherapyRecommendation = newTherapyRecommendations;
+            //this.onHideAddEditForm(newTherapyRecommendations);
+        } else {
+            newTherapyRecommendations.map(
+                (therapyRecommendation: ITherapyRecommendation) =>
+                    this.onHideAddEditForm(therapyRecommendation)
+            );
+        }
+    }
+
+    public onHideFhirSparkForm(
+        newTherapyRecommendations?:
+            | ITherapyRecommendation
+            | ITherapyRecommendation[]
+    ) {
+        if (!_.isArray(newTherapyRecommendations)) {
+            this.showFhirSparkForm = false;
             this.selectedTherapyRecommendation = newTherapyRecommendations;
             //this.onHideAddEditForm(newTherapyRecommendations);
         } else {
@@ -709,6 +737,18 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                             </Button>
                         </Else>
                     </If>
+                    <Button
+                        type="button"
+                        className={'btn btn-default ' + styles.addOncoKbButton}
+                        disabled={this.props.isDisabled}
+                        onClick={() => this.openAddFhirSparkForm()}
+                    >
+                        <i
+                            className={`fa fa-plus ${styles.marginLeft}`}
+                            aria-hidden="true"
+                        ></i>{' '}
+                        Add from local knowledge
+                    </Button>
                     {/* <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button> */}
                 </p>
                 {this.selectedTherapyRecommendation && (
@@ -757,6 +797,33 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                             this.onHideOncoKbForm(therapyRecommendations);
                         }}
                         title="Add therapy recommendation from OncoKB"
+                        userEmailAddress={
+                            AppConfig.serverConfig.user_email_address
+                        }
+                    />
+                )}
+                {this.showFhirSparkForm && (
+                    <TherapyRecommendationFormFhirSpark
+                        show={this.showOncoKBForm}
+                        patientID={this.props.patientId}
+                        oncoKbResult={this.props.oncoKbData}
+                        cnaOncoKbResult={this.props.cnaOncoKbData}
+                        pubMedCache={this.props.pubMedCache}
+                        mutations={this.props.mutations}
+                        indexedVariantAnnotations={
+                            this.props.indexedVariantAnnotations
+                        }
+                        indexedMyVariantInfoAnnotations={
+                            this.props.indexedMyVariantInfoAnnotations
+                        }
+                        onHide={(
+                            therapyRecommendations?:
+                                | ITherapyRecommendation
+                                | ITherapyRecommendation[]
+                        ) => {
+                            this.onHideFhirSparkForm(therapyRecommendations);
+                        }}
+                        title="Add therapy recommendation from local knowledgebase"
                         userEmailAddress={
                             AppConfig.serverConfig.user_email_address
                         }
