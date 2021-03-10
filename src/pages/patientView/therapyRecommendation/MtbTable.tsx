@@ -31,6 +31,8 @@ import WindowStore from 'shared/components/window/WindowStore';
 import MtbTherapyRecommendationTable from './MtbTherapyRecommendationTable';
 import Select from 'react-select';
 import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';
+import { isMacOs, isSafari } from 'react-device-detect';
+import DatePicker from 'react-date-picker';
 
 export type IMtbProps = {
     patientId: string;
@@ -114,22 +116,49 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                             <i className={'fa fa-user-circle'}></i>
                         </DefaultTooltip>
                     </span>
-                    <input
-                        type="date"
-                        value={mtb.date}
-                        style={{
-                            display: 'block',
-                            marginTop: '2px',
-                            marginBottom: '2px',
-                        }}
-                        disabled={this.isDisabled(mtb)}
-                        onChange={(e: React.FormEvent<HTMLInputElement>) => {
-                            const newDate = e.currentTarget.value;
-                            const newMtbs = this.state.mtbs.slice();
-                            newMtbs.find(x => x.id === mtb.id)!.date = newDate;
-                            this.setState({ mtbs: newMtbs });
-                        }}
-                    ></input>
+                    {isMacOs && isSafari ? (
+                        <div>
+                            <DatePicker
+                                value={mtb.date ? new Date(mtb.date) : null}
+                                disabled={this.isDisabled(mtb)}
+                                onChange={(d: Date) => {
+                                    const newDate =
+                                        d.getFullYear() +
+                                        '-' +
+                                        ('0' + (d.getMonth() + 1)).slice(-2) +
+                                        '-' +
+                                        ('0' + d.getDate()).slice(-2);
+                                    const newMtbs = this.state.mtbs.slice();
+                                    newMtbs.find(
+                                        x => x.id === mtb.id
+                                    )!.date = newDate;
+                                    this.setState({ mtbs: newMtbs });
+                                }}
+                                format="dd.MM.y"
+                            />
+                        </div>
+                    ) : (
+                        <input
+                            type="date"
+                            value={mtb.date}
+                            style={{
+                                display: 'block',
+                                marginTop: '2px',
+                                marginBottom: '2px',
+                            }}
+                            disabled={this.isDisabled(mtb)}
+                            onChange={(
+                                e: React.FormEvent<HTMLInputElement>
+                            ) => {
+                                const newDate = e.currentTarget.value;
+                                const newMtbs = this.state.mtbs.slice();
+                                newMtbs.find(
+                                    x => x.id === mtb.id
+                                )!.date = newDate;
+                                this.setState({ mtbs: newMtbs });
+                            }}
+                        ></input>
+                    )}
                     <select
                         defaultValue={mtb.mtbState}
                         style={{ display: 'block', marginBottom: '2px' }}
