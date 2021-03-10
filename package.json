@@ -237,6 +237,8 @@
     "react-clipboard.js": "^1.0.1",
     "react-collapse": "^4.0.3",
     "react-column-resizer": "^1.1.9",
+    "react-date-picker": "8.0.7",
+    "react-device-detect": "1.15.0",
     "react-dom": "^16.6.3",
     "react-draggable": "^3.3.0",
     "react-file-download": "^0.3.2",
