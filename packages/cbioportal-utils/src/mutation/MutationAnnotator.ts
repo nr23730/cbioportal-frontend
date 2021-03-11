@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { toJS } from 'mobx';
 
 import {
     TranscriptConsequenceSummary,
@@ -109,13 +108,13 @@ export function filterMutationByTranscriptId(
     }
 }
 
-export function getMutationByTranscriptId(
-    mutation: Mutation,
+export function getMutationByTranscriptId<T extends Mutation>(
+    mutation: T,
     ensemblTranscriptId: string,
     indexedVariantAnnotations: { [genomicLocation: string]: VariantAnnotation },
     isCanonicalTranscript: boolean = false,
     skipAnnotationForCanonicalTranscript: boolean = false
-): Mutation | undefined {
+): T | undefined {
     const genomicLocation = extractGenomicLocation(mutation);
     const variantAnnotation = genomicLocation
         ? indexedVariantAnnotations[genomicLocationString(genomicLocation)]
@@ -151,7 +150,7 @@ export function getMutationByTranscriptId(
         if (!annotatedMutation.proteinChange) {
             annotatedMutation.proteinChange = '';
         }
-        return annotatedMutation as Mutation;
+        return annotatedMutation as T;
     } else {
         return undefined;
     }
@@ -217,16 +216,19 @@ export function getAnnotatedMutationFromAnnotationSummary(
     return annotatedMutation;
 }
 
-export function getMutationsByTranscriptId(
-    mutations: Mutation[],
+export function getMutationsByTranscriptId<T extends Mutation>(
+    mutations: T[],
     ensemblTranscriptId: string,
     indexedVariantAnnotations: { [genomicLocation: string]: VariantAnnotation },
     isCanonicalTranscript?: boolean,
     skipAnnotationForCanonicalTranscript: boolean = false
-): Mutation[] {
+): T[] {
     const fusionMutation = getFusionMutations(mutations);
     // only non-fusion mutations need to get mutation with transcript id
-    const annotatableMutations = _.difference(mutations, fusionMutation);
+    const annotatableMutations: Mutation[] = _.difference(
+        mutations,
+        fusionMutation
+    );
     return _.concat(
         _.compact(
             annotatableMutations.map(mutation =>
@@ -240,7 +242,7 @@ export function getMutationsByTranscriptId(
             )
         ),
         fusionMutation
-    );
+    ) as T[];
 }
 
 export function filterMutationsByTranscriptId(
@@ -290,17 +292,15 @@ export function annotateMutation(
 export function initAnnotatedMutation(
     mutation: Partial<Mutation>
 ): Partial<Mutation> {
-    const deepClone = toJS(mutation);
-
     return {
-        ...deepClone,
+        ...mutation,
         // set some default values in case annotation fails
-        variantType: deepClone.variantType || '',
-        gene: deepClone.gene || {
+        variantType: mutation.variantType || '',
+        gene: mutation.gene || {
             hugoGeneSymbol: '',
         },
-        proteinChange: deepClone.proteinChange || '',
-        mutationType: deepClone.mutationType || '',
+        proteinChange: mutation.proteinChange || '',
+        mutationType: mutation.mutationType || '',
     };
 }
 
@@ -355,9 +355,9 @@ export function genomicLocationStringFromVariantAnnotation(
     });
 }
 
-export function getFusionMutations(mutations: Mutation[]) {
+export function getFusionMutations<T extends Mutation>(mutations: T[]): T[] {
     const fusionRegex = new RegExp('fusion', 'i');
     return mutations.filter(
-        (m: Mutation) => m.mutationType && fusionRegex.test(m.mutationType)
+        (m: T) => m.mutationType && fusionRegex.test(m.mutationType)
     );
 }
