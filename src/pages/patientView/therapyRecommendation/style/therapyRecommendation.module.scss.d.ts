@@ -6,6 +6,7 @@ declare const styles: {
   readonly "armDiv": string;
   readonly "criteriaHr": string;
   readonly "deleteButton": string;
+  readonly "deleteMtbButton": string;
   readonly "edit": string;
   readonly "editButton": string;
   readonly "editContainer": string;
