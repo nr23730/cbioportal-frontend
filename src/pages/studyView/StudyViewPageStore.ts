@@ -45,10 +45,10 @@ import {
     Sample,
     SampleIdentifier,
     SampleTreatmentRow,
+    PatientTreatmentRow,
     StudyViewFilter,
     GenericAssayDataFilter,
     GenericAssayMeta,
-    PatientTreatmentRow,
 } from 'cbioportal-ts-api-client';
 import {
     fetchCopyNumberSegmentsForSamples,
@@ -182,6 +182,7 @@ import {
     DataTypeConstants,
 } from 'pages/resultsView/ResultsViewPageStore';
 import {
+    createSurvivalAttributeIdsDict,
     generateStudyViewSurvivalPlotTitle,
     getSurvivalStatusBoolean,
 } from 'pages/resultsView/survival/SurvivalUtil';
@@ -189,8 +190,8 @@ import { ISurvivalDescription } from 'pages/resultsView/survival/SurvivalDescrip
 import {
     toPatientTreatmentFilter,
     toSampleTreatmentFilter,
-    treatmentUniqueKey,
     treatmentComparisonGroupName,
+    treatmentUniqueKey,
 } from './table/treatments/treatmentsTableUtil';
 import StudyViewURLWrapper from './StudyViewURLWrapper';
 import { isMixedReferenceGenome } from 'shared/lib/referenceGenomeUtils';
@@ -211,7 +212,7 @@ import {
     GenericAssayDataBinFilter,
     GenericAssayDataBin,
 } from 'cbioportal-ts-api-client/dist/generated/CBioPortalAPIInternal';
-import { fetchGenericAssayMetaByMolecularProfileIdsGroupByGenericAssayType } from 'shared/lib/GenericAssayUtils/GenericAssayCommonUtils';
+import { fetchGenericAssayMetaByMolecularProfileIdsGroupedByGenericAssayType } from 'shared/lib/GenericAssayUtils/GenericAssayCommonUtils';
 import { CustomChart, CustomChartSession } from 'shared/api/sessionServiceAPI';
 
 type ChartUniqueKey = string;
@@ -2429,13 +2430,13 @@ export class StudyViewPageStore {
     }
 
     @action.bound
-    addGenomicProfilesFilter(profiles: string[][]): void {
+    addGenomicProfilesFilter(chartMeta: ChartMeta, profiles: string[][]): void {
         let genomicProfilesFilter = toJS(this.genomicProfilesFilter) || [];
         this.setGenomicProfilesFilter(genomicProfilesFilter.concat(profiles));
     }
 
     @action.bound
-    addCaseListsFilter(caseLists: string[][]): void {
+    addCaseListsFilter(chartMeta: ChartMeta, caseLists: string[][]): void {
         let caseListsFilter = toJS(this.caseListsFilter) || [];
         this.setCaseListsFilter(caseListsFilter.concat(caseLists));
     }
@@ -4459,12 +4460,12 @@ export class StudyViewPageStore {
         default: [],
     });
 
-    readonly genericAssayEntitiesGroupByGenericAssayType = remoteData<{
+    readonly genericAssayEntitiesGroupedByGenericAssayType = remoteData<{
         [genericAssayType: string]: GenericAssayMeta[];
     }>({
         await: () => [this.molecularProfiles],
         invoke: async () => {
-            return await fetchGenericAssayMetaByMolecularProfileIdsGroupByGenericAssayType(
+            return await fetchGenericAssayMetaByMolecularProfileIdsGroupedByGenericAssayType(
                 this.molecularProfiles.result
             );
         },
@@ -4473,10 +4474,12 @@ export class StudyViewPageStore {
     readonly genericAssayStableIdToMeta = remoteData<{
         [genericAssayStableId: string]: GenericAssayMeta;
     }>({
-        await: () => [this.genericAssayEntitiesGroupByGenericAssayType],
+        await: () => [this.genericAssayEntitiesGroupedByGenericAssayType],
         invoke: () => {
             return Promise.resolve(
-                _.chain(this.genericAssayEntitiesGroupByGenericAssayType.result)
+                _.chain(
+                    this.genericAssayEntitiesGroupedByGenericAssayType.result
+                )
                     .values()
                     .flatten()
                     .uniqBy(meta => meta.stableId)
@@ -4779,10 +4782,24 @@ export class StudyViewPageStore {
             _.fromPairs(this._genericAssayCharts.toJSON())
         );
 
+        // filter out survival attributes (months attributes only)
+        const survivalMonthAttributeIdsDict = createSurvivalAttributeIdsDict(
+            this.survivalClinicalAttributesPrefix.result,
+            false,
+            true
+        );
+        const filteredClinicalAttributes = _.filter(
+            this.clinicalAttributes.result,
+            attribute =>
+                !(
+                    attribute.clinicalAttributeId in
+                    survivalMonthAttributeIdsDict
+                )
+        );
         // Add meta information for each of the clinical attribute
         // Convert to a Set for easy access and to update attribute meta information(would be useful while adding new features)
         _.reduce(
-            this.clinicalAttributes.result,
+            filteredClinicalAttributes,
             (acc: { [id: string]: ChartMeta }, attribute) => {
                 const uniqueKey = getUniqueKey(attribute);
                 acc[uniqueKey] = {
@@ -8076,7 +8093,10 @@ export class StudyViewPageStore {
     });
 
     @action.bound
-    public onSampleTreatmentSelection(values: string[][]): void {
+    public onSampleTreatmentSelection(
+        ignored: ChartMeta,
+        values: string[][]
+    ): void {
         const filters = values.map(outerFilter => {
             return {
                 filters: outerFilter.map(innerFilter => {
@@ -8089,7 +8109,10 @@ export class StudyViewPageStore {
     }
 
     @action.bound
-    public onPatientTreatmentSelection(values: string[][]): void {
+    public onPatientTreatmentSelection(
+        ignored: ChartMeta,
+        values: string[][]
+    ): void {
         const filters = values.map(outerFilter => {
             return {
                 filters: outerFilter.map(innerFilter => {

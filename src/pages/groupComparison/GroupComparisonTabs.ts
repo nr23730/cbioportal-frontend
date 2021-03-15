@@ -7,5 +7,8 @@ export enum GroupComparisonTab {
     SURVIVAL = 'survival',
     CLINICAL = 'clinical',
     DNAMETHYLATION = 'dna_methylation',
+    ALTERATIONS = 'alterations',
     GENERIC_ASSAY_PREFIX = 'generic_assay',
 }
+
+export const GENOMIC_ALTERATIONS_TAB_NAME = 'Genomic Alterations';
