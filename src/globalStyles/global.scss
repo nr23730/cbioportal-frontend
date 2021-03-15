@@ -662,3 +662,7 @@ h2.divider {
     padding-bottom: 10px;
     border-bottom: 1px solid $borderColor;
 }
+
+.react-date-picker__inputGroup__input--hasLeadingZero {
+    padding-left: 0 !important;
+}

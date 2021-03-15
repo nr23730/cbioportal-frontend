@@ -123,28 +123,24 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                     >
                         Date:
                         {isMacOs && isSafari ? (
-                            <div>
-                                <DatePicker
-                                    value={mtb.date ? new Date(mtb.date) : null}
-                                    disabled={this.isDisabled(mtb)}
-                                    onChange={(d: Date) => {
-                                        const newDate =
-                                            d.getFullYear() +
-                                            '-' +
-                                            ('0' + (d.getMonth() + 1)).slice(
-                                                -2
-                                            ) +
-                                            '-' +
-                                            ('0' + d.getDate()).slice(-2);
-                                        const newMtbs = this.state.mtbs.slice();
-                                        newMtbs.find(
-                                            x => x.id === mtb.id
-                                        )!.date = newDate;
-                                        this.setState({ mtbs: newMtbs });
-                                    }}
-                                    format="dd.MM.y"
-                                />
-                            </div>
+                            <DatePicker
+                                value={mtb.date ? new Date(mtb.date) : null}
+                                disabled={this.isDisabled(mtb)}
+                                onChange={(d: Date) => {
+                                    const newDate =
+                                        d.getFullYear() +
+                                        '-' +
+                                        ('0' + (d.getMonth() + 1)).slice(-2) +
+                                        '-' +
+                                        ('0' + d.getDate()).slice(-2);
+                                    const newMtbs = this.state.mtbs.slice();
+                                    newMtbs.find(
+                                        x => x.id === mtb.id
+                                    )!.date = newDate;
+                                    this.setState({ mtbs: newMtbs });
+                                }}
+                                format="dd.MM.y"
+                            />
                         ) : (
                             <input
                                 type="date"
