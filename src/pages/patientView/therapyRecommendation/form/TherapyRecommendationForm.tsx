@@ -18,6 +18,7 @@ import TherapyRecommendationFormReferenceInput from './TherapyRecommendationForm
 import TherapyRecommendationFormCommentInput from './TherapyRecommendationFormCommentInput';
 import TherapyRecommendationFormEvidenceLevelInput from './TherapyRecommendationFormEvidenceLevelInput';
 import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';
+import SampleManager from 'pages/patientView/SampleManager';
 
 interface ITherapyRecommendationFormProps {
     show: boolean;
@@ -30,6 +31,7 @@ interface ITherapyRecommendationFormProps {
         | { [genomicLocation: string]: MyVariantInfo }
         | undefined;
     cna: DiscreteCopyNumberData[];
+    sampleManager: SampleManager | null;
     clinicalData: ClinicalData[];
     title: string;
     userEmailAddress: string;
@@ -78,6 +80,7 @@ export default class TherapyRecommendationForm extends React.Component<
                             <TherapyRecommendationFormClinicalInput
                                 data={therapyRecommendation}
                                 clinicalData={this.props.clinicalData}
+                                sampleManager={this.props.sampleManager}
                                 onChange={clinicalDataItems =>
                                     (therapyRecommendation.reasoning.clinicalData = clinicalDataItems)
                                 }
