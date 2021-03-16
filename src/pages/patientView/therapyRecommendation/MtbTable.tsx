@@ -160,7 +160,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                                 type="date"
                                 value={mtb.date}
                                 style={{ marginLeft: 6 }}
-                                disabled={this.isDisabled(mtb)}
+                                disabled={this.isDisabled(mtb) || !this.state.permission}
                                 onChange={(
                                     e: React.FormEvent<HTMLInputElement>
                                 ) => {
@@ -183,7 +183,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         <select
                             defaultValue={mtb.mtbState}
                             style={{ marginLeft: 2 }}
-                            disabled={this.isDisabled(mtb)}
+                            disabled={this.isDisabled(mtb) || !this.state.permission}
                             onChange={(
                                 e: React.ChangeEvent<HTMLSelectElement>
                             ) => {
