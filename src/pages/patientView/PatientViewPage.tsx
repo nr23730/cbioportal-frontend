@@ -1715,6 +1715,14 @@ export default class PatientViewPage extends React.Component<
                                                     this.patientViewPageStore
                                                         .updateMtbs
                                                 }
+                                                mtbUrl={
+                                                    this.patientViewPageStore.
+                                                        getMtbJsonStoreUrl('')
+                                                }
+                                                checkPermission={
+                                                    this.patientViewPageStore
+                                                        .checkPermission
+                                                }
                                                 oncoKbData={
                                                     this.patientViewPageStore
                                                         .oncoKbData
