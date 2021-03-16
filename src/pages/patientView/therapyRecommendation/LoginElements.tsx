@@ -117,7 +117,7 @@ export class UserInfoButton extends React.Component<
 
     public render() {
         return (
-            <DropdownButton id='drop1' className={this.props.className} title='Show User Information'>
+            <DropdownButton id='drop1' className={this.props.className} title='User Info / MTB Logout'>
                     <MenuItem onClick={() => this.props.openLoginModal()}>Show User Information</MenuItem>
                     <MenuItem onClick={() => this.logout()}>MTB Logout</MenuItem>
             </DropdownButton>
