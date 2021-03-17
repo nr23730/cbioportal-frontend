@@ -85,7 +85,7 @@ export async function updateMtbUsingPUT(id: string, url: string, mtbs: IMtb[]) {
                 console.group('### MTB ### ERROR res not ok PUTting ' + url);
                 console.log(JSON.parse(res.text));
                 console.groupEnd();
-                window.alert('Saving data failed with http status (' + res.status + ').');
+                // window.alert('Saving data failed with http status (' + res.status + ').');
                 return false;
             }
         })
@@ -93,7 +93,7 @@ export async function updateMtbUsingPUT(id: string, url: string, mtbs: IMtb[]) {
             console.group('### MTB ### ERROR catched PUTting ' + url);
             console.log(err);
             console.groupEnd();
-            window.alert('Saving data failed - error output in console.');
+            // window.alert('Saving data failed - error output in console.');
             return false;
         });
 }

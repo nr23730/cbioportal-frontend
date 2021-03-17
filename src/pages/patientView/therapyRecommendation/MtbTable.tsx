@@ -485,6 +485,8 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                     console.log('Showing successfulSave div');
                     this.setState({successfulSave: true});
                     setTimeout(() => this.saveCallback(), 3000);
+                } else {
+                    window.alert('Saving data failed - error output is in console.');
                 }
             }
         );
