@@ -35,6 +35,8 @@ export default class TherapyRecommendationFormClinicalInput extends React.Compon
                     <components.Option {...props}>
                         <If
                             condition={
+                                typeof props.value === 'object' &&
+                                props.value !== null &&
                                 'sampleId' in props.value &&
                                 props.value.sampleId
                             }
