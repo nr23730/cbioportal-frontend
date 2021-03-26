@@ -176,7 +176,7 @@ export default class OncoKbTreatmentTable extends React.Component<
                 <div style={{ maxWidth: '400px' }}>
                     {drugName} is <b>not</b> authorized in the EU. <br />
                     <a
-                        href={cancerdrugsUrl + '/drug/' + drugName}
+                        href={cancerdrugsUrl + '/drugs/' + drugName}
                         target={'_blank'}
                     >
                         More info on cancerdrugs
@@ -190,7 +190,7 @@ export default class OncoKbTreatmentTable extends React.Component<
                         this.emaTooltipEntry(drugName, drugInfoEntry)
                     )}
                     <a
-                        href={cancerdrugsUrl + '/drug/' + drugName}
+                        href={cancerdrugsUrl + '/drugs/' + drugName}
                         target={'_blank'}
                     >
                         More info on cancerdrugs
@@ -207,7 +207,10 @@ export default class OncoKbTreatmentTable extends React.Component<
                 {drugInfo.medicineName} since{' '}
                 {drugInfo.authorisationDate.split(' ')[0]} by{' '}
                 {drugInfo.authorisationHolder} (
-                <a href={drugInfo.url}>more info</a>). <br />
+                <a href={drugInfo.url} target={'_blank'}>
+                    more info
+                </a>
+                ). <br />
                 Authorized indication: {drugInfo.conditionIndication} <br />
             </span>
         );
