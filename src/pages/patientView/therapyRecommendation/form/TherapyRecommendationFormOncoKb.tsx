@@ -92,7 +92,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
     private therapyRecommendationFromTreatmentEntry(
         result: IndicatorQueryResp,
         treatmentIndex: number
-    ): ITherapyRecommendation {
+    ): ITherapyRecommendation | null {
         let therapyRecommendation: ITherapyRecommendation = getNewTherapyRecommendation(
             this.props.patientID
         );
@@ -129,24 +129,53 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
                 value.gene.hugoGeneSymbol == result.query.hugoSymbol &&
                 value.proteinChange === result.query.alteration
         )[0];
-        const index =
-            mutation.chr +
-            ',' +
-            mutation.startPosition +
-            ',' +
-            mutation.endPosition +
-            ',' +
-            mutation.referenceAllele +
-            ',' +
-            mutation.variantAllele;
-        const annotation = this.props.indexedVariantAnnotations![index];
-        const myVariantInfo = this.props.indexedMyVariantInfoAnnotations![
-            index
-        ];
+
+        if (!mutation) {
+            return null;
+        }
+
         let dbsnp;
         let clinvar;
         let cosmic;
         let gnomad;
+
+        if (
+            mutation.chr &&
+            mutation.startPosition &&
+            mutation.endPosition &&
+            mutation.referenceAllele &&
+            mutation.variantAllele
+        ) {
+            const index =
+                mutation.chr +
+                ',' +
+                mutation.startPosition +
+                ',' +
+                mutation.endPosition +
+                ',' +
+                mutation.referenceAllele +
+                ',' +
+                mutation.variantAllele;
+            const annotation = this.props.indexedVariantAnnotations![index];
+            const myVariantInfo = this.props.indexedMyVariantInfoAnnotations![
+                index
+            ];
+
+            if (myVariantInfo) {
+                if (myVariantInfo.dbsnp) {
+                    dbsnp = myVariantInfo.dbsnp.rsid;
+                }
+                if (myVariantInfo.clinVar) {
+                    clinvar = myVariantInfo.clinVar.variantId;
+                }
+                if (myVariantInfo.cosmic) {
+                    cosmic = myVariantInfo.cosmic.cosmicId;
+                }
+                if (myVariantInfo.gnomadExome) {
+                    gnomad = myVariantInfo.gnomadExome.alleleFrequency.af;
+                }
+            }
+        }
 
         // Reasoning
         therapyRecommendation.reasoning.geneticAlterations = [
@@ -195,14 +224,15 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
         let therapyRecommendations: ITherapyRecommendation[] = [];
 
         results.map(result =>
-            result.treatments.map((treatment, treatmentIndex) =>
-                therapyRecommendations.push(
-                    this.therapyRecommendationFromTreatmentEntry(
-                        result,
-                        treatmentIndex
-                    )
-                )
-            )
+            result.treatments.map((treatment, treatmentIndex) => {
+                let therapyRecommendation = this.therapyRecommendationFromTreatmentEntry(
+                    result,
+                    treatmentIndex
+                );
+                if (therapyRecommendation) {
+                    therapyRecommendations.push(therapyRecommendation);
+                }
+            })
         );
 
         return therapyRecommendations;
@@ -317,7 +347,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
                                             selectedOption.value.treatmentIndex
                                         );
                                         console.log(selectedOption);
-                                        selectedTherapyRecommendation = therapyRecommendation;
+                                        selectedTherapyRecommendation = therapyRecommendation!;
                                     }}
                                     formatGroupLabel={(data: any) => (
                                         <div
