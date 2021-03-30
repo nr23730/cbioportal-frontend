@@ -107,6 +107,28 @@ export function setServerConfig(serverConfig: { [key: string]: any }) {
         config.fhirspark = frontendOverride.fhirspark;
     }
 
+    if (frontendOverride.cancerdrugsUrl) {
+        console.log(
+            `Overriding cancerdrugs URL with: `,
+            frontendOverride.cancerdrugsUrl
+        );
+        config.cancerdrugsUrl = frontendOverride.cancerdrugsUrl;
+    }
+
+    if (frontendOverride.cancerdrugsJsonUrl) {
+        console.log(
+            `Overriding cancerdrugs JSON URL with: `,
+            frontendOverride.cancerdrugsJsonUrl
+        );
+        config.cancerdrugsJsonUrl = frontendOverride.cancerdrugsJsonUrl;
+    }
+
+    sessionStorage.setItem('cancerdrugsUrl', AppConfig.cancerdrugsUrl || '');
+    sessionStorage.setItem(
+        'cancerdrugsJsonUrl',
+        AppConfig.cancerdrugsJsonUrl || ''
+    );
+
     // allow any hardcoded serverConfig props to override those from service
     const mergedConfig = Object.assign(
         {},
@@ -301,6 +323,13 @@ export function initializeConfiguration() {
 
     // @ts-ignore: ENV_* are defined in webpack.config.js
     config.fhirspark.port = `${ENV_FHIRSPARK_PORT || config.fhirspark.port}`;
+
+    // @ts-ignore: ENV_* are defined in webpack.config.js
+    config.cancerdrugsUrl = `${ENV_CANCERDRUGS_URL || config.cancerdrugsUrl}`;
+
+    // @ts-ignore: ENV_* are defined in webpack.config.js
+    config.cancerdrugsJsonUrl = `${ENV_CANCERDRUGSJSON_URL ||
+        config.cancerdrugsJsonUrl}`;
 
     // should override both when in dev mode and when serving compiled source
     // code outside of legacy project

@@ -6,6 +6,8 @@ export interface IAppConfig {
     serverConfig: IServerConfig;
     hide_login?: boolean;
     fhirspark?: IFhirsparkConfig;
+    cancerdrugsUrl?: string;
+    cancerdrugsJsonUrl?: string;
 }
 
 export type CategorizedConfigItems = {
