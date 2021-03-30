@@ -13,6 +13,9 @@ import mainStyles from './main.module.scss';
 import './oncoKbTreatmentTable.scss';
 import request from 'superagent';
 
+let cancerdrugsUrl = sessionStorage.getItem('cancerdrugsUrl') || '';
+let cancerdrugsJsonUrl = sessionStorage.getItem('cancerdrugsJsonUrl') || '';
+
 type OncoKbTreatmentTableProps = {
     variant: string;
     treatments: IndicatorQueryTreatment[];
@@ -90,11 +93,7 @@ export default class OncoKbTreatmentTable extends React.Component<
     promiseDrugInfo = (drug: string) =>
         new Promise<EmaDrugInfo>((resolve, reject) => {
             request
-                .get(
-                    'https://componc.github.io/cancerdrugs/drugs/' +
-                        drug.replace(' ', '_') +
-                        '.json'
-                )
+                .get(cancerdrugsJsonUrl + drug.replace(' ', '_') + '.json')
                 .end((err, res) => {
                     if (!err && res.ok) {
                         const response = JSON.parse(res.text);
@@ -167,12 +166,7 @@ export default class OncoKbTreatmentTable extends React.Component<
             return (
                 <div style={{ maxWidth: '400px' }}>
                     No entry found in cancerdrugs. <br />
-                    <a
-                        href={
-                            'http://cancerdrugs.s3-website.eu-central-1.amazonaws.com'
-                        }
-                        target={'_blank'}
-                    >
+                    <a href={cancerdrugsUrl} target={'_blank'}>
                         Search on cancerdrugs
                     </a>
                 </div>
@@ -182,10 +176,7 @@ export default class OncoKbTreatmentTable extends React.Component<
                 <div style={{ maxWidth: '400px' }}>
                     {drugName} is <b>not</b> authorized in the EU. <br />
                     <a
-                        href={
-                            'http://cancerdrugs.s3-website.eu-central-1.amazonaws.com/drug/' +
-                            drugName
-                        }
+                        href={cancerdrugsUrl + '/drugs/' + drugName}
                         target={'_blank'}
                     >
                         More info on cancerdrugs
@@ -199,10 +190,7 @@ export default class OncoKbTreatmentTable extends React.Component<
                         this.emaTooltipEntry(drugName, drugInfoEntry)
                     )}
                     <a
-                        href={
-                            'http://cancerdrugs.s3-website.eu-central-1.amazonaws.com/drug/' +
-                            drugName
-                        }
+                        href={cancerdrugsUrl + '/drugs/' + drugName}
                         target={'_blank'}
                     >
                         More info on cancerdrugs
@@ -219,7 +207,10 @@ export default class OncoKbTreatmentTable extends React.Component<
                 {drugInfo.medicineName} since{' '}
                 {drugInfo.authorisationDate.split(' ')[0]} by{' '}
                 {drugInfo.authorisationHolder} (
-                <a href={drugInfo.url}>more info</a>). <br />
+                <a href={drugInfo.url} target={'_blank'}>
+                    more info
+                </a>
+                ). <br />
                 Authorized indication: {drugInfo.conditionIndication} <br />
             </span>
         );
