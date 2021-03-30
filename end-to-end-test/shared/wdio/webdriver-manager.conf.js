@@ -1,5 +1,7 @@
 var CustomReporter = require('./customReporter');
 
+const errorshot = require('wdio-errorshot-reporter');
+
 var path = require('path');
 var VisualRegressionCompare = require('wdio-visual-regression-service/compare');
 var getScreenshotName = require('./getScreenshotName');
@@ -11,7 +13,7 @@ require.extensions['.txt'] = function(module, filename) {
 
 const debug = process.env.DEBUG;
 const defaultTimeoutInterval = 180000;
-var defaultMaxInstances = 3;
+var defaultMaxInstances = process.env.MANAGER_MAX_INSTANCES || 3;
 
 var diffDir = process.env.SCREENSHOT_DIRECTORY + '/diff' || 'screenshots/diff/';
 var refDir =
@@ -71,7 +73,18 @@ var config = {
                 args: [
                     '--disable-composited-antialiasing',
                     '--allow-insecure-localhost',
-                ],
+                ].concat(
+                    (function() {
+                        return process.env.HEADLESS_CHROME
+                            ? [
+                                  '--headless',
+                                  '--no-sandbox',
+                                  '--disable-gpu',
+                                  '--disable-setuid-sandbox',
+                              ]
+                            : [];
+                    })()
+                ),
             },
 
             os: 'OS X',
@@ -93,6 +106,8 @@ var config = {
             'browserstack.local': true,
         },
     ],
+
+    // wdio.conf.js
 
     //
     // ===================
@@ -158,13 +173,24 @@ var config = {
 
     services: ['visual-regression'],
 
+    // FIXME: the browser name 'chrome' is passed for screenshot name evaluation
+    // Reason is a bug with headless chrome reporting as 'safari'. This should be
+    // changed when adding tests for other browsers.
+    // See: https://github.com/zinserjan/wdio-visual-regression-service/issues/81
     visualRegression: {
         compare: new VisualRegressionCompare.LocalCompare({
-            referenceName: getScreenshotName(path.join(process.cwd(), refDir)),
-            screenshotName: getScreenshotName(
-                path.join(process.cwd(), screenDir)
+            referenceName: getScreenshotName(
+                path.join(process.cwd(), refDir),
+                'chrome'
             ),
-            diffName: getScreenshotName(path.join(process.cwd(), diffDir)),
+            screenshotName: getScreenshotName(
+                path.join(process.cwd(), screenDir),
+                'chrome'
+            ),
+            diffName: getScreenshotName(
+                path.join(process.cwd(), diffDir),
+                'chrome'
+            ),
             misMatchTolerance: 0.01,
             ignoreComparison: 'antialiasing',
         }),
@@ -183,7 +209,7 @@ var config = {
     // Test reporter for stdout.
     // The only one supported by default is 'dot'
     // see also: http://webdriver.io/guide/testrunner/reporters.html
-    reporters: ['spec', 'junit', CustomReporter],
+    reporters: ['spec', 'junit', CustomReporter, errorshot],
     reporterOptions: {
         junit: {
             outputDir: process.env.JUNIT_REPORT_PATH || './',
@@ -197,6 +223,9 @@ var config = {
             outputFileFormat: function(opts) {
                 // optional
                 return `custom-results-${opts.cid}.${opts.capabilities}.xml`;
+            },
+            errorshotReporter: {
+                template: 'foobar-%capId%_%timestamp%_%parent%-%title%',
             },
         },
     },

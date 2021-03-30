@@ -114,14 +114,21 @@ function setDropdownOpen(
     );
 }
 
-function goToUrlAndSetLocalStorage(url) {
+function goToUrlAndSetLocalStorage(url, authenticated = false) {
+    const currentUrl = browser.getUrl();
+    const needToLogin =
+        authenticated && (!currentUrl || !currentUrl.includes('http'));
     if (!useExternalFrontend) {
         browser.url(url);
+        console.log('Connecting to: ' + url);
     } else {
         var urlparam = useLocalDist ? 'localdist' : 'localdev';
         var prefix = url.indexOf('?') > 0 ? '&' : '?';
         browser.url(`${url}${prefix}${urlparam}=true`);
+        console.log('Connecting to: ' + `${url}${prefix}${urlparam}=true`);
     }
+    if (needToLogin) keycloakLogin();
+
     browser.setViewportSize({ height: 1000, width: 1600 });
 
     // move mouse out of the way
@@ -226,6 +233,14 @@ function waitForStudyViewSelectedInfo() {
     browser.waitForVisible("[data-test='selected-info']", 5000);
     // pause to wait the animation finished
     browser.pause(2000);
+}
+
+function waitForStudyView() {
+    browser.waitUntil(() => $$('.sk-spinner').length === 0, 10000);
+}
+
+function waitForGroupComparisonTabOpen() {
+    $('[data-test=ComparisonPageOverlapTabDiv]').waitForVisible(100000);
 }
 
 function getTextFromElement(element) {
@@ -393,7 +408,10 @@ function getOncoprintGroupHeaderOptionsElements(trackGroupIndex) {
     };
 }
 
-function postDataToUrl(url, data) {
+function postDataToUrl(url, data, authenticated = true) {
+    const currentUrl = browser.getUrl();
+    const needToLogin =
+        authenticated && (!currentUrl || !currentUrl.includes('http'));
     browser.execute(
         (url, data) => {
             function formSubmit(url, params) {
@@ -421,6 +439,58 @@ function postDataToUrl(url, data) {
         url,
         data
     );
+    if (needToLogin) keycloakLogin();
+}
+
+function keycloakLogin(timeout) {
+    browser.waitUntil(
+        () => browser.getUrl().includes('/auth/realms/cbio'),
+        timeout,
+        'No redirect to Keycloak could be detected.'
+    );
+    $('body').waitForVisible(timeout);
+
+    $('#username').setValue('testuser');
+    $('#password').setValue('P@ssword1');
+    $('#kc-login').click();
+
+    browser.waitUntil(() => !browser.getUrl().includes('/auth/realms/cbio'));
+    $('body').waitForVisible(timeout);
+}
+
+function openGroupComparison(studyViewUrl, chartDataTest, timeout) {
+    goToUrlAndSetLocalStorage(studyViewUrl, true);
+    $('[data-test=summary-tab-content]').waitForVisible();
+    waitForNetworkQuiet();
+    const chart = '[data-test=' + chartDataTest + ']';
+    browser.waitForVisible(chart, timeout || 10000);
+    browser.moveToObject(chart);
+    browser.waitUntil(() => {
+        return browser.isExisting(chart + ' .controls');
+    }, timeout || 10000);
+
+    // move to hamburger icon
+    const hamburgerIcon = '[data-test=chart-header-hamburger-icon]';
+    browser.moveToObject(hamburgerIcon);
+
+    // wait for the menu available
+    browser.waitForVisible(hamburgerIcon, timeout || 10000);
+
+    // open comparison session
+    const studyViewTabId = browser.getCurrentTabId();
+    $(chart)
+        .$(hamburgerIcon)
+        .$$('li')[1]
+        .click();
+    const groupComparisonTabId = browser
+        .windowHandles()
+        .value.filter(id => id !== studyViewTabId)[0];
+    browser.window(groupComparisonTabId);
+    waitForGroupComparisonTabOpen();
+}
+
+function selectElementByText(text) {
+    return $(`//*[text()="${text}"]`);
 }
 
 module.exports = {
@@ -441,6 +511,8 @@ module.exports = {
     toStudyViewClinicalDataTab: toStudyViewClinicalDataTab,
     removeAllStudyViewFilters: removeAllStudyViewFilters,
     waitForStudyViewSelectedInfo: waitForStudyViewSelectedInfo,
+    waitForStudyView: waitForStudyView,
+    waitForGroupComparisonTabOpen: waitForGroupComparisonTabOpen,
     getTextFromElement: getTextFromElement,
     getNumberOfStudyViewCharts: getNumberOfStudyViewCharts,
     setOncoprintMutationsMenuOpen: setOncoprintMutationsMenuOpen,
@@ -465,4 +537,6 @@ module.exports = {
     setDropdownOpen: setDropdownOpen,
     postDataToUrl: postDataToUrl,
     getPortalUrlFromEnv: getPortalUrlFromEnv,
+    openGroupComparison: openGroupComparison,
+    selectElementByText: selectElementByText,
 };

@@ -724,6 +724,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         }
                         cna={this.props.cna}
                         clinicalData={this.props.clinicalData}
+                        sampleManager={this.props.sampleManager}
                         onHide={(
                             therapyRecommendation?: ITherapyRecommendation
                         ) => {

@@ -49,6 +49,8 @@ const resolve = path.resolve;
 const isDev = NODE_ENV === 'development';
 const isTest = NODE_ENV === 'test';
 
+console.log('NODE_ENV', NODE_ENV);
+
 // devServer config
 const devHost = process.env.HOST || 'localhost';
 const devPort = process.env.PORT || 3000;
@@ -69,6 +71,11 @@ const babelCacheFolder = process.env.BABEL_CACHE_FOLDER || false;
 const sourceMap = process.env.DISABLE_SOURCEMAP ? '' : 'source-map';
 
 var routeComponentRegex = /routes\/([^\/]+\/?[^\/]+).js$/;
+
+// extract number of cores, or boolean value from WEBPACK_PARALLEL env var
+const parallel = isNaN(parseInt(process.env.WEBPACK_PARALLEL))
+    ? process.env.WEBPACK_PARALLEL
+    : parseInt(process.env.WEBPACK_PARALLEL);
 
 var sassResourcesLoader = {
     loader: 'sass-resources-loader',
@@ -105,7 +112,7 @@ var config = {
     optimization: {
         minimizer: [
             new TerserPlugin({
-                parallel: !process.env.NO_PARALLEL,
+                parallel,
             }),
         ],
     },
@@ -556,7 +563,8 @@ if (process.env.BUILD_REPORT_ERRORS_ONLY === 'true') {
 // END BOOTSTRAP LOADER
 
 // Roots
-config.resolve.modules = [src, common, modules];
+
+config.resolve.modules = [src, common, './node_modules'];
 
 // end Roots
 

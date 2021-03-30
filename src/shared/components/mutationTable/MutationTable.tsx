@@ -766,7 +766,7 @@ export default class MutationTable<
                         .genomeNexusMutationAssessorCache as GenomeNexusMutationAssessorCache
                 ),
             headerRender: FunctionalImpactColumnFormatter.headerRender,
-            visible: false,
+            visible: true,
             shouldExclude: () => !this.props.enableFunctionalImpact,
         };
 
