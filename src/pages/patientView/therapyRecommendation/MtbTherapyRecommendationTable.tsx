@@ -750,6 +750,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         indexedMyVariantInfoAnnotations={
                             this.props.indexedMyVariantInfoAnnotations
                         }
+                        cna={this.props.cna}
                         onHide={(
                             therapyRecommendations?:
                                 | ITherapyRecommendation
