@@ -227,6 +227,7 @@ import {
     fetchMtbsUsingGET,
     updateMtbUsingPUT,
     deleteMtbUsingDELETE,
+    checkPermissionUsingGET,
 } from 'shared/api/TherapyRecommendationAPI';
 import { RecruitingStatus } from 'shared/enums/ClinicalTrialsGovRecruitingStatus';
 import { ageAsNumber } from '../clinicalTrialMatch/utils/AgeSexConverter';
@@ -2291,9 +2292,9 @@ export class PatientViewPageStore {
         []
     );
 
-    updateMtbs = (mtbs: IMtb[]) => {
+    updateMtbs = async (mtbs: IMtb[]): Promise<boolean> => {
         console.log('update');
-        updateMtbUsingPUT(
+        return updateMtbUsingPUT(
             this.getSafePatientId(),
             this.getMtbJsonStoreUrl(this.getSafePatientId()),
             mtbs
@@ -2314,7 +2315,12 @@ export class PatientViewPageStore {
         );
     };
 
-    private getMtbJsonStoreUrl(id: string) {
+    checkPermission = async (): Promise<boolean[]> => {
+        let checkUrl = this.getMtbJsonStoreUrl(this.getSafePatientId()) + '/permission';
+        return checkPermissionUsingGET(checkUrl);
+    };
+
+    getMtbJsonStoreUrl = (id: string) => {
         let host = window.location.hostname;
         let port = ':' + window.location.port;
         if (
