@@ -155,49 +155,6 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                                 }}
                                 format="dd.MM.y"
                             />
-                        </div>
-                    ) : (
-                        <input
-                            type="date"
-                            value={mtb.date}
-                            style={{
-                                display: 'block',
-                                marginTop: '2px',
-                                marginBottom: '2px',
-                            }}
-                            disabled={this.isDisabled(mtb)}
-                            onChange={(
-                                e: React.FormEvent<HTMLInputElement>
-                            ) => {
-                                const newDate = e.currentTarget.value;
-                                const newMtbs = this.state.mtbs.slice();
-                                newMtbs.find(
-                                    x => x.id === mtb.id
-                                )!.date = newDate;
-                                this.setState({ mtbs: newMtbs });
-                            }}
-                        ></input>
-                    )}
-                    <select
-                        defaultValue={mtb.mtbState}
-                        style={{ display: 'block', marginBottom: '2px' }}
-                        disabled={this.isDisabled(mtb)}
-                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                            const newState = e.target.value;
-                            if (newState === MtbState.FINAL.toUpperCase())
-                                if (
-                                    !window.confirm(
-                                        'Are you sure you wish to finalize this MTB session to disable editing?'
-                                    )
-                                ) {
-                                    const newMtbs = this.state.mtbs.slice();
-                                    newMtbs.find(
-                                        x => x.id === mtb.id
-                                    )!.date = newDate;
-                                    this.setState({ mtbs: newMtbs });
-                                }}
-                                format="dd.MM.y"
-                            />
                         ) : (
                             <input
                                 type="date"
