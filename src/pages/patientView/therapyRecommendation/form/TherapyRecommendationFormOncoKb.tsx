@@ -4,6 +4,7 @@ import { Modal, Button } from 'react-bootstrap';
 import {
     ITherapyRecommendation,
     EvidenceLevel,
+    IGeneticAlteration,
 } from 'shared/model/TherapyRecommendation';
 import Select from 'react-select';
 import { IndicatorQueryResp } from 'oncokb-ts-api-client';
@@ -11,7 +12,7 @@ import { getNewTherapyRecommendation } from '../TherapyRecommendationTableUtils'
 import { RemoteData, IOncoKbData } from 'cbioportal-utils';
 import PubMedCache from 'shared/cache/PubMedCache';
 import { ICache } from 'cbioportal-frontend-commons';
-import { Mutation } from 'cbioportal-ts-api-client';
+import { DiscreteCopyNumberData, Mutation } from 'cbioportal-ts-api-client';
 import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';
 import AlleleFreqColumnFormatter from 'pages/patientView/mutation/column/AlleleFreqColumnFormatter';
 
@@ -24,6 +25,7 @@ interface ITherapyRecommendationFormOncoKbProps {
     title: string;
     userEmailAddress: string;
     mutations: Mutation[];
+    cna: DiscreteCopyNumberData[];
     indexedVariantAnnotations:
         | { [genomicLocation: string]: VariantAnnotation }
         | undefined;
@@ -92,7 +94,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
     private therapyRecommendationFromTreatmentEntry(
         result: IndicatorQueryResp,
         treatmentIndex: number
-    ): ITherapyRecommendation {
+    ): ITherapyRecommendation | null {
         let therapyRecommendation: ITherapyRecommendation = getNewTherapyRecommendation(
             this.props.patientID
         );
@@ -123,34 +125,57 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
             );
         }
 
-        const mutation = this.props.mutations.filter(
-            value =>
-                value.entrezGeneId == result.query.entrezGeneId &&
-                value.gene.hugoGeneSymbol == result.query.hugoSymbol &&
-                value.proteinChange === result.query.alteration
-        )[0];
-        const index =
-            mutation.chr +
-            ',' +
-            mutation.startPosition +
-            ',' +
-            mutation.endPosition +
-            ',' +
-            mutation.referenceAllele +
-            ',' +
-            mutation.variantAllele;
-        const annotation = this.props.indexedVariantAnnotations![index];
-        const myVariantInfo = this.props.indexedMyVariantInfoAnnotations![
-            index
-        ];
-        let dbsnp;
-        let clinvar;
-        let cosmic;
-        let gnomad;
+        let allAlterations = this.props.mutations.map((mutation: Mutation) => {
+            let dbsnp;
+            let clinvar;
+            let cosmic;
+            let gnomad;
 
-        // Reasoning
-        therapyRecommendation.reasoning.geneticAlterations = [
-            {
+            if (
+                mutation.chr &&
+                mutation.startPosition &&
+                mutation.endPosition &&
+                mutation.referenceAllele &&
+                mutation.variantAllele
+            ) {
+                const index =
+                    mutation.chr +
+                    ',' +
+                    mutation.startPosition +
+                    ',' +
+                    mutation.endPosition +
+                    ',' +
+                    mutation.referenceAllele +
+                    ',' +
+                    mutation.variantAllele;
+                const annotation = this.props.indexedVariantAnnotations![index];
+                const myVariantInfo = this.props
+                    .indexedMyVariantInfoAnnotations![index];
+
+                if (annotation && annotation.colocatedVariants) {
+                    const f = annotation.colocatedVariants.filter(value =>
+                        value.dbSnpId.startsWith('rs')
+                    );
+                    if (f.length > 0) dbsnp = f[0].dbSnpId;
+                }
+
+                if (myVariantInfo) {
+                    if (myVariantInfo.dbsnp) {
+                        dbsnp = myVariantInfo.dbsnp.rsid;
+                    }
+                    if (myVariantInfo.clinVar) {
+                        clinvar = myVariantInfo.clinVar.variantId;
+                    }
+                    if (myVariantInfo.cosmic) {
+                        cosmic = myVariantInfo.cosmic.cosmicId;
+                    }
+                    if (myVariantInfo.gnomadExome) {
+                        gnomad = myVariantInfo.gnomadExome.alleleFrequency.af;
+                    }
+                }
+            }
+
+            return {
                 hugoSymbol: mutation.gene.hugoGeneSymbol,
                 alteration: mutation.proteinChange,
                 entrezGeneId: mutation.entrezGeneId,
@@ -167,8 +192,28 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
                 clinvar,
                 cosmic,
                 gnomad,
-            },
-        ];
+            } as IGeneticAlteration;
+        });
+        const allCna = this.props.cna.map((alt: DiscreteCopyNumberData) => {
+            return {
+                hugoSymbol: alt.gene.hugoGeneSymbol,
+                alteration:
+                    alt.alteration === -2 ? 'Deletion' : 'Amplification',
+                entrezGeneId: alt.entrezGeneId,
+            } as IGeneticAlteration;
+        });
+
+        allAlterations.push(...allCna);
+
+        const mutation = allAlterations.filter(
+            value =>
+                value.entrezGeneId == result.query.entrezGeneId &&
+                value.hugoSymbol == result.query.hugoSymbol &&
+                value.alteration === result.query.alteration
+        )[0];
+
+        // Reasoning
+        therapyRecommendation.reasoning.geneticAlterations = [mutation];
 
         // Evidence Level
         therapyRecommendation.evidenceLevel = EvidenceLevel.NA;
@@ -195,14 +240,15 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
         let therapyRecommendations: ITherapyRecommendation[] = [];
 
         results.map(result =>
-            result.treatments.map((treatment, treatmentIndex) =>
-                therapyRecommendations.push(
-                    this.therapyRecommendationFromTreatmentEntry(
-                        result,
-                        treatmentIndex
-                    )
-                )
-            )
+            result.treatments.map((treatment, treatmentIndex) => {
+                let therapyRecommendation = this.therapyRecommendationFromTreatmentEntry(
+                    result,
+                    treatmentIndex
+                );
+                if (therapyRecommendation) {
+                    therapyRecommendations.push(therapyRecommendation);
+                }
+            })
         );
 
         return therapyRecommendations;
@@ -317,7 +363,7 @@ export default class TherapyRecommendationFormOncoKb extends React.Component<
                                             selectedOption.value.treatmentIndex
                                         );
                                         console.log(selectedOption);
-                                        selectedTherapyRecommendation = therapyRecommendation;
+                                        selectedTherapyRecommendation = therapyRecommendation!;
                                     }}
                                     formatGroupLabel={(data: any) => (
                                         <div

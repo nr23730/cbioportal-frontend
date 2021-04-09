@@ -724,6 +724,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         }
                         cna={this.props.cna}
                         clinicalData={this.props.clinicalData}
+                        sampleManager={this.props.sampleManager}
                         onHide={(
                             therapyRecommendation?: ITherapyRecommendation
                         ) => {
@@ -749,6 +750,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         indexedMyVariantInfoAnnotations={
                             this.props.indexedMyVariantInfoAnnotations
                         }
+                        cna={this.props.cna}
                         onHide={(
                             therapyRecommendations?:
                                 | ITherapyRecommendation
