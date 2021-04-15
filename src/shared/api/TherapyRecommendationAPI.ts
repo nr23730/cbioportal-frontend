@@ -16,7 +16,8 @@ export function flattenArray(x: Array<any>): Array<any> {
     return y;
 }
 
-export async function fetchMtbsUsingGET(url: string) {
+export async function fetchMtbsUsingGET(url: string, studyId: string) {
+    url = url + '?studyId=' + studyId;
     console.log('### MTB ### Calling GET: ' + url);
     return request
         .get(url)
@@ -58,13 +59,14 @@ export async function fetchMtbsUsingGET(url: string) {
         });
 }
 
-export async function updateMtbUsingPUT(id: string, url: string, mtbs: IMtb[]) {
+export async function updateMtbUsingPUT(id: string, studyId: string, url: string, mtbs: IMtb[]) {
     mtbs.forEach(
         mtb =>
             (mtb.therapyRecommendations = flattenArray(
                 mtb.therapyRecommendations
             ))
     );
+    url = url + '?studyId=' + studyId;
     console.log('### MTB ### Calling PUT: ' + url);
     return request
         .put(url)
@@ -100,9 +102,11 @@ export async function updateMtbUsingPUT(id: string, url: string, mtbs: IMtb[]) {
 
 export async function deleteMtbUsingDELETE(
     id: string,
+    studyId: string,
     url: string,
     deletions: IDeletions
 ) {
+    url = url + '?studyId=' + studyId;
     console.log('### MTB ### Calling DELETE: ' + url);
     return request
         .delete(url)
@@ -128,10 +132,11 @@ export async function deleteMtbUsingDELETE(
         });
 }
 
-export async function checkPermissionUsingGET(url: string) {
+export async function checkPermissionUsingGET(url: string, studyId: string) {
     console.log('### MTB ### checkPermissionUsingGET - Calling GET: ' + url);
+    let studyParam = 'studyId=' + studyId;
     let seqParam = 'seq=' + new Date().getTime();
-    let realUrl = url + '?' + seqParam;
+    let realUrl = url + '?' + studyParam + '&' + seqParam;
 
     // returns boolean array[]
     // boolArray[0] is used for whether user is logged in
