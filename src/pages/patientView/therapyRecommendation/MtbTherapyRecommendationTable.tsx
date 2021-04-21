@@ -56,9 +56,9 @@ export type ITherapyRecommendationProps = {
     oncoKbAvailable: boolean;
     therapyRecommendations: ITherapyRecommendation[];
     containerWidth: number;
-    onDelete: (therapyRecommendation: ITherapyRecommendation) => boolean;
-    onAddOrEdit: (therapyRecommendation?: ITherapyRecommendation) => boolean;
-    onReposition: (
+    onDelete?: (therapyRecommendation: ITherapyRecommendation) => boolean;
+    onAddOrEdit?: (therapyRecommendation?: ITherapyRecommendation) => boolean;
+    onReposition?: (
         therapyRecommendation: ITherapyRecommendation,
         newIndex: number
     ) => boolean;
@@ -66,6 +66,8 @@ export type ITherapyRecommendationProps = {
     cnaOncoKbData?: RemoteData<IOncoKbData | Error | undefined>;
     pubMedCache?: PubMedCache;
     isDisabled: boolean;
+    showButtons: boolean;
+    columnVisibility?: { [columnId: string]: boolean };
 };
 
 export type ITherapyRecommendationState = {
@@ -138,6 +140,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                                 this.findIndex(therapyRecommendation) <= 0
                             }
                             onClick={() =>
+                                this.props.onReposition &&
                                 this.props.onReposition(
                                     therapyRecommendation,
                                     this.findIndex(therapyRecommendation) - 1
@@ -160,6 +163,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                                     this.props.therapyRecommendations.length - 1
                             }
                             onClick={() =>
+                                this.props.onReposition &&
                                 this.props.onReposition(
                                     therapyRecommendation,
                                     this.findIndex(therapyRecommendation) + 1
@@ -512,7 +516,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
     }
 
     public openDeleteForm(therapyRecommendation: ITherapyRecommendation) {
-        if (this.props.onDelete(therapyRecommendation))
+        if (this.props.onDelete && this.props.onDelete(therapyRecommendation))
             this.updateTherapyRecommendationTable();
     }
 
@@ -567,14 +571,15 @@ export default class MtbTherapyRecommendationTable extends React.Component<
             isTherapyRecommendationEmpty(newTherapyRecommendation)
         ) {
             if (this.backupTherapyRecommendation) {
-                this.props.onAddOrEdit(undefined);
+                this.props.onAddOrEdit && this.props.onAddOrEdit(undefined);
                 this.backupTherapyRecommendation = undefined;
             }
         } else {
             newTherapyRecommendation = setAuthorInTherapyRecommendation(
                 newTherapyRecommendation
             );
-            this.props.onAddOrEdit(newTherapyRecommendation);
+            this.props.onAddOrEdit &&
+                this.props.onAddOrEdit(newTherapyRecommendation);
         }
         this.showOncoKBForm = false;
         this.updateTherapyRecommendationTable();
@@ -663,54 +668,62 @@ export default class MtbTherapyRecommendationTable extends React.Component<
     render() {
         return (
             <div>
-                <p className={styles.edit}>
-                    <Button
-                        type="button"
-                        className={'btn btn-default ' + styles.addButton}
-                        disabled={this.props.isDisabled}
-                        onClick={() => this.openAddForm()}
-                    >
-                        <i
-                            className={`fa fa-plus ${styles.marginLeft}`}
-                            aria-hidden="true"
-                        ></i>{' '}
-                        Add
-                    </Button>
-                    <If condition={this.props.oncoKbAvailable}>
-                        <Then>
+                <If condition={this.props.showButtons}>
+                    <Then>
+                        <p className={styles.edit}>
                             <Button
                                 type="button"
                                 className={
-                                    'btn btn-default ' + styles.addOncoKbButton
+                                    'btn btn-default ' + styles.addButton
                                 }
                                 disabled={this.props.isDisabled}
-                                onClick={() => this.openAddOncoKbForm()}
+                                onClick={() => this.openAddForm()}
                             >
                                 <i
                                     className={`fa fa-plus ${styles.marginLeft}`}
                                     aria-hidden="true"
                                 ></i>{' '}
-                                Add from OncoKB
+                                Add
                             </Button>
-                        </Then>
-                        <Else>
-                            <Button
-                                type="button"
-                                className={
-                                    'btn btn-default ' + styles.addOncoKbButton
-                                }
-                                disabled={true}
-                            >
-                                <i
-                                    className={`fa fa-exclamation-triangle ${styles.marginLeft}`}
-                                    aria-hidden="true"
-                                ></i>{' '}
-                                OncoKB unavailable
-                            </Button>
-                        </Else>
-                    </If>
-                    {/* <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button> */}
-                </p>
+                            <If condition={this.props.oncoKbAvailable}>
+                                <Then>
+                                    <Button
+                                        type="button"
+                                        className={
+                                            'btn btn-default ' +
+                                            styles.addOncoKbButton
+                                        }
+                                        disabled={this.props.isDisabled}
+                                        onClick={() => this.openAddOncoKbForm()}
+                                    >
+                                        <i
+                                            className={`fa fa-plus ${styles.marginLeft}`}
+                                            aria-hidden="true"
+                                        ></i>{' '}
+                                        Add from OncoKB
+                                    </Button>
+                                </Then>
+                                <Else>
+                                    <Button
+                                        type="button"
+                                        className={
+                                            'btn btn-default ' +
+                                            styles.addOncoKbButton
+                                        }
+                                        disabled={true}
+                                    >
+                                        <i
+                                            className={`fa fa-exclamation-triangle ${styles.marginLeft}`}
+                                            aria-hidden="true"
+                                        ></i>{' '}
+                                        OncoKB unavailable
+                                    </Button>
+                                </Else>
+                            </If>
+                            {/* <Button type="button" className={"btn btn-default " + styles.testButton} onClick={() => this.test()}>Test (Update)</Button> */}
+                        </p>
+                    </Then>
+                </If>
                 {this.selectedTherapyRecommendation && (
                     <TherapyRecommendationForm
                         show={!!this.selectedTherapyRecommendation}
@@ -766,8 +779,9 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                     data={this.props.therapyRecommendations}
                     columns={this._columns}
                     showCopyDownload={false}
-                    // showFilter={false}
+                    showFilter={false}
                     showColumnVisibility={false}
+                    columnVisibility={this.props.columnVisibility} //{{"Edit": false, "Comment": true}}
                 />
                 {/* <SimpleCopyDownloadControls
                     downloadData={() =>

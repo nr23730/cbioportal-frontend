@@ -22,6 +22,32 @@ export interface IRecommender {
     email?: string;
 }
 
+export interface IResponseCriteria {
+    cr3: boolean;
+    pr3: boolean;
+    sd3: boolean;
+    pd3: boolean;
+    cr6: boolean;
+    pr6: boolean;
+    sd6: boolean;
+    pd6: boolean;
+    cr12: boolean;
+    pr12: boolean;
+    sd12: boolean;
+    pd12: boolean;
+}
+
+export interface IFollowUp {
+    id: string;
+    therapyRecommendation: ITherapyRecommendation;
+    date: string;
+    author: string;
+    therapyRecommendationRealized: boolean;
+    sideEffect: boolean;
+    response: IResponseCriteria;
+    comment: string;
+}
+
 export interface IMtb {
     id: string;
     therapyRecommendations: ITherapyRecommendation[];
@@ -89,4 +115,5 @@ export interface IGeneticAlteration {
 export interface IDeletions {
     mtb: string[];
     therapyRecommendation: string[];
+    followUp: string[];
 }
