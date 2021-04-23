@@ -2285,7 +2285,8 @@ export class PatientViewPageStore {
         {
             invoke: () => {
                 return fetchMtbsUsingGET(
-                    this.getMtbJsonStoreUrl(this.getSafePatientId())
+                    this.getMtbJsonStoreUrl(this.getSafePatientId()),
+                    this.getSafeStudyId()
                 );
             },
         },
@@ -2296,6 +2297,7 @@ export class PatientViewPageStore {
         console.log('update');
         return updateMtbUsingPUT(
             this.getSafePatientId(),
+            this.getSafeStudyId(),
             this.getMtbJsonStoreUrl(this.getSafePatientId()),
             mtbs
         );
@@ -2310,6 +2312,7 @@ export class PatientViewPageStore {
         console.log('delete');
         deleteMtbUsingDELETE(
             this.getSafePatientId(),
+            this.getSafeStudyId(),
             this.getMtbJsonStoreUrl(this.getSafePatientId()),
             deletions
         );
@@ -2317,7 +2320,8 @@ export class PatientViewPageStore {
 
     checkPermission = async (): Promise<boolean[]> => {
         let checkUrl = this.getMtbJsonStoreUrl(this.getSafePatientId()) + '/permission';
-        return checkPermissionUsingGET(checkUrl);
+        return checkPermissionUsingGET(checkUrl, this.getSafeStudyId());
+        
     };
 
     getMtbJsonStoreUrl = (id: string) => {
@@ -2341,6 +2345,10 @@ export class PatientViewPageStore {
     private getSafePatientId = () => {
         return encodeURIComponent(this.patientId);
     };
+    
+    private getSafeStudyId = () => {
+        return encodeURIComponent(this.studyId);
+    }
 
     readonly getStudiesFromOncoKBSortedByCondition = remoteData<
         IOncoKBStudyDictionary
