@@ -14,9 +14,10 @@ import {
     Sample,
     Gene,
     MolecularProfile,
-    GenePanelData,
     GenericAssayData,
     GenericAssayMeta,
+    SampleMolecularIdentifier,
+    MolecularDataMultipleStudyFilter,
 } from 'cbioportal-ts-api-client';
 import {
     ICaseAlteration,
@@ -34,13 +35,15 @@ import {
     MergedTrackLineFilterOutput,
 } from 'shared/lib/oql/oqlfilter';
 import { isNotGermlineMutation } from 'shared/lib/MutationUtils';
-import { coverageInformation } from 'pages/resultsView/expression/expressionHelpers.sample';
 import { isSampleProfiled } from 'shared/lib/isSampleProfiled';
 import {
     getGenericAssayMetaPropertyOrDefault,
     COMMON_GENERIC_ASSAY_PROPERTY,
 } from 'shared/lib/GenericAssayUtils/GenericAssayCommonUtils';
 import { Alteration } from 'shared/lib/oql/oql-parser';
+import client from 'shared/api/cbioportalClientInstance';
+import { REQUEST_ARG_ENUM } from 'shared/constants';
+import fileDownload from 'react-file-download';
 
 export interface IDownloadFileRow {
     studyId: string;
@@ -58,7 +61,7 @@ export function generateOqlData(
     }
 ): IOqlData {
     const mutation: IOqlData['mutation'] = [];
-    const fusions: string[] = [];
+    const structuralVariant: string[] = [];
     const cnaAlterations: ISubAlteration[] = [];
     const proteinLevels: ISubAlteration[] = [];
     const mrnaExpressions: ISubAlteration[] = [];
@@ -75,6 +78,7 @@ export function generateOqlData(
                     cnaAlterations.push({
                         type: alterationSubType,
                         value: alteration.value,
+                        putativeDriver: alteration.putativeDriver,
                     });
                     alterationTypes.push('CNA');
                 }
@@ -98,17 +102,16 @@ export function generateOqlData(
                 }
                 break;
             case AlterationTypeConstants.MUTATION_EXTENDED:
-                if (alteration.mutationType.toLowerCase().includes('fusion')) {
-                    fusions.push(alteration.proteinChange);
-                    alterationTypes.push('FUSION');
-                } else {
-                    mutation.push({
-                        proteinChange: alteration.proteinChange,
-                        isGermline: !isNotGermlineMutation(alteration),
-                    });
-                    alterationTypes.push('MUT');
-                }
+                mutation.push({
+                    proteinChange: alteration.proteinChange,
+                    isGermline: !isNotGermlineMutation(alteration),
+                    putativeDriver: alteration.putativeDriver,
+                });
+                alterationTypes.push('MUT');
                 break;
+            case AlterationTypeConstants.STRUCTURAL_VARIANT:
+                structuralVariant.push(alteration.eventInfo);
+                alterationTypes.push('FUSION');
         }
     }
 
@@ -124,12 +127,12 @@ export function generateOqlData(
                 : true,
         geneSymbol: datum.trackLabel,
         mutation,
-        fusion: fusions,
+        structuralVariant,
         cna: cnaAlterations,
         mrnaExp: mrnaExpressions,
         proteinLevel: proteinLevels,
         isMutationNotProfiled: false,
-        isFusionNotProfiled: false,
+        isStructuralVariantNotProfiled: false,
         isCnaNotProfiled: false,
         isMrnaExpNotProfiled: false,
         isProteinLevelNotProfiled: false,
@@ -145,7 +148,7 @@ export function updateOqlData(
     }
 ): IOqlData {
     let isMutationNotProfiled = true;
-    let isFusionNotProfiled = true;
+    let isStructuralVariantNotProfiled = true;
     let isCnaNotProfiled = true;
     let isMrnaExpNotProfiled = true;
     let isProteinLevelNotProfiled = true;
@@ -170,15 +173,15 @@ export function updateOqlData(
                         break;
                     case AlterationTypeConstants.MUTATION_EXTENDED:
                         isMutationNotProfiled = false;
-                    case AlterationTypeConstants.FUSION:
-                        isFusionNotProfiled = false;
+                    case AlterationTypeConstants.STRUCTURAL_VARIANT:
+                        isStructuralVariantNotProfiled = false;
                         break;
                 }
             }
         }
     }
     oql.isMutationNotProfiled = isMutationNotProfiled;
-    oql.isFusionNotProfiled = isFusionNotProfiled;
+    oql.isStructuralVariantNotProfiled = isStructuralVariantNotProfiled;
     oql.isCnaNotProfiled = isCnaNotProfiled;
     oql.isMrnaExpNotProfiled = isMrnaExpNotProfiled;
     oql.isProteinLevelNotProfiled = isProteinLevelNotProfiled;
@@ -264,6 +267,27 @@ export function generateMutationDownloadData(
         : [];
 }
 
+export function generateStructuralDownloadData(
+    sampleAlterationDataByGene: { [key: string]: ExtendedAlteration[] },
+    samples: Sample[] = [],
+    genes: Gene[] = [],
+    isSampleProfiledFunc: (
+        uniqueSampleKey: string,
+        studyId: string,
+        hugoGeneSymbol: string
+    ) => boolean
+): string[][] {
+    return sampleAlterationDataByGene
+        ? generateDownloadData(
+              sampleAlterationDataByGene,
+              samples,
+              genes,
+              isSampleProfiledFunc,
+              extractStructuralVariantValue
+          )
+        : [];
+}
+
 export function generateMrnaData(
     unfilteredCaseAggregatedData?: CaseAggregatedData<ExtendedAlteration>
 ): { [key: string]: ExtendedAlteration[] } {
@@ -318,6 +342,24 @@ export function generateCnaData(
         : {};
 }
 
+export function generateStructuralVariantData(
+    unfilteredCaseAggregatedData?: CaseAggregatedData<ExtendedAlteration>
+): { [key: string]: ExtendedAlteration[] } {
+    const sampleFilter = (alteration: ExtendedAlteration) => {
+        return (
+            alteration.molecularProfileAlterationType ===
+            AlterationTypeConstants.STRUCTURAL_VARIANT
+        );
+    };
+
+    return unfilteredCaseAggregatedData
+        ? generateSampleAlterationDataByGene(
+              unfilteredCaseAggregatedData,
+              sampleFilter
+          )
+        : {};
+}
+
 export function generateOtherMolecularProfileData(
     molecularProfileId: string[],
     unfilteredCaseAggregatedData?: CaseAggregatedData<ExtendedAlteration>
@@ -325,11 +367,15 @@ export function generateOtherMolecularProfileData(
     const sampleFilter = (alteration: ExtendedAlteration) => {
         return molecularProfileId.includes(alteration.molecularProfileId);
     };
+    const keyGenerator = (alteration: ExtendedAlteration) => {
+        return `${alteration.gene.hugoGeneSymbol}_${alteration.uniqueSampleKey}`;
+    };
 
     return unfilteredCaseAggregatedData
         ? generateSampleAlterationDataByGene(
               unfilteredCaseAggregatedData,
-              sampleFilter
+              sampleFilter,
+              keyGenerator
           )
         : {};
 }
@@ -347,6 +393,83 @@ export function generateOtherMolecularProfileDownloadData(
               () => true // dont deal with labeling not profiled
           )
         : [];
+}
+
+export async function downloadOtherMolecularProfileData(
+    profileName: string,
+    profiles: MolecularProfile[],
+    samples: Sample[],
+    genes: Gene[],
+    transposed: boolean = false
+) {
+    // STEP 1: fetch data
+    let molecularData: any[] = [];
+    if (profiles.length && genes != undefined && genes.length) {
+        const profilesGroupByStudyId = _.groupBy(
+            profiles,
+            profile => profile.studyId
+        );
+        // find samples which share studyId with profile and add identifier
+        const sampleIdentifiers: SampleMolecularIdentifier[] = (samples as Sample[]).reduce(
+            (acc: SampleMolecularIdentifier[], sample) => {
+                if (sample.studyId in profilesGroupByStudyId) {
+                    acc.push(
+                        ...profilesGroupByStudyId[sample.studyId].map(
+                            profile => {
+                                return {
+                                    molecularProfileId:
+                                        profile.molecularProfileId,
+                                    sampleId: sample.sampleId,
+                                } as SampleMolecularIdentifier;
+                            }
+                        )
+                    );
+                }
+                return acc;
+            },
+            []
+        );
+
+        if (sampleIdentifiers.length) {
+            molecularData = await client.fetchMolecularDataInMultipleMolecularProfilesUsingPOST(
+                {
+                    projection: REQUEST_ARG_ENUM.PROJECTION_DETAILED,
+                    molecularDataMultipleStudyFilter: {
+                        entrezGeneIds: _.map(
+                            genes,
+                            (gene: Gene) => gene.entrezGeneId
+                        ),
+                        sampleMolecularIdentifiers: sampleIdentifiers,
+                    } as MolecularDataMultipleStudyFilter,
+                }
+            );
+        }
+    }
+
+    // STEP 2: generate alteration data
+    const data = {
+        samples: _.groupBy(molecularData, data => data.uniqueSampleKey),
+    } as CaseAggregatedData<ExtendedAlteration>;
+
+    const alterationData = generateOtherMolecularProfileData(
+        profiles.map(profile => profile.molecularProfileId),
+        data
+    );
+
+    // STEP 3: generate download data
+    const downloadData = generateOtherMolecularProfileDownloadData(
+        alterationData,
+        samples,
+        genes
+    );
+
+    // STEP 4: download data
+    fileDownload(
+        transposed
+            ? unzipDownloadData(downloadData)
+            : downloadDataText(downloadData),
+        `${profileName}.txt`
+    );
 }
 
 export function generateGenericAssayProfileData(
@@ -437,14 +560,17 @@ export function generateGenericAssayProfileDownloadData(
 
 export function generateSampleAlterationDataByGene(
     unfilteredCaseAggregatedData: CaseAggregatedData<ExtendedAlteration>,
-    sampleFilter?: (alteration: ExtendedAlteration) => boolean
+    sampleFilter?: (alteration: ExtendedAlteration) => boolean,
+    keyGenerator?: (alteration: ExtendedAlteration) => string
 ): { [key: string]: ExtendedAlteration[] } {
     // key => gene + uniqueSampleKey
     const sampleDataByGene: { [key: string]: ExtendedAlteration[] } = {};
 
     _.values(unfilteredCaseAggregatedData.samples).forEach(alterations => {
         alterations.forEach(alteration => {
-            const key = `${alteration.gene.hugoGeneSymbol}_${alteration.uniqueSampleKey}`;
+            const key = keyGenerator
+                ? keyGenerator(alteration)
+                : `${alteration.hugoGeneSymbol}_${alteration.uniqueSampleKey}`;
             sampleDataByGene[key] = sampleDataByGene[key] || [];
 
             // if no filter function provided nothing is filtered out,
@@ -830,6 +956,19 @@ function extractMutationValue(alteration: ExtendedAlteration) {
     }`;
 }
 
+export function hasValidStructuralVariantData(sampleAlterationDataByGene: {
+    [key: string]: ExtendedAlteration[];
+}): boolean {
+    return hasValidData(
+        sampleAlterationDataByGene,
+        extractStructuralVariantValue
+    );
+}
+
+function extractStructuralVariantValue(alteration: ExtendedAlteration) {
+    return alteration.eventInfo;
+}
+
 export function decideMolecularProfileSortingOrder(
     profileType: MolecularProfile['molecularAlterationType']
 ) {
@@ -851,4 +990,28 @@ export function decideMolecularProfileSortingOrder(
         default:
             return Number.MAX_VALUE;
     }
+}
+
+export function unzipDownloadDataGroupByKey(downloadDataGroupByKey: {
+    [key: string]: string[][];
+}): { [key: string]: string[][] } {
+    return _.mapValues(downloadDataGroupByKey, downloadData => {
+        return _.unzip(downloadData);
+    });
+}
+
+export function downloadDataTextGroupByKey(downloadDataGroupByKey: {
+    [key: string]: string[][];
+}): { [x: string]: string } {
+    return _.mapValues(downloadDataGroupByKey, downloadData => {
+        return stringify2DArray(downloadData);
+    });
+}
+
+export function unzipDownloadData(downloadData: string[][]): string[][] {
+    return _.unzip(downloadData);
+}
+
+export function downloadDataText(downloadData: string[][]): string {
+    return stringify2DArray(downloadData);
 }

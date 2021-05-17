@@ -1,25 +1,22 @@
 import React from 'react';
-import AlterationEnrichmentTypeSelector, {
-    IAlterationEnrichmentTypeSelectorHandlers,
-} from 'shared/lib/comparison/AlterationEnrichmentTypeSelector';
+import AlterationEnrichmentTypeSelector from 'shared/lib/comparison/AlterationEnrichmentTypeSelector';
 import ComparisonStore from 'shared/lib/comparison/ComparisonStore';
 import { mountWithCustomWrappers } from 'enzyme-custom-wrappers';
 import { assert } from 'chai';
 import _ from 'lodash';
 import sinon from 'sinon';
 import {
+    cnaEventTypeSelectInit,
     CopyNumberEnrichmentEventType,
-    fusionGroup,
     MutationEnrichmentEventType,
+    mutationEventTypeSelectInit,
     mutationGroup,
 } from './ComparisonStoreUtils';
+import { MolecularProfile } from 'cbioportal-ts-api-client';
 
 describe('AlterationEnrichmentTypeSelector', () => {
     let menu: any;
-    const handlers: IAlterationEnrichmentTypeSelectorHandlers = {
-        updateSelectedCopyNumber: sinon.spy(),
-        updateSelectedMutations: sinon.spy(),
-    };
+    const updateSelectedEnrichmentEventTypes = sinon.spy();
 
     const inframeCheckboxRefs = [
         'InFrame',
@@ -41,8 +38,6 @@ describe('AlterationEnrichmentTypeSelector', () => {
         'Nonstart',
         'Nonstop',
     ];
-
-    const structvarCheckboxRefs = ['Fusion'];
 
     const cnaCheckboxRefs = [
         'CheckCopynumberAlterations',
@@ -127,8 +122,8 @@ describe('AlterationEnrichmentTypeSelector', () => {
                 allCheckBoxesDeselected: () =>
                     allDeselected(mutationTypeCheckboxRefs),
             },
-            fusionSection: {
-                pressMasterButton: () => toggleCheckbox('Fusion'),
+            structuralVariantSection: {
+                pressMasterButton: () => toggleCheckbox('StructuralVariants'),
             },
             pressSubmitButton: () =>
                 component.findByDataTest('buttonSelectAlterations').click(),
@@ -136,22 +131,18 @@ describe('AlterationEnrichmentTypeSelector', () => {
     };
 
     function createStore() {
-        let selectedMutationEnrichmentEventTypes = [
-            ...mutationGroup,
-            ...fusionGroup,
-        ].reduce((acc, type) => {
-            acc[type] = true;
-            return acc;
-        }, {} as { [key in MutationEnrichmentEventType]?: boolean });
-
-        let selectedCopyNumberEnrichmentEventTypes = {
-            [CopyNumberEnrichmentEventType.HOMDEL]: true,
-            [CopyNumberEnrichmentEventType.AMP]: true,
-        };
-
         return {
-            selectedCopyNumberEnrichmentEventTypes,
-            selectedMutationEnrichmentEventTypes,
+            selectedCopyNumberEnrichmentEventTypes: cnaEventTypeSelectInit([
+                {
+                    molecularAlterationType: 'COPY_NUMBER_ALTERATION',
+                } as MolecularProfile,
+            ]),
+            selectedMutationEnrichmentEventTypes: mutationEventTypeSelectInit([
+                {
+                    molecularAlterationType: 'MUTATION_EXTENDED',
+                } as MolecularProfile,
+            ]),
+            isStructuralVariantEnrichmentSelected: true,
         } as ComparisonStore;
     }
 
@@ -159,10 +150,12 @@ describe('AlterationEnrichmentTypeSelector', () => {
         beforeEach(() => {
             menu = mountWithCustomWrappers(
                 <AlterationEnrichmentTypeSelector
-                    handlers={handlers}
+                    updateSelectedEnrichmentEventTypes={
+                        updateSelectedEnrichmentEventTypes
+                    }
                     store={createStore()}
                     showMutations={true}
-                    showFusions={true}
+                    showStructuralVariants={true}
                     showCnas={true}
                 />,
                 wrapperForMenu
@@ -284,16 +277,18 @@ describe('AlterationEnrichmentTypeSelector', () => {
         it('shows all sections when asked', function() {
             menu = mountWithCustomWrappers(
                 <AlterationEnrichmentTypeSelector
-                    handlers={handlers}
+                    updateSelectedEnrichmentEventTypes={
+                        updateSelectedEnrichmentEventTypes
+                    }
                     store={createStore()}
                     showMutations={true}
-                    showFusions={true}
+                    showStructuralVariants={true}
                     showCnas={true}
                 />,
                 wrapperForMenu
             );
             assert.isTrue(menu.exists('input[data-test="Mutations"]'));
-            assert.isTrue(menu.exists('input[data-test="Fusion"]'));
+            assert.isTrue(menu.exists('input[data-test="StructuralVariants"]'));
             assert.isTrue(
                 menu.exists('input[data-test="CheckCopynumberAlterations"]')
             );
@@ -302,16 +297,20 @@ describe('AlterationEnrichmentTypeSelector', () => {
         it('shows no sections when asked', function() {
             menu = mountWithCustomWrappers(
                 <AlterationEnrichmentTypeSelector
-                    handlers={handlers}
+                    updateSelectedEnrichmentEventTypes={
+                        updateSelectedEnrichmentEventTypes
+                    }
                     store={createStore()}
                     showMutations={false}
-                    showFusions={false}
+                    showStructuralVariants={false}
                     showCnas={false}
                 />,
                 wrapperForMenu
             );
             assert.isFalse(menu.exists('input[data-test="Mutations"]'));
-            assert.isFalse(menu.exists('input[data-test="Fusion"]'));
+            assert.isFalse(
+                menu.exists('input[data-test="StructuralVariants"]')
+            );
             assert.isFalse(
                 menu.exists('input[data-test="CheckCopynumberAlterations"]')
             );
@@ -320,34 +319,40 @@ describe('AlterationEnrichmentTypeSelector', () => {
         it('shows mutation section when asked', function() {
             menu = mountWithCustomWrappers(
                 <AlterationEnrichmentTypeSelector
-                    handlers={handlers}
+                    updateSelectedEnrichmentEventTypes={
+                        updateSelectedEnrichmentEventTypes
+                    }
                     store={createStore()}
                     showMutations={true}
-                    showFusions={false}
+                    showStructuralVariants={false}
                     showCnas={false}
                 />,
                 wrapperForMenu
             );
             assert.isTrue(menu.exists('input[data-test="Mutations"]'));
-            assert.isFalse(menu.exists('input[data-test="Fusion"]'));
+            assert.isFalse(
+                menu.exists('input[data-test="StructuralVariants"]')
+            );
             assert.isFalse(
                 menu.exists('input[data-test="CheckCopynumberAlterations"]')
             );
         });
 
-        it('shows fusions section when asked', function() {
+        it('shows structural variant section when asked', function() {
             menu = mountWithCustomWrappers(
                 <AlterationEnrichmentTypeSelector
-                    handlers={handlers}
+                    updateSelectedEnrichmentEventTypes={
+                        updateSelectedEnrichmentEventTypes
+                    }
                     store={createStore()}
                     showMutations={false}
-                    showFusions={true}
+                    showStructuralVariants={true}
                     showCnas={false}
                 />,
                 wrapperForMenu
             );
             assert.isFalse(menu.exists('input[data-test="Mutations"]'));
-            assert.isTrue(menu.exists('input[data-test="Fusion"]'));
+            assert.isTrue(menu.exists('input[data-test="StructuralVariants"]'));
             assert.isFalse(
                 menu.exists('input[data-test="CheckCopynumberAlterations"]')
             );
@@ -356,16 +361,20 @@ describe('AlterationEnrichmentTypeSelector', () => {
         it('shows cna section when asked', function() {
             menu = mountWithCustomWrappers(
                 <AlterationEnrichmentTypeSelector
-                    handlers={handlers}
+                    updateSelectedEnrichmentEventTypes={
+                        updateSelectedEnrichmentEventTypes
+                    }
                     store={createStore()}
                     showMutations={false}
-                    showFusions={false}
+                    showStructuralVariants={false}
                     showCnas={true}
                 />,
                 wrapperForMenu
             );
             assert.isFalse(menu.exists('input[data-test="Mutations"]'));
-            assert.isFalse(menu.exists('input[data-test="Fusion"]'));
+            assert.isFalse(
+                menu.exists('input[data-test="StructuralVariants"]')
+            );
             assert.isTrue(
                 menu.exists('input[data-test="CheckCopynumberAlterations"]')
             );
@@ -376,52 +385,56 @@ describe('AlterationEnrichmentTypeSelector', () => {
         beforeEach(() => {
             menu = mountWithCustomWrappers(
                 <AlterationEnrichmentTypeSelector
-                    handlers={handlers}
+                    updateSelectedEnrichmentEventTypes={
+                        updateSelectedEnrichmentEventTypes
+                    }
                     store={createStore()}
                     showMutations={true}
-                    showFusions={true}
+                    showStructuralVariants={true}
                     showCnas={true}
                 />,
                 wrapperForMenu
             );
-            (handlers.updateSelectedMutations as sinon.SinonSpy).resetHistory();
-            (handlers.updateSelectedCopyNumber as sinon.SinonSpy).resetHistory();
+            updateSelectedEnrichmentEventTypes.resetHistory();
         });
 
-        it('invokes callback when pressed', function() {
+        it('is disabled before any changes are made', function() {
             menu.pressSubmitButton();
-            assert.isTrue(
-                (handlers.updateSelectedMutations as sinon.SinonSpy).calledOnce
-            );
-            assert.isTrue(
-                (handlers.updateSelectedCopyNumber as sinon.SinonSpy).calledOnce
-            );
+            assert.isTrue(updateSelectedEnrichmentEventTypes.notCalled);
+        });
+
+        it('invokes callback when pressed after change is made', function() {
+            menu.mutationSection.pressChildButton();
+            menu.pressSubmitButton();
+            assert.isTrue(updateSelectedEnrichmentEventTypes.calledOnce);
         });
 
         it('returns mutation types to callback', function() {
             menu.mutationSection.pressMasterButton();
             menu.cnaSection.pressMasterButton();
-            menu.fusionSection.pressMasterButton();
+            menu.structuralVariantSection.pressMasterButton();
 
             menu.mutationSection.pressChildButton();
             menu.pressSubmitButton();
 
-            (handlers.updateSelectedMutations as sinon.SinonSpy).args[0][0].should.have.members(
-                ['missense', 'missense_mutation', 'missense_variant']
-            );
+            updateSelectedEnrichmentEventTypes.args[0][0].should.have.members([
+                'missense',
+                'missense_mutation',
+                'missense_variant',
+            ]);
         });
 
         it('returns cna types to callback', function() {
             menu.mutationSection.pressMasterButton();
             menu.cnaSection.pressMasterButton();
-            menu.fusionSection.pressMasterButton();
+            menu.structuralVariantSection.pressMasterButton();
 
             menu.cnaSection.pressChildButton();
             menu.pressSubmitButton();
 
-            (handlers.updateSelectedCopyNumber as sinon.SinonSpy).args[0][0].should.have.members(
-                ['HOMDEL']
-            );
+            updateSelectedEnrichmentEventTypes.args[0][0].should.have.members([
+                'HOMDEL',
+            ]);
         });
     });
 });

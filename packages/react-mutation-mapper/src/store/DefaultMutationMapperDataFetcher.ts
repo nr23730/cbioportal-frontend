@@ -11,6 +11,7 @@ import {
     IOncoKbData,
     Mutation,
     uniqueGenomicLocations,
+    StructuralVariantType,
 } from 'cbioportal-utils';
 import {
     AnnotateMutationByProteinChangeQuery,
@@ -43,6 +44,7 @@ import {
     initOncoKbClient,
     ONCOKB_DEFAULT_DATA,
 } from '../util/DataFetcherUtils';
+import { CanonicalMutationType } from 'cbioportal-frontend-commons';
 
 export interface MutationMapperDataFetcherConfig {
     myGeneUrlTemplate?: string;
@@ -273,7 +275,11 @@ export class DefaultMutationMapperDataFetcher
 
         const mutationsToQuery = _.filter(
             mutations,
-            m => !!annotatedGenes[getEntrezGeneId(m)]
+            m =>
+                (m.mutationType &&
+                    m.mutationType.toLowerCase() ===
+                        CanonicalMutationType.FUSION) ||
+                !!annotatedGenes[getEntrezGeneId(m)]
         );
 
         return this.queryOncoKbData(
@@ -314,7 +320,9 @@ export class DefaultMutationMapperDataFetcher
         const structuralQueryVariants: AnnotateStructuralVariantQuery[] = _.uniqBy(
             _.map(
                 queryVariants.filter(
-                    mutation => mutation.mutationType === 'Fusion'
+                    mutation =>
+                        mutation.mutationType?.toUpperCase() ===
+                        StructuralVariantType.FUSION
                 ),
                 (mutation: Mutation) => {
                     return generateAnnotateStructuralVariantQuery(

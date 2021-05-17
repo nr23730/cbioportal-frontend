@@ -30,15 +30,10 @@ import GroupSelector from '../../groupComparison/groupSelector/GroupSelector';
 import CaseFilterWarning from '../../../shared/components/banners/CaseFilterWarning';
 import MethylationEnrichments from 'pages/groupComparison/MethylationEnrichments';
 import AlterationEnrichments from 'pages/groupComparison/AlterationEnrichments';
-import AlterationEnrichmentTypeSelector, {
-    IAlterationEnrichmentTypeSelectorHandlers,
-} from 'shared/lib/comparison/AlterationEnrichmentTypeSelector';
+import AlterationEnrichmentTypeSelector from 'shared/lib/comparison/AlterationEnrichmentTypeSelector';
 import GenericAssayEnrichments from 'pages/groupComparison/GenericAssayEnrichments';
 import { deriveDisplayTextFromGenericAssayType } from '../plots/PlotsTabUtils';
-import {
-    buildAlterationEnrichmentTypeSelectorHandlers,
-    buildAlterationsTabName,
-} from 'shared/lib/comparison/ComparisonStoreUtils';
+import { buildAlterationsTabName } from 'shared/lib/comparison/ComparisonStoreUtils';
 
 export interface IComparisonTabProps {
     urlWrapper: ResultsViewURLWrapper;
@@ -52,7 +47,6 @@ export default class ComparisonTab extends React.Component<
     {}
 > {
     @observable.ref private store: ResultsViewComparisonStore;
-    private alterationEnrichmentTypeSelectorHandlers: IAlterationEnrichmentTypeSelectorHandlers;
 
     constructor(props: IComparisonTabProps) {
         super(props);
@@ -62,9 +56,6 @@ export default class ComparisonTab extends React.Component<
             this.props.appStore,
             this.props.urlWrapper,
             this.props.store
-        );
-        this.alterationEnrichmentTypeSelectorHandlers = buildAlterationEnrichmentTypeSelectorHandlers(
-            this.store
         );
     }
 
@@ -138,7 +129,7 @@ export default class ComparisonTab extends React.Component<
             this.store._activeGroupsNotOverlapRemoved,
             this.store.activeGroups,
             this.store.mutationEnrichmentProfiles,
-            this.store.structuralVariantProfiles,
+            this.store.structuralVariantEnrichmentProfiles,
             this.store.copyNumberEnrichmentProfiles,
             this.store.mRNAEnrichmentProfiles,
             this.store.proteinEnrichmentProfiles,
@@ -154,10 +145,7 @@ export default class ComparisonTab extends React.Component<
                     onTabClick={this.props.urlWrapper.setComparisonSubTabId}
                     className="secondaryNavigation comparisonTabSubTabs"
                 >
-                    <MSKTab
-                        id={ResultsViewComparisonSubTab.OVERLAP}
-                        linkText="Overlap"
-                    >
+                    <MSKTab id={GroupComparisonTab.OVERLAP} linkText="Overlap">
                         <Overlap store={this.store} />
                     </MSKTab>
                     {this.store.showSurvivalTab && (
@@ -174,7 +162,7 @@ export default class ComparisonTab extends React.Component<
                         </MSKTab>
                     )}
                     <MSKTab
-                        id={ResultsViewComparisonSubTab.CLINICAL}
+                        id={GroupComparisonTab.CLINICAL}
                         linkText="Clinical"
                         anchorClassName={
                             this.store.clinicalTabUnavailable ? 'greyedOut' : ''
@@ -196,9 +184,9 @@ export default class ComparisonTab extends React.Component<
                                 this.store.activeGroups.result!.length > 1 && (
                                     <AlterationEnrichmentTypeSelector
                                         store={this.store}
-                                        handlers={
-                                            this
-                                                .alterationEnrichmentTypeSelectorHandlers!
+                                        updateSelectedEnrichmentEventTypes={
+                                            this.store
+                                                .updateSelectedEnrichmentEventTypes
                                         }
                                         showMutations={
                                             this.store.hasMutationEnrichmentData
@@ -206,8 +194,8 @@ export default class ComparisonTab extends React.Component<
                                         showCnas={
                                             this.store.hasCnaEnrichmentData
                                         }
-                                        showFusions={
-                                            this.store.hasFusionEnrichmentData
+                                        showStructuralVariants={
+                                            this.store.hasStructuralVariantData
                                         }
                                     />
                                 )}
@@ -219,7 +207,7 @@ export default class ComparisonTab extends React.Component<
                     )}
                     {this.store.showMRNATab && (
                         <MSKTab
-                            id={ResultsViewComparisonSubTab.MRNA}
+                            id={GroupComparisonTab.MRNA}
                             linkText="mRNA"
                             anchorClassName={
                                 this.store.mRNATabUnavailable ? 'greyedOut' : ''
@@ -233,7 +221,7 @@ export default class ComparisonTab extends React.Component<
                     )}
                     {this.store.showProteinTab && (
                         <MSKTab
-                            id={ResultsViewComparisonSubTab.PROTEIN}
+                            id={GroupComparisonTab.PROTEIN}
                             linkText="Protein"
                             anchorClassName={
                                 this.store.proteinTabUnavailable
@@ -249,7 +237,7 @@ export default class ComparisonTab extends React.Component<
                     )}
                     {this.store.showMethylationTab && (
                         <MSKTab
-                            id={ResultsViewComparisonSubTab.DNAMETHYLATION}
+                            id={GroupComparisonTab.DNAMETHYLATION}
                             linkText="DNA Methylation"
                             anchorClassName={
                                 this.store.methylationTabUnavailable

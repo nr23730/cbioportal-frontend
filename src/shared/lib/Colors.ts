@@ -4,14 +4,15 @@ import {
     CNA_COLOR_GAIN,
     CNA_COLOR_HETLOSS,
     CNA_COLOR_HOMDEL,
-    MUT_COLOR_FUSION,
     MUT_COLOR_INFRAME,
     MUT_COLOR_MISSENSE,
     MUT_COLOR_MISSENSE_PASSENGER,
     MUT_COLOR_PROMOTER,
     MUT_COLOR_SPLICE,
     MUT_COLOR_TRUNC,
+    STRUCTURAL_VARIANT_COLOR,
 } from 'cbioportal-frontend-commons';
+import { MUT_PROFILE_COUNT_NOT_MUTATED } from 'pages/resultsView/plots/PlotsTabUtils';
 // Default grey
 export const BLACK = '#000000';
 export const LIGHT_GREY = '#D3D3D3';
@@ -80,8 +81,8 @@ export let RESERVED_CLINICAL_VALUE_COLORS: { [value: string]: string } = {
     missense: MUT_COLOR_MISSENSE,
     inframe: MUT_COLOR_INFRAME,
     truncating: MUT_COLOR_TRUNC,
+    fusion: STRUCTURAL_VARIANT_COLOR,
     splice: MUT_COLOR_SPLICE,
-    fusion: MUT_COLOR_FUSION,
     promoter: MUT_COLOR_PROMOTER,
     driver: MUT_COLOR_MISSENSE,
     vus: MUT_COLOR_MISSENSE_PASSENGER,
@@ -117,6 +118,7 @@ export let RESERVED_CLINICAL_VALUE_COLORS: { [value: string]: string } = {
     '0:ned': CLI_YES_COLOR,
     // OTHER: MUT_COLOR_OTHER,
     'wild type': DEFAULT_GREY,
+    'no mutation': DEFAULT_GREY,
     amplification: CNA_COLOR_AMP,
     gain: CNA_COLOR_GAIN,
     diploid: DEFAULT_GREY,
@@ -149,4 +151,21 @@ export function getClinicalValueColor(value: string): string | undefined {
     return RESERVED_CLINICAL_VALUE_COLORS[
         value.replace(/\s/g, '').toLowerCase()
     ];
+}
+
+export function getReservedGroupColor(value: string): string | undefined {
+    // if group is composed of multiple predefined colors (ex: 0:Living, Female) then return undefined
+    let groupColor: string | undefined = undefined;
+    const words: string[] = value.split(',');
+    words.forEach((word, index) => {
+        const color = getClinicalValueColor(word);
+        if (color != undefined) {
+            if (groupColor == undefined) groupColor = color;
+            else {
+                groupColor = undefined;
+                return groupColor;
+            }
+        }
+    });
+    return groupColor;
 }

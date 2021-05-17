@@ -5,7 +5,6 @@ import {
     getOrdinals,
     getStudyIds,
 } from './GroupComparisonUtils';
-import { GroupComparisonTab } from './GroupComparisonTabs';
 import { remoteData, stringListToIndexSet } from 'cbioportal-frontend-commons';
 import { SampleFilter, CancerStudy } from 'cbioportal-ts-api-client';
 import { action, computed, observable, makeObservable } from 'mobx';
@@ -27,19 +26,17 @@ import ComparisonStore, {
 } from '../../shared/lib/comparison/ComparisonStore';
 import { VirtualStudy } from 'shared/model/VirtualStudy';
 import sessionServiceClient from 'shared/api//sessionServiceInstance';
+import { COLORS } from '../studyView/StudyViewUtils';
 
 export default class GroupComparisonStore extends ComparisonStore {
-    @observable private _currentTabId:
-        | GroupComparisonTab
-        | undefined = undefined;
     @observable.ref private sessionId: string;
 
     constructor(
         sessionId: string,
         appStore: AppStore,
-        private urlWrapper: GroupComparisonURLWrapper
+        protected urlWrapper: GroupComparisonURLWrapper
     ) {
-        super(appStore);
+        super(appStore, urlWrapper);
 
         makeObservable(this);
 
@@ -128,7 +125,7 @@ export default class GroupComparisonStore extends ComparisonStore {
     @action
     protected async saveAndGoToSession(newSession: Session) {
         const { id } = await comparisonClient.addComparisonSession(newSession);
-        this.urlWrapper.updateURL({ sessionId: id });
+        this.urlWrapper.updateURL({ comparisonId: id });
     }
 
     get _session() {
@@ -178,10 +175,27 @@ export default class GroupComparisonStore extends ComparisonStore {
             let ret: ComparisonGroup[] = [];
             const sampleSet = this.sampleMap.result!;
 
+            // filter colors (remove those that were already selected by user for some groups)
+            // and get the list of groups with no color
+            let colors: string[] = COLORS;
+            let filteredColors = colors;
+            let groupsWithoutColor: SessionGroupData[] = [];
+            this._session.result!.groups.forEach((group, i) => {
+                if (group.color != undefined) {
+                    filteredColors = filteredColors.filter(
+                        color => color != group.color!.toUpperCase()
+                    );
+                } else {
+                    groupsWithoutColor.push(group);
+                }
+            });
+
+            // pick a color for groups without color
             let defaultGroupColors = pickClinicalDataColors(
-                _.map(this._session.result!.groups, group => ({
+                _.map(groupsWithoutColor, group => ({
                     value: group.name,
-                })) as any
+                })) as any,
+                filteredColors
             );
 
             const finalizeGroup = (

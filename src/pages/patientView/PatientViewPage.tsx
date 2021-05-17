@@ -78,6 +78,7 @@ import PatientViewPathwayMapper from './pathwayMapper/PatientViewPathwayMapper';
 import ResourcesTab, { RESOURCES_TAB_NAME } from './resources/ResourcesTab';
 import { MakeMobxView } from '../../shared/components/MobxView';
 import ResourceTab from '../../shared/components/resources/ResourceTab';
+import PatientViewStructuralVariantTable from './structuralVariant/PatientViewStructuralVariantTable';
 import TimelineWrapper from './timeline2/TimelineWrapper';
 import { isFusion } from '../../shared/lib/MutationUtils';
 import { Mutation } from 'cbioportal-ts-api-client';
@@ -207,13 +208,6 @@ export default class PatientViewPage extends React.Component<
             },
             { fireImmediately: true }
         );
-
-        this.onMutationTableColumnVisibilityToggled = this.onMutationTableColumnVisibilityToggled.bind(
-            this
-        );
-        this.onCnaTableColumnVisibilityToggled = this.onCnaTableColumnVisibilityToggled.bind(
-            this
-        );
     }
 
     private dataStore: PatientViewMutationsDataStore;
@@ -312,7 +306,8 @@ export default class PatientViewPage extends React.Component<
         );
     }
 
-    @action private onCnaTableColumnVisibilityToggled(
+    @action.bound
+    private onCnaTableColumnVisibilityToggled(
         columnId: string,
         columnVisibility?: IColumnVisibilityDef[]
     ) {
@@ -323,7 +318,8 @@ export default class PatientViewPage extends React.Component<
         );
     }
 
-    @action private onMutationTableColumnVisibilityToggled(
+    @action.bound
+    private onMutationTableColumnVisibilityToggled(
         columnId: string,
         columnVisibility?: IColumnVisibilityDef[]
     ) {
@@ -479,35 +475,6 @@ export default class PatientViewPage extends React.Component<
             this.genePanelModal.genePanelId
         ];
     }
-    @computed get sampleManager() {
-        if (
-            this.patientViewPageStore.patientViewDataForAllSamplesForPatient
-                .isComplete &&
-            this.patientViewPageStore.studyMetaData.isComplete
-        ) {
-            const patientData = this.patientViewPageStore
-                .patientViewDataForAllSamplesForPatient.result;
-
-            if (
-                this.patientViewPageStore.clinicalEvents.isComplete &&
-                this.patientViewPageStore.clinicalEvents.result!.length > 0
-            ) {
-                return new SampleManager(
-                    patientData.samples!,
-                    this.patientViewPageStore.clinicalEvents.result,
-                    this.patientViewPageStore.sampleIds
-                );
-            } else {
-                return new SampleManager(
-                    patientData.samples!,
-                    undefined,
-                    this.patientViewPageStore.sampleIds
-                );
-            }
-        } else {
-            return null;
-        }
-    }
 
     @autobind
     private onMutationTableRowClick(d: Mutation[]) {
@@ -598,7 +565,10 @@ export default class PatientViewPage extends React.Component<
     }
 
     public render() {
-        const sampleManager = this.sampleManager;
+        let sampleManager: SampleManager | null = null;
+        if (this.patientViewPageStore.sampleManager.isComplete) {
+            sampleManager = this.patientViewPageStore.sampleManager.result!;
+        }
         let cohortNav: JSX.Element | null = null;
         let studyName: JSX.Element | null = null;
 
@@ -1288,6 +1258,15 @@ export default class PatientViewPage extends React.Component<
                                         }
                                     />
 
+                                    <PatientViewStructuralVariantTable
+                                        store={this.patientViewPageStore}
+                                        onSelectGenePanel={
+                                            this.toggleGenePanelModal
+                                        }
+                                    />
+
+                                    <hr />
+
                                     {this.patientViewPageStore.studyIdToStudy
                                         .isComplete &&
                                         this.patientViewPageStore
@@ -1545,7 +1524,10 @@ export default class PatientViewPage extends React.Component<
                                     <div>
                                         <ResourcesTab
                                             store={this.patientViewPageStore}
-                                            sampleManager={this.sampleManager}
+                                            sampleManager={
+                                                this.patientViewPageStore
+                                                    .sampleManager.result!
+                                            }
                                             openResource={this.openResource}
                                         />
                                     </div>

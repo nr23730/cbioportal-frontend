@@ -491,10 +491,10 @@ export class ChartContainer extends React.Component<IChartContainerProps, {}> {
                     />
                 );
             }
-            case ChartTypeEnum.FUSION_GENES_TABLE: {
+            case ChartTypeEnum.STRUCTURAL_VARIANT_GENES_TABLE: {
                 return () => (
                     <MultiSelectionTable
-                        tableType={FreqColumnTypeEnum.FUSION}
+                        tableType={FreqColumnTypeEnum.STRUCTURAL_VARIANT}
                         promise={this.props.promise}
                         width={getWidthByDimension(
                             this.props.dimension,
@@ -524,7 +524,7 @@ export class ChartContainer extends React.Component<IChartContainerProps, {}> {
                             { columnKey: MultiSelectionTableColumnKey.GENE },
                             {
                                 columnKey:
-                                    MultiSelectionTableColumnKey.NUMBER_FUSIONS,
+                                    MultiSelectionTableColumnKey.NUMBER_STRUCTURAL_VARIANTS,
                             },
                             { columnKey: MultiSelectionTableColumnKey.NUMBER },
                             { columnKey: MultiSelectionTableColumnKey.FREQ },
@@ -699,7 +699,7 @@ export class ChartContainer extends React.Component<IChartContainerProps, {}> {
                             legendLocation={LegendLocation.TOOLTIP}
                             title={this.props.title}
                             totalCasesHeader="Number of Cases, Total"
-                            statusCasesHeader="Number of Cases, Deceased"
+                            statusCasesHeader="Number of Events"
                             medianMonthsHeader="Median Months Survival"
                             yLabelTooltip={SURVIVAL_PLOT_Y_LABEL_TOOLTIP}
                             xLabelWithEventTooltip={

@@ -1,9 +1,9 @@
 import {
     AnnotatedExtendedAlteration,
-    AnnotatedMutation,
     CaseAggregatedData,
     CustomDriverNumericGeneMolecularData,
     ExtendedAlteration,
+    AlterationTypeConstants,
 } from '../../../pages/resultsView/ResultsViewPageStore';
 import {
     ClinicalAttribute,
@@ -23,10 +23,7 @@ import {
     IGeneHeatmapTrackDatum,
 } from './Oncoprint';
 import { isSample, isSampleList } from '../../lib/CBioPortalAPIUtils';
-import {
-    getSimplifiedMutationType,
-    SimplifiedMutationType,
-} from '../../lib/oql/AccessorsForOqlFilter';
+import { getSimplifiedMutationType } from '../../lib/oql/AccessorsForOqlFilter';
 import _ from 'lodash';
 import { MutationSpectrum } from 'cbioportal-ts-api-client';
 import { ExtendedClinicalAttribute } from '../../../pages/resultsView/ResultsViewPageStoreUtils';
@@ -79,7 +76,6 @@ type HeatmapCaseDatum = {
 export type OncoprintMutationType =
     | 'missense'
     | 'inframe'
-    | 'fusion'
     | 'promoter'
     | 'trunc'
     | 'splice'
@@ -93,6 +89,7 @@ export enum OncoprintMutationTypeEnum {
     TRUNC = 'trunc',
     SPLICE = 'splice',
     OTHER = 'other',
+    STRUCTURAL_VARIANT = 'structuralVariant',
 }
 
 export function getOncoprintMutationType(
@@ -108,7 +105,6 @@ export function getOncoprintMutationType(
         switch (simplifiedMutationType) {
             case 'missense':
             case 'inframe':
-            case 'fusion':
             case 'splice':
             case 'other':
                 return simplifiedMutationType;
@@ -159,12 +155,12 @@ export function fillGeneticTrackDatum(
     newDatum.trackLabel = trackLabel;
     newDatum.data = data;
 
-    let dispFusion = false;
     const dispCnaCounts: { [cnaEvent: string]: number } = {};
     const dispMrnaCounts: { [mrnaEvent: string]: number } = {};
     const dispProtCounts: { [protEvent: string]: number } = {};
     const dispMutCounts: { [mutType: string]: number } = {};
     const dispGermline: { [mutType: string]: boolean } = {};
+    let structuralVariantCounts: number = 0;
     const caseInsensitiveGermlineMatch = new RegExp(
         MUTATION_STATUS_GERMLINE,
         'i'
@@ -173,7 +169,7 @@ export function fillGeneticTrackDatum(
     for (const event of data) {
         const molecularAlterationType = event.molecularProfileAlterationType;
         switch (molecularAlterationType) {
-            case 'COPY_NUMBER_ALTERATION':
+            case AlterationTypeConstants.COPY_NUMBER_ALTERATION:
                 let oncoprintCnaType =
                     cnaDataToString[
                         event.value as CustomDriverNumericGeneMolecularData['value']
@@ -188,43 +184,40 @@ export function fillGeneticTrackDatum(
                     dispCnaCounts[oncoprintCnaType] += 1;
                 }
                 break;
-            case 'MRNA_EXPRESSION':
+            case AlterationTypeConstants.MRNA_EXPRESSION:
                 if (event.alterationSubType) {
                     const mrnaEvent = event.alterationSubType;
                     dispMrnaCounts[mrnaEvent] = dispMrnaCounts[mrnaEvent] || 0;
                     dispMrnaCounts[mrnaEvent] += 1;
                 }
                 break;
-            case 'PROTEIN_LEVEL':
+            case AlterationTypeConstants.PROTEIN_LEVEL:
                 if (event.alterationSubType) {
                     const protEvent = event.alterationSubType;
                     dispProtCounts[protEvent] = dispProtCounts[protEvent] || 0;
                     dispProtCounts[protEvent] += 1;
                 }
                 break;
-            case 'MUTATION_EXTENDED':
+            case AlterationTypeConstants.MUTATION_EXTENDED:
                 let oncoprintMutationType = getOncoprintMutationType(
                     event as Pick<Mutation, 'proteinChange' | 'mutationType'>
                 );
-                if (oncoprintMutationType === 'fusion') {
-                    dispFusion = true;
-                } else {
-                    if (event.putativeDriver) {
-                        oncoprintMutationType += '_rec';
-                    }
-                    dispGermline[oncoprintMutationType] =
-                        dispGermline[oncoprintMutationType] ||
-                        caseInsensitiveGermlineMatch.test(event.mutationStatus);
-                    dispMutCounts[oncoprintMutationType] =
-                        dispMutCounts[oncoprintMutationType] || 0;
-                    dispMutCounts[oncoprintMutationType] += 1;
+                if (event.putativeDriver) {
+                    oncoprintMutationType += '_rec';
                 }
+                dispGermline[oncoprintMutationType] =
+                    dispGermline[oncoprintMutationType] ||
+                    caseInsensitiveGermlineMatch.test(event.mutationStatus);
+                dispMutCounts[oncoprintMutationType] =
+                    dispMutCounts[oncoprintMutationType] || 0;
+                dispMutCounts[oncoprintMutationType] += 1;
+                break;
+            case AlterationTypeConstants.STRUCTURAL_VARIANT:
+                structuralVariantCounts += 1;
                 break;
         }
     }
-    if (dispFusion) {
-        newDatum.disp_fusion = true;
-    }
+    newDatum.disp_structuralVariant = structuralVariantCounts > 0;
     newDatum.disp_cna = selectDisplayValue(dispCnaCounts, cnaRenderPriority);
     newDatum.disp_mrna = selectDisplayValue(dispMrnaCounts, mrnaRenderPriority);
     newDatum.disp_prot = selectDisplayValue(dispProtCounts, protRenderPriority);
