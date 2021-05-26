@@ -1697,10 +1697,9 @@ export default class PatientViewPage extends React.Component<
                                                     this.patientViewPageStore
                                                         .updateMtbs
                                                 }
-                                                mtbUrl={
-                                                    this.patientViewPageStore.
-                                                        getMtbJsonStoreUrl('')
-                                                }
+                                                mtbUrl={this.patientViewPageStore.getMtbJsonStoreUrl(
+                                                    ''
+                                                )}
                                                 checkPermission={
                                                     this.patientViewPageStore
                                                         .checkPermission
@@ -1722,7 +1721,7 @@ export default class PatientViewPage extends React.Component<
                                     )}
 
                                 <MSKTab
-                                    key={8}
+                                    key={43}
                                     id={PatientViewPageTabs.ClinicalTrialsGov}
                                     linkText="ClinicalTrialsGov"
                                     unmountOnHide={false}
