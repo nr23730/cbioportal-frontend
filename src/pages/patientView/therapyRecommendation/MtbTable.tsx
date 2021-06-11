@@ -34,10 +34,8 @@ import Select from 'react-select';
 import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';
 import { isMacOs, isSafari } from 'react-device-detect';
 import DatePicker from 'react-date-picker';
-import { LoginModal,
-         LoginButton,
-         UserInfoButton,
-} from './LoginElements';
+import { LoginModal, LoginButton, UserInfoButton } from './LoginElements';
+import { IMutationalSignature } from 'shared/model/MutationalSignature';
 export type IMtbProps = {
     patientId: string;
     mutations: Mutation[];
@@ -49,6 +47,7 @@ export type IMtbProps = {
         | undefined;
     cna: DiscreteCopyNumberData[];
     clinicalData: ClinicalData[];
+    mutationSignatureData: _.Dictionary<IMutationalSignature[]>;
     sampleManager: SampleManager | null;
     oncoKbAvailable: boolean;
     mtbs: IMtb[];
@@ -68,7 +67,7 @@ export type IMtbState = {
     deletions: IDeletions;
     loggedIn: boolean;
     permission: boolean;
-    username: string;    // currently not used
+    username: string; // currently not used
     successfulSave: boolean;
 };
 
@@ -92,7 +91,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
             deletions: props.deletions,
             loggedIn: false,
             permission: false,
-            username: 'Unknown',    // currently not used
+            username: 'Unknown', // currently not used
             successfulSave: false,
         };
         makeObservable(this);
@@ -139,7 +138,10 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         {isMacOs && isSafari ? (
                             <DatePicker
                                 value={mtb.date ? new Date(mtb.date) : null}
-                                disabled={this.isDisabled(mtb) || !this.state.permission}
+                                disabled={
+                                    this.isDisabled(mtb) ||
+                                    !this.state.permission
+                                }
                                 onChange={(d: Date) => {
                                     const newDate =
                                         d.getFullYear() +
@@ -160,7 +162,10 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                                 type="date"
                                 value={mtb.date}
                                 style={{ marginLeft: 6 }}
-                                disabled={this.isDisabled(mtb) || !this.state.permission}
+                                disabled={
+                                    this.isDisabled(mtb) ||
+                                    !this.state.permission
+                                }
                                 onChange={(
                                     e: React.FormEvent<HTMLInputElement>
                                 ) => {
@@ -183,7 +188,9 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         <select
                             defaultValue={mtb.mtbState}
                             style={{ marginLeft: 2 }}
-                            disabled={this.isDisabled(mtb) || !this.state.permission}
+                            disabled={
+                                this.isDisabled(mtb) || !this.state.permission
+                            }
                             onChange={(
                                 e: React.ChangeEvent<HTMLSelectElement>
                             ) => {
@@ -219,7 +226,9 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                     </label>
                     <LabeledCheckbox
                         checked={mtb.geneticCounselingRecommendation}
-                        disabled={this.isDisabled(mtb) || !this.state.permission}
+                        disabled={
+                            this.isDisabled(mtb) || !this.state.permission
+                        }
                         onChange={() => {
                             const newGcr = !mtb.geneticCounselingRecommendation;
                             const newMtbs = this.state.mtbs.slice();
@@ -236,7 +245,9 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                     </LabeledCheckbox>
                     <LabeledCheckbox
                         checked={mtb.rebiopsyRecommendation}
-                        disabled={this.isDisabled(mtb) || !this.state.permission}
+                        disabled={
+                            this.isDisabled(mtb) || !this.state.permission
+                        }
                         onChange={() => {
                             const newRr = !mtb.rebiopsyRecommendation;
                             const newMtbs = this.state.mtbs.slice();
@@ -255,7 +266,9 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         cols={30}
                         value={mtb.generalRecommendation}
                         placeholder="Comments"
-                        disabled={this.isDisabled(mtb) || !this.state.permission}
+                        disabled={
+                            this.isDisabled(mtb) || !this.state.permission
+                        }
                         onChange={(
                             e: React.ChangeEvent<HTMLTextAreaElement>
                         ) => {
@@ -283,7 +296,9 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         className="basic-multi-select"
                         classNamePrefix="select"
                         placeholder="Select considered samples..."
-                        isDisabled={this.isDisabled(mtb) || !this.state.permission}
+                        isDisabled={
+                            this.isDisabled(mtb) || !this.state.permission
+                        }
                         onChange={(selectedOption: Array<any>) => {
                             const newSamples = [];
                             if (selectedOption !== null) {
@@ -305,7 +320,9 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                             className={
                                 'btn btn-default ' + styles.deleteMtbButton
                             }
-                            disabled={this.isDisabled(mtb) || !this.state.permission}
+                            disabled={
+                                this.isDisabled(mtb) || !this.state.permission
+                            }
                             onClick={() =>
                                 window.confirm(
                                     'Are you sure you wish to delete this MTB session?'
@@ -337,6 +354,7 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                     }
                     cna={this.props.cna}
                     clinicalData={this.props.clinicalData}
+                    mutationSignatureData={this.props.mutationSignatureData}
                     sampleManager={this.props.sampleManager}
                     oncoKbAvailable={this.props.oncoKbAvailable}
                     therapyRecommendations={mtb.therapyRecommendations}
@@ -477,43 +495,41 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
         }
         console.group('Save mtbs');
         this.isProcessingSaveData = true;
-        this.props.onSaveData(this.state.mtbs).then(
-            res => {
-                this.isProcessingSaveData = false;
-                console.log('onSaveData returned with ' + res);
-                if(res == true){
-                    console.log('Showing successfulSave div');
-                    this.setState({successfulSave: true});
-                    setTimeout(() => this.saveCallback(), 3000);
-                } else {
-                    window.alert('Saving data failed - error output is in console.');
-                }
+        this.props.onSaveData(this.state.mtbs).then(res => {
+            this.isProcessingSaveData = false;
+            console.log('onSaveData returned with ' + res);
+            if (res == true) {
+                console.log('Showing successfulSave div');
+                this.setState({ successfulSave: true });
+                setTimeout(() => this.saveCallback(), 3000);
+            } else {
+                window.alert(
+                    'Saving data failed - error output is in console.'
+                );
             }
-        );
+        });
         console.groupEnd();
     }
-    
+
     private saveCallback() {
         console.log('Hiding successfulSave div');
-        this.setState({successfulSave: false});
+        this.setState({ successfulSave: false });
     }
 
     @observable showLoginModal: boolean = false;
     @observable isProcessingSaveData: boolean = false;
 
-    private openLoginModal(){
+    private openLoginModal() {
         this.showLoginModal = true;
     }
 
     private closeLoginModal() {
         this.showLoginModal = false;
-        this.props.checkPermission().then(
-            res => {
-                console.log('checkPermission returned with ' + res);
-                this.setState({loggedIn: res[0]});
-                this.setState({permission: res[1]});
-            }
-        );
+        this.props.checkPermission().then(res => {
+            console.log('checkPermission returned with ' + res);
+            this.setState({ loggedIn: res[0] });
+            this.setState({ permission: res[1] });
+        });
     }
 
     private isDisabled(mtb: IMtb) {
@@ -532,25 +548,26 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
     }
 
     render() {
-        const loginButton = (this.state.loggedIn 
-            ? <UserInfoButton 
-                className={'btn btn-default ' + styles.loginButton} 
-                mtbUrl={this.props.mtbUrl} 
-                openLoginModal={() => this.openLoginModal()} 
-                checkPermission={() => this.closeLoginModal()} 
-              />
-            : <LoginButton 
-                className={'btn btn-default ' + styles.loginButton} 
-                openLoginModal={() => this.openLoginModal()} 
-              />
+        const loginButton = this.state.loggedIn ? (
+            <UserInfoButton
+                className={'btn btn-default ' + styles.loginButton}
+                mtbUrl={this.props.mtbUrl}
+                openLoginModal={() => this.openLoginModal()}
+                checkPermission={() => this.closeLoginModal()}
+            />
+        ) : (
+            <LoginButton
+                className={'btn btn-default ' + styles.loginButton}
+                openLoginModal={() => this.openLoginModal()}
+            />
         );
 
         return (
             <div>
                 <h2 style={{ marginBottom: '0' }}>MTB Sessions</h2>
                 <p className={styles.edit}>
-                    <div className='btn-group'>
-                            {loginButton}
+                    <div className="btn-group">
+                        {loginButton}
                         <LoginModal
                             showLoginModal={this.showLoginModal}
                             handleClose={() => this.closeLoginModal()}
@@ -576,13 +593,11 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
                         >
                             Save Data
                         </Button>
-                        {this.state.successfulSave ? 
-                            (<div 
-                                className={styles.successBox}>Saving data was successful!
-                            </div>) 
-                        :
-                            null
-                        }
+                        {this.state.successfulSave ? (
+                            <div className={styles.successBox}>
+                                Saving data was successful!
+                            </div>
+                        ) : null}
                         <LoadingIndicator
                             center={true}
                             isLoading={this.isProcessingSaveData}
@@ -608,12 +623,10 @@ export default class MtbTable extends React.Component<IMtbProps, IMtbState> {
 
     componentDidMount() {
         // console.log('cDM got invoked');
-        this.props.checkPermission().then(
-            res => {
-                console.log('checkPermission returned with ' + res);
-                this.setState({loggedIn: res[0]});
-                this.setState({permission: res[1]});
-            }
-        );
+        this.props.checkPermission().then(res => {
+            console.log('checkPermission returned with ' + res);
+            this.setState({ loggedIn: res[0] });
+            this.setState({ permission: res[1] });
+        });
     }
 }

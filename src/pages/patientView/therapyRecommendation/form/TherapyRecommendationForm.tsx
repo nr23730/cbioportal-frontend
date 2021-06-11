@@ -19,6 +19,7 @@ import TherapyRecommendationFormCommentInput from './TherapyRecommendationFormCo
 import TherapyRecommendationFormEvidenceLevelInput from './TherapyRecommendationFormEvidenceLevelInput';
 import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';
 import SampleManager from 'pages/patientView/SampleManager';
+import { IMutationalSignature } from 'shared/model/MutationalSignature';
 
 interface ITherapyRecommendationFormProps {
     show: boolean;
@@ -33,6 +34,7 @@ interface ITherapyRecommendationFormProps {
     cna: DiscreteCopyNumberData[];
     sampleManager: SampleManager | null;
     clinicalData: ClinicalData[];
+    mutationSignatureData: _.Dictionary<IMutationalSignature[]>;
     title: string;
     userEmailAddress: string;
     onHide: (newTherapyRecommendation?: ITherapyRecommendation) => void;
@@ -80,6 +82,9 @@ export default class TherapyRecommendationForm extends React.Component<
                             <TherapyRecommendationFormClinicalInput
                                 data={therapyRecommendation}
                                 clinicalData={this.props.clinicalData}
+                                mutationSignatureData={
+                                    this.props.mutationSignatureData
+                                }
                                 sampleManager={this.props.sampleManager}
                                 onChange={clinicalDataItems =>
                                     (therapyRecommendation.reasoning.clinicalData = clinicalDataItems)
