@@ -40,6 +40,7 @@ import { RemoteData, IOncoKbData } from 'cbioportal-utils';
 import TherapyRecommendationFormOncoKb from './form/TherapyRecommendationFormOncoKb';
 import PubMedCache from 'shared/cache/PubMedCache';
 import { VariantAnnotation, MyVariantInfo } from 'genome-nexus-ts-api-client';
+import { IMutationalSignature } from 'shared/model/MutationalSignature';
 
 export type ITherapyRecommendationProps = {
     patientId: string;
@@ -52,6 +53,7 @@ export type ITherapyRecommendationProps = {
         | undefined;
     cna: DiscreteCopyNumberData[];
     clinicalData: ClinicalData[];
+    mutationSignatureData: _.Dictionary<IMutationalSignature[]>;
     sampleManager: SampleManager | null;
     oncoKbAvailable: boolean;
     therapyRecommendations: ITherapyRecommendation[];
@@ -724,6 +726,7 @@ export default class MtbTherapyRecommendationTable extends React.Component<
                         }
                         cna={this.props.cna}
                         clinicalData={this.props.clinicalData}
+                        mutationSignatureData={this.props.mutationSignatureData}
                         sampleManager={this.props.sampleManager}
                         onHide={(
                             therapyRecommendation?: ITherapyRecommendation

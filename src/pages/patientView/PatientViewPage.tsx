@@ -1668,6 +1668,11 @@ export default class PatientViewPage extends React.Component<
                                                         .clinicalDataForSamples
                                                         .result
                                                 )}
+                                                mutationSignatureData={
+                                                    this.patientViewPageStore
+                                                        .mutationalSignatureDataGroupByVersion
+                                                        .result
+                                                }
                                                 sampleManager={sampleManager}
                                                 oncoKbAvailable={
                                                     AppConfig.serverConfig

@@ -14,10 +14,12 @@ import {
     DefaultTooltip,
     placeArrowBottomLeft,
 } from 'cbioportal-frontend-commons';
+import { IMutationalSignature } from 'shared/model/MutationalSignature';
 
 interface TherapyRecommendationFormClinicalInputProps {
     data: ITherapyRecommendation;
     clinicalData: ClinicalData[];
+    mutationSignatureData: _.Dictionary<IMutationalSignature[]>;
     sampleManager: SampleManager | null;
     onChange: (clinicalData: IClinicalData[]) => void;
 }
@@ -80,8 +82,8 @@ export default class TherapyRecommendationFormClinicalInput extends React.Compon
             );
         };
 
-        let allClinicalData = this.props.clinicalData.map(
-            (clinicalDataItem: ClinicalData) => {
+        let allClinicalData = this.props.clinicalData
+            .map((clinicalDataItem: ClinicalData) => {
                 return {
                     sampleId: clinicalDataItem.sampleId,
                     attributeId:
@@ -90,8 +92,23 @@ export default class TherapyRecommendationFormClinicalInput extends React.Compon
                         clinicalDataItem.clinicalAttribute.displayName,
                     value: clinicalDataItem.value,
                 } as IClinicalData;
-            }
-        );
+            })
+            .concat(
+                (this.props.mutationSignatureData['v2'] || []).map(
+                    (signatureItem: IMutationalSignature) => {
+                        return {
+                            sampleId: signatureItem.sampleId,
+                            attributeId: signatureItem.mutationalSignatureId,
+                            attributeName:
+                                signatureItem.meta.name +
+                                ' (' +
+                                signatureItem.meta.description +
+                                ')',
+                            value: _.toString(signatureItem.value),
+                        } as IClinicalData;
+                    }
+                )
+            );
         // allClinicalData = _.uniqBy(allClinicalData, "attribute");
 
         let clinicalDataOptions = allClinicalData.map(
