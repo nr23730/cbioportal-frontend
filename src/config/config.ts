@@ -123,8 +123,8 @@ export function setServerConfig(serverConfig: { [key: string]: any }) {
         config.cancerdrugsJsonUrl = frontendOverride.cancerdrugsJsonUrl;
     }
 
-    sessionStorage.setItem('cancerdrugsUrl', AppConfig.cancerdrugsUrl || '');
-    sessionStorage.setItem(
+    localStorage.setItem('cancerdrugsUrl', AppConfig.cancerdrugsUrl || '');
+    localStorage.setItem(
         'cancerdrugsJsonUrl',
         AppConfig.cancerdrugsJsonUrl || ''
     );
