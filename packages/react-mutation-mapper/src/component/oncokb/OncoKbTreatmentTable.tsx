@@ -13,8 +13,8 @@ import mainStyles from './main.module.scss';
 import './oncoKbTreatmentTable.scss';
 import request from 'superagent';
 
-let cancerdrugsUrl = sessionStorage.getItem('cancerdrugsUrl') || '';
-let cancerdrugsJsonUrl = sessionStorage.getItem('cancerdrugsJsonUrl') || '';
+let cancerdrugsUrl = localStorage.getItem('cancerdrugsUrl') || '';
+let cancerdrugsJsonUrl = localStorage.getItem('cancerdrugsJsonUrl') || '';
 
 type OncoKbTreatmentTableProps = {
     variant: string;
